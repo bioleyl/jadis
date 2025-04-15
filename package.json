@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "build:publish": "npm publish --workspaces --access public",
     "test": "jest"
   },
   "workspaces": [
@@ -12,5 +13,7 @@
     "rimraf": "^6.0.1",
     "ts-jest": "^29.3.2",
     "typescript": "^5.8.3"
-  }
+  },
+  "name": "",
+  "version": ""
 }
