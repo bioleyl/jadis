@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declarationDir": "./dist/types",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "module": "esnext",
+    "outDir": "./build",
+    "target": "esnext"
   },
   "include": [
     "src"

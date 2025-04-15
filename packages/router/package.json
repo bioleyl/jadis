@@ -1,6 +1,6 @@
 {
   "name": "@jadis/router",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/types/index.d.ts",
@@ -14,11 +14,10 @@
     "dist"
   ],
   "scripts": {
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json && npm run rename:esm",
-    "build": "npm run build:cjs && npm run build:esm",
+    "build:ts": "tsc -p ./tsconfig.json --emitDeclarationOnly false",
+    "build:rollup": "rollup -c",
+    "build": "npm run build:ts && npm run build:rollup",
     "clean": "rimraf dist",
-    "rename:esm": "node ../../scripts/rename-js-to-mjs.mjs",
     "prepack": "npm run clean && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -33,7 +32,7 @@
     "url": "https://github.com/bioleyl/jadis/issues"
   },
   "description": "The Router for Jadis",
-  "dependencies": {
+  "devDependencies": {
     "@jadis/helpers": "^1.0.0"
   }
 }
