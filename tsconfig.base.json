@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "declaration": true,
+    "declarationDir": "./dist/types",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "rootDir": "./src",
+    "paths": {
+      "@jadis/*": ["./packages/*/"]
+    }
+  },
+  "exclude": [
+    "**/dist",
+    "**/node_modules",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.stub.ts"
+  ]
+}
