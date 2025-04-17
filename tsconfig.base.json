@@ -10,12 +10,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "rootDir": "./src",
-    "paths": {
-      "@jadis/*": ["./packages/*/"]
-    }
+    "moduleResolution": "node"
   },
   "exclude": [
     "**/dist",

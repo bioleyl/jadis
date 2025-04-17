@@ -1,16 +1,11 @@
 {
   "private": true,
   "scripts": {
-    "build:helpers": "npm run build --workspace=packages/helpers",
     "publish:core": "npm publish --workspace=packages/core --access public",
-    "publish:router": "npm publish --workspace=packages/router --access public",
-    "build:publish": "npm run build:helpers && npm publish:core && npm publish:router",
     "test": "jest"
   },
   "workspaces": [
-    "./packages/helpers",
-    "./packages/core",
-    "./packages/router"
+    "./packages/core"
   ],
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",

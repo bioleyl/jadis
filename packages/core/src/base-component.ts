@@ -1,9 +1,10 @@
-import { assert, createElement } from '@jadis/helpers';
+import { assert } from './helpers/assert.helper';
+import { createElement } from './helpers/element.helper';
 import type {
-  Constructor,
   OptionalIfUndefined,
   Primitive,
-} from '@jadis/helpers';
+  Constructor,
+} from './helpers/type.helper';
 
 interface JadisConstructor {
   new (): Jadis;
