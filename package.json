@@ -2,6 +2,7 @@
   "private": true,
   "scripts": {
     "publish:core": "npm publish --workspace=packages/core --access public",
+    "publish:create": "npm publish --workspace=packages/create --access public",
     "test": "jest"
   },
   "workspaces": [
