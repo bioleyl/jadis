@@ -24,7 +24,7 @@ class Counter extends Jadis {
   }
 
   #updateCount() {
-    this.countElement.textContent = this.#count;
+    this.countElement.textContent = this.#count.toString();
   }
 
   /** @returns {HTMLSpanElement} */
