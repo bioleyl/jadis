@@ -31,5 +31,6 @@
   "bugs": {
     "url": "https://github.com/bioleyl/jadis/issues"
   },
+  "homepage": "https://bioleyl.github.io/jadis/",
   "description": "Jadis is a minimal JavaScript library for building web interfaces using native Web Components."
 }
