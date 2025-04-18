@@ -5,7 +5,8 @@
     "test": "jest"
   },
   "workspaces": [
-    "./packages/core"
+    "./packages/core",
+    "./packages/create"
   ],
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
@@ -18,6 +19,6 @@
     "ts-jest": "^29.3.2",
     "typescript": "^5.8.3"
   },
-  "name": "",
-  "version": ""
+  "name": "jadis",
+  "version": "1.0.0"
 }
