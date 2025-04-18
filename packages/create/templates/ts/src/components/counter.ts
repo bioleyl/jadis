@@ -6,7 +6,9 @@ class Counter extends Jadis {
     <p>Count: <span></span></p>
     <button id="increment">Increment</button>
   `;
-  events = this.useEvents({ change: Number });
+  events = this.useEvents<{
+    change: number;
+  }>();
   private count = 0;
 
   onConnect(): void {
