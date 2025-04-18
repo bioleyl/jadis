@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'Jadis',
   description: 'Jadis official documentation',
+  base: '/jadis/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
