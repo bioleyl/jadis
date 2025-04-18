@@ -1,7 +1,3 @@
-import HelloPage from './pages/hello/hello';
-import MainPage from './pages/main/main-page';
+import { Router } from '@jadis/core';
 
-export const loadRoutes = (router) => {
-  router.addRoute('/', MainPage.selector, 'main');
-  router.addRoute('/hello/:name', HelloPage.selector, 'hello');
-};
+export const myRouter = new Router();

@@ -1,5 +1,5 @@
 import { Jadis } from '@jadis/core';
-import { myRouter } from '../../router';
+import { myRouter } from '../../main';
 
 class HelloPage extends Jadis {
   static selector = 'hello-page';
@@ -9,19 +9,16 @@ class HelloPage extends Jadis {
     <p>Click the button to go back to the main page.</p>
     <button>Go Back</button>
   `;
-  static style = `
-    h1 { color: blue; }
-  `;
 
   onConnect() {
-    this.spanElement.textContent = decodeURI(this.getAttribute('name'));
+    this.spanElement.textContent = this.getAttribute('name');
 
     this.listenOn(this.buttonElement)
       .when('click')
-      .do(() => this.#onButtonClick());
+      .do(() => this.onButtonClick());
   }
 
-  #onButtonClick() {
+  onButtonClick() {
     myRouter.gotoName('main');
   }
 

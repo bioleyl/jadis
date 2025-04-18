@@ -1,5 +1,5 @@
 import { Jadis } from '@jadis/core';
-import { myRouter } from '../../main';
+import { myRouter } from '../../router';
 
 class HelloPage extends Jadis {
   static selector = 'hello-page' as const;

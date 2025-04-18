@@ -1,7 +1,7 @@
 import { createElement, Jadis } from '@jadis/core';
 import template from './main-page.html?raw';
 import style from './main-page.css?inline';
-import { myRouter } from '../../main';
+import { myRouter } from '../../router';
 import Counter from '../../components/counter';
 import logo from '../../assets/logo.svg';
 

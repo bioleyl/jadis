@@ -1,0 +1,20 @@
+{
+  "name": "@jadis/create",
+  "version": "1.0.0",
+  "description": "Boilerplate generator for Jadis",
+  "main": "index.js",
+  "bin": {
+    "create-boilerplate": "./index.js"
+  },
+  "author": "Leal Bioley <lb@syware.ch>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bioleyl/jadis.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bioleyl/jadis/issues"
+  },
+  "homepage": "https://bioleyl.github.io/jadis/",
+  "description": "Jadis boilerplate generator"
+}

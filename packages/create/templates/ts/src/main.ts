@@ -1,6 +1,7 @@
-import { Router } from '@jadis/core';
-import { loadRoutes } from './router';
+import HelloPage from './pages/hello/hello';
+import MainPage from './pages/main/main-page';
+import { myRouter } from './router';
 
-export const myRouter = new Router();
-loadRoutes(myRouter);
+myRouter.addRoute('/', MainPage.selector, 'main');
+myRouter.addRoute('/hello/:name', HelloPage.selector, 'hello');
 myRouter.mountOn(document.getElementById('app')!);
