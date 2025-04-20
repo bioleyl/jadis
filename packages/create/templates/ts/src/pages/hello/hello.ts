@@ -2,14 +2,14 @@ import { Jadis } from '@jadis/core';
 import { myRouter } from '../../router';
 
 class HelloPage extends Jadis {
-  static selector = 'hello-page' as const;
-  static template = `
+  static readonly selector = 'hello-page';
+  static readonly template = `
     <h1>Hello, <span></span>!</h1>
     <p>Welcome to the Hello Page.</p>
     <p>Click the button to go back to the main page.</p>
     <button>Go Back</button>
   `;
-  static style = `
+  static readonly style = `
     h1 { color: blue; }
   `;
 

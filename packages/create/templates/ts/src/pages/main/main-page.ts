@@ -6,9 +6,9 @@ import Counter from '../../components/counter';
 import logo from '../../assets/logo.svg';
 
 class MainPage extends Jadis {
-  static selector = 'main-page' as const;
-  static template = template;
-  static style = style;
+  static readonly selector = 'main-page';
+  static readonly template = template;
+  static readonly style = style;
 
   onConnect(): void {
     createElement('img', { src: logo }, this.headerElement);

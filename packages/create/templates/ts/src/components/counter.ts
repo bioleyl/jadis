@@ -1,8 +1,8 @@
 import { Jadis } from '@jadis/core';
 
 class Counter extends Jadis {
-  static selector = 'counter-page' as const;
-  static template = `
+  static readonly selector = 'counter-component';
+  static readonly template = `
     <p>Count: <span></span></p>
     <button id="increment">Increment</button>
   `;

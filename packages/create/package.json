@@ -1,6 +1,6 @@
 {
   "name": "@jadis/create",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Boilerplate generator for Jadis",
   "main": "index.js",
   "bin": {
