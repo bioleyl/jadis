@@ -7,7 +7,7 @@ export const createElement = <T = HTMLElement>(
 ): T => {
   const el = document.createElement(tag);
   Object.entries(attributes).forEach(([key, value]) =>
-    el.setAttribute(toKebabCase(key), value)
+    el.setAttribute(toKebabCase(key), decodeURI(value))
   );
   appendTo?.appendChild(el);
   return el as T;
