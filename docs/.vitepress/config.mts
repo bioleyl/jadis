@@ -15,12 +15,21 @@ export default defineConfig({
     sidebar: [
       {
         text: 'Getting Started',
-        link: '/pages/getting-started',
+        items: [
+          { text: 'Installation', link: '/pages/getting-started/installation' },
+          {
+            text: 'First component',
+            link: '/pages/getting-started/first-component',
+          },
+        ],
       },
       {
         text: 'Communication',
         items: [
-          { text: 'With children', link: '/pages/communication/with-children' },
+          {
+            text: 'Parent to children',
+            link: '/pages/communication/parent-to-children',
+          },
           { text: 'With parent', link: '/pages/communication/with-parent' },
           { text: 'From anywhere', link: '/pages/communication/from-anywhere' },
         ],
