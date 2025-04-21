@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@jadis/core": "^0.3.0",
+    "@jadis/core": "^0.4.1",
     "typescript": "~5.7.2",
     "vite": "^6.3.1"
   }

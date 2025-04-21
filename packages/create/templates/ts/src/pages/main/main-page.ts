@@ -17,9 +17,7 @@ class MainPage extends Jadis {
       ...Array.from({ length: 3 }).map((_, i) => this.createCounter(i))
     );
 
-    this.listenOn(this.buttonElement)
-      .when('click')
-      .do(() => this.onButtonClick());
+    this.on(this.buttonElement, 'click', () => this.onButtonClick());
   }
 
   private onButtonClick(): void {
