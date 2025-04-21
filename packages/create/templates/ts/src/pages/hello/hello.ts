@@ -13,13 +13,14 @@ const style = css`
     color: blue;
   }
 `;
+
 class HelloPage extends Jadis {
   static readonly selector = 'hello-page';
   static readonly template = template;
   static readonly style = style;
 
   onConnect(): void {
-    this.spanElement.textContent = decodeURI(this.getAttribute('name') ?? '');
+    this.spanElement.textContent = this.getAttribute('name') ?? '';
 
     this.on(this.buttonElement, 'click', () => this.#onButtonClick());
   }
