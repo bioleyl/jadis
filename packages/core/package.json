@@ -32,5 +32,27 @@
     "url": "https://github.com/bioleyl/jadis/issues"
   },
   "homepage": "https://bioleyl.github.io/jadis/",
-  "description": "Jadis is a minimal JavaScript library for building web interfaces using native Web Components."
+  "description": "Jadis is a minimal JavaScript library for building web interfaces using native Web Components.",
+  "keywords": [
+    "jadis",
+    "web components",
+    "custom elements",
+    "frontend",
+    "native",
+    "javascript",
+    "typescript",
+    "no framework",
+    "vanilla js",
+    "lightweight",
+    "minimal",
+    "no virtual dom",
+    "no reactivity",
+    "simple ui",
+    "frontend toolkit",
+    "browser native",
+    "anti-framework",
+    "html templates",
+    "declarative",
+    "nostalgia"
+  ]
 }
