@@ -1,5 +1,6 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import terser from '@rollup/plugin-terser';
 import dtsPlugin from 'rollup-plugin-dts';
 
 const dts = dtsPlugin.default || dtsPlugin;
@@ -39,7 +40,7 @@ export default [
       name,
       sourcemap: true,
     },
-    plugins: [resolve(), commonjs()],
+    plugins: [resolve(), commonjs(), terser()],
     external: [],
   },
 
