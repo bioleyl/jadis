@@ -1,10 +1,12 @@
 import { assert } from './helpers/assert.helper';
+import { Bus } from './helpers/bus.helper';
 import { createElement } from './helpers/element.helper';
+import { html } from './helpers/template.helper';
 import type {
   OptionalIfUndefined,
   Primitive,
   Constructor,
-} from './helpers/type.helper';
+} from './helpers/type.helper.ts';
 
 interface JadisConstructor {
   new (): Jadis;
@@ -15,10 +17,6 @@ interface JadisConstructor {
 }
 
 type InferAttributes<T> = T extends (infer U)[] ? U : never;
-
-interface GetElementOptions {
-  cache: boolean;
-}
 
 export abstract class Jadis extends HTMLElement {
   static readonly selector: `${string}-${string}`;
@@ -58,7 +56,7 @@ export abstract class Jadis extends HTMLElement {
     );
   }
 
-  static register() {
+  static register(): void {
     assert(this.selector, `selector is not defined for ${this.name}`);
     if (!customElements.get(this.typeOfClass.selector)) {
       customElements.define(this.typeOfClass.selector, this.typeOfClass);
@@ -79,7 +77,11 @@ export abstract class Jadis extends HTMLElement {
     this.onDisconnect?.();
   }
 
-  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+  attributeChangedCallback(
+    name: string,
+    oldValue: string,
+    newValue: string
+  ): void {
     this.attributesCallback[name]?.(newValue, oldValue);
   }
 
@@ -87,49 +89,58 @@ export abstract class Jadis extends HTMLElement {
     return this._abortController.signal;
   }
 
-  protected getElement<T extends HTMLElement>(
-    query: string,
-    options: Partial<GetElementOptions> = {}
-  ): T {
+  protected getElement<Element extends HTMLElement>(query: string): Element {
     const el = query
       .split('>>>')
-      .reduce(
-        (nextEl: HTMLElement, nextQuery: string) =>
-          (nextEl.shadowRoot ?? nextEl).querySelector<T>(nextQuery)!,
-        this
-      );
+      .reduce((nextEl: HTMLElement, nextQuery: string) => {
+        return (nextEl.shadowRoot ?? nextEl).querySelector<Element>(nextQuery)!;
+      }, this);
     assert(el, `${query} element is not reachable`);
 
-    return el as T;
+    return el as Element;
   }
 
-  protected toggleClass(className: string) {
-    return {
-      if: (condition: boolean) => {
-        condition
-          ? this.classList.add(className)
-          : this.classList.remove(className);
-      },
-    };
+  protected toggleClass(className: string, condition: boolean): void {
+    condition
+      ? this.classList.add(className)
+      : this.classList.remove(className);
   }
 
-  protected useEvents<T>(_schema?: {
-    [K in keyof T]: Constructor<T[K]> | undefined;
-  }) {
+  protected onBus<BusType, BusEventKey extends keyof BusType>(
+    bus: Bus<BusType>,
+    event: BusEventKey,
+    callback: (detail: Primitive<BusType[BusEventKey]>) => void
+  ): void {
+    bus.register(event, callback, this.killSignal);
+  }
+
+  protected useEvents<EventType>(_schema?: {
+    [EventKey in keyof EventType]: Constructor<EventType[EventKey]> | undefined;
+  }): {
+    register: <EventKey extends keyof EventType>(
+      event: EventKey,
+      callback: (detail: Primitive<EventType[EventKey]>) => void
+    ) => void;
+    emit: <EventKey extends keyof EventType>(
+      event: EventKey,
+      ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
+    ) => void;
+  } {
     return {
-      register: <K extends keyof T>(
-        event: K,
-        callback: (detail: Primitive<T[K]>) => void
+      register: <EventKey extends keyof EventType>(
+        event: EventKey,
+        callback: (detail: Primitive<EventType[EventKey]>) => void
       ): void => {
-        const listener = ({ detail }: CustomEvent<Primitive<T[K]>>) =>
-          callback(detail);
+        const listener = ({
+          detail,
+        }: CustomEvent<Primitive<EventType[EventKey]>>) => callback(detail);
         this.addEventListener(event as string, listener as EventListener, {
           signal: this.killSignal,
         });
       },
-      emit: <K extends keyof T>(
-        event: K,
-        ...params: OptionalIfUndefined<Primitive<T[K]>>
+      emit: <EventKey extends keyof EventType>(
+        event: EventKey,
+        ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
       ): void => {
         this.dispatchEvent(
           new CustomEvent(event as string, { detail: params[0] })
@@ -138,33 +149,25 @@ export abstract class Jadis extends HTMLElement {
     };
   }
 
-  protected listenOn<T extends HTMLElement>(element: T) {
-    return {
-      when: <K extends keyof HTMLElementEventMap>(eventType: K) => {
-        return this.registerListener<HTMLElementEventMap, K>(
-          element,
-          eventType
-        );
-      },
-    };
+  protected on<
+    Element extends HTMLElement,
+    Event extends keyof HTMLElementEventMap,
+  >(
+    element: Element,
+    event: Event,
+    callback: (event: HTMLElementEventMap[Event]) => void
+  ): void {
+    element.addEventListener(event as string, callback as EventListener, {
+      signal: this.killSignal,
+    });
   }
 
-  private registerListener<EventMap, Key extends keyof EventMap>(
-    on: HTMLElement,
-    eventType: Key
-  ) {
-    return {
-      do: (callback: (event: EventMap[Key]) => void) => {
-        on.addEventListener(eventType as string, callback as EventListener, {
-          signal: this.killSignal,
-        });
-      },
-    };
-  }
-
-  private buildTemplate() {
+  private buildTemplate(): HTMLTemplateElement {
     const template = document.createElement('template');
-    template.innerHTML = `<style>${this.typeOfConstructor.style}</style>${this.typeOfConstructor.template}`;
+    template.innerHTML = html`<style>
+        ${this.typeOfConstructor.style}
+      </style>
+      ${this.typeOfConstructor.template}`;
     return template;
   }
 
