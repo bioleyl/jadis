@@ -5,4 +5,3 @@ coverage
 dist
 build
 cache
-package-lock.json
