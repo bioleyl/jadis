@@ -1,24 +1,28 @@
-import { Jadis } from '@jadis/core';
+import { Jadis, html, css } from '@jadis/core';
 import { myRouter } from '../../router';
+
+const template = html`
+  <h1>Hello, <span></span>!</h1>
+  <p>Welcome to the Hello Page.</p>
+  <p>Click the button to go back to the main page.</p>
+  <button>Go Back</button>
+`;
+
+const style = css`
+  h1 {
+    color: blue;
+  }
+`;
 
 class HelloPage extends Jadis {
   static selector = 'hello-page';
-  static template = `
-    <h1>Hello, <span></span>!</h1>
-    <p>Welcome to the Hello Page.</p>
-    <p>Click the button to go back to the main page.</p>
-    <button>Go Back</button>
-  `;
-  static style = `
-    h1 { color: blue; }
-  `;
+  static template = template;
+  static style = style;
 
   onConnect() {
-    this.spanElement.textContent = decodeURI(this.getAttribute('name'));
+    this.spanElement.textContent = this.getAttribute('name');
 
-    this.listenOn(this.buttonElement)
-      .when('click')
-      .do(() => this.#onButtonClick());
+    this.on(this.buttonElement, 'click', () => this.#onButtonClick());
   }
 
   #onButtonClick() {

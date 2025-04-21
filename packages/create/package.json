@@ -1,7 +1,7 @@
 {
   "name": "@jadis/create",
   "version": "1.0.2",
-  "description": "Boilerplate generator for Jadis",
+  "description": "Jadis boilerplate generator",
   "main": "index.js",
   "bin": {
     "create-boilerplate": "./index.js"
@@ -15,6 +15,5 @@
   "bugs": {
     "url": "https://github.com/bioleyl/jadis/issues"
   },
-  "homepage": "https://bioleyl.github.io/jadis/",
-  "description": "Jadis boilerplate generator"
+  "homepage": "https://bioleyl.github.io/jadis/"
 }
