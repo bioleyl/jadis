@@ -1,6 +1,6 @@
 {
   "name": "@jadis/create",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Jadis boilerplate generator",
   "main": "index.js",
   "bin": {
@@ -15,5 +15,20 @@
   "bugs": {
     "url": "https://github.com/bioleyl/jadis/issues"
   },
-  "homepage": "https://bioleyl.github.io/jadis/"
+  "homepage": "https://bioleyl.github.io/jadis/",
+  "keywords": [
+    "jadis",
+    "boilerplate",
+    "cli",
+    "generator",
+    "web components",
+    "javascript",
+    "typescript",
+    "minimal",
+    "frontend",
+    "native web",
+    "simplicity",
+    "nostalgia",
+    "no magic"
+  ]
 }
