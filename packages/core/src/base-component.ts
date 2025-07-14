@@ -13,7 +13,7 @@ interface JadisConstructor {
   readonly selector: `${string}-${string}`;
   readonly template: string;
   readonly style: string;
-  readonly observedAttributes: string[];
+  readonly observedAttributes: Array<string>;
 }
 
 type InferAttributes<T> = T extends (infer U)[] ? U : never;
@@ -164,10 +164,7 @@ export abstract class Jadis extends HTMLElement {
 
   private buildTemplate(): HTMLTemplateElement {
     const template = document.createElement('template');
-    template.innerHTML = html`<style>
-        ${this.typeOfConstructor.style}
-      </style>
-      ${this.typeOfConstructor.template}`;
+    template.innerHTML = html`<style>${this.typeOfConstructor.style}</style>${this.typeOfConstructor.template}`;
     return template;
   }
 
