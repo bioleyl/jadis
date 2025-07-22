@@ -7,6 +7,7 @@ import type {
   Primitive,
   Constructor,
 } from './helpers/type.helper.ts';
+import { UseEventsHandler } from './types/jadis.type';
 
 interface JadisConstructor {
   new (): Jadis;
@@ -116,16 +117,7 @@ export abstract class Jadis extends HTMLElement {
 
   protected useEvents<EventType>(_schema?: {
     [EventKey in keyof EventType]: Constructor<EventType[EventKey]> | undefined;
-  }): {
-    register: <EventKey extends keyof EventType>(
-      event: EventKey,
-      callback: (detail: Primitive<EventType[EventKey]>) => void
-    ) => void;
-    emit: <EventKey extends keyof EventType>(
-      event: EventKey,
-      ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
-    ) => void;
-  } {
+  }): UseEventsHandler<EventType> {
     return {
       register: <EventKey extends keyof EventType>(
         event: EventKey,
@@ -164,7 +156,9 @@ export abstract class Jadis extends HTMLElement {
 
   private buildTemplate(): HTMLTemplateElement {
     const template = document.createElement('template');
-    template.innerHTML = html`<style>${this.typeOfConstructor.style}</style>${this.typeOfConstructor.template}`;
+    template.innerHTML = html`<style>
+        ${this.typeOfConstructor.style}</style
+      >${this.typeOfConstructor.template}`;
     return template;
   }
 
