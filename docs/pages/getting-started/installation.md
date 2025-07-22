@@ -1,8 +1,15 @@
-# Installation
+# 🚀 Installation
 
-## Using a boilerplate
+Jadis is flexible and easy to get started with — whether you prefer a boilerplate setup, manual installation via npm, or embedding via CDN. It provides **full type support for both TypeScript and JSDoc**, allowing you to describe component behavior with precision and confidence. Even in plain JavaScript, Jadis offers **partial typing** through primitive constructors, giving you a lightweight way to improve clarity and reduce bugs.
+
+## 🧱 Using a boilerplate
 
 The easiest way to start a project is with a pre-made boilerplate.
+
+- **JS Boilerplate**
+- **TS Boilerplate**
+
+Create a new project using:
 
 ::: code-group
 
@@ -13,28 +20,29 @@ npx @jadis/create js my-project
 ```bash [TS Boilerplate]
 npx @jadis/create ts my-project
 ```
+
 :::
 
-## Installing from NPM
+## 📦 Installing from NPM
 
-You can also start a project from scratch, using the NPM package.
+You can also start from scratch using the official Jadis package:
 
-```bash 
+```bash
 npm install @jadis/core
 ```
 
-Then create a file `index.js` with the following content:
+Then create a file named `index.js` with the following content:
 
 ```javascript
 import { Jadis } from '@jadis/core';
 
 class HelloWorld extends Jadis {
-    static selector = 'hello-world';
-    static template = '<p>Hello, <span id="name"></span></p>';
+  static selector = 'hello-world';
+  static template = '<p>Hello, <span id="name"></span></p>';
 
-    onConnect() {
-        this.getElement('#name').textContent = 'Jadis developers';
-    }
+  onConnect() {
+    this.getElement('#name').textContent = 'Jadis developers';
+  }
 }
 HelloWorld.register();
 ```
@@ -45,31 +53,31 @@ Then in your HTML:
 <hello-world></hello-world>
 ```
 
-## Using a CDN
+## 🌐 Using a CDN
 
-You can also use Jadis directly from a CDN, like [unpkg](https://unpkg.com/@jadis/core/dist/umd/index.js).
+You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis/core/dist/umd/index.js):
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jadis Example</title>
     <script src="https://unpkg.com/@jadis/core/dist/umd/index.js"></script>
   </head>
   <body>
     <hello-world></hello-world>
     <script>
-    class HelloWorld extends Jadis.Jadis {
-      static selector = 'hello-world';
-      static template = '<p>Hello, <span id="name"></span></p>';
+      class HelloWorld extends Jadis.Jadis {
+        static selector = 'hello-world';
+        static template = '<p>Hello, <span id="name"></span></p>';
 
-      onConnect() {
-        this.getElement('#name').textContent = 'Jadis developers';
+        onConnect() {
+          this.getElement('#name').textContent = 'Jadis developers';
+        }
       }
-    }
-    HelloWorld.register();
+      HelloWorld.register();
     </script>
   </body>
 </html>

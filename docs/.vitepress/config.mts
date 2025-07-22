@@ -27,11 +27,17 @@ export default defineConfig({
         text: 'Communication',
         items: [
           {
-            text: 'Parent to children',
-            link: '/pages/communication/parent-to-children',
+            text: 'Parent to child',
+            link: '/pages/communication/parent-to-child',
           },
-          { text: 'With parent', link: '/pages/communication/with-parent' },
-          { text: 'From anywhere', link: '/pages/communication/from-anywhere' },
+          {
+            text: 'Child to parent',
+            link: '/pages/communication/child-to-parent',
+          },
+          {
+            text: 'Between anybody',
+            link: '/pages/communication/between-anybody',
+          },
         ],
       },
       {

@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: "Jadis"
-  text: "documentation"
+  name: 'Jadis'
+  text: 'documentation'
   tagline: The web, like it used to be
   actions:
     - theme: brand
@@ -17,7 +17,7 @@ hero:
 features:
   - title: Communication
     details: How to communicate between components
-    link: /pages/communication/parent-to-children
+    link: /pages/communication/parent-to-child
   - title: Routing
     details: How to use the router
     link: /pages/routing/declaring-routes
@@ -25,4 +25,3 @@ features:
     details: How to use the embedded helpers
     link: /pages/helpers/create-element
 ---
-

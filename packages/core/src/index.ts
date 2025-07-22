@@ -1,6 +1,7 @@
 export { Jadis } from './base-component';
 export { Router } from './router';
 
+export { UseEventsHandler } from './types/jadis.type';
 export { RouterMode, Route, RouterOptions } from './types/router.type';
 
 export { createElement } from './helpers/element.helper';

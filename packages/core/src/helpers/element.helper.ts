@@ -16,7 +16,9 @@ export function createElement(
   appendTo?: HTMLElement | ShadowRoot
 ): HTMLElement {
   const el = document.createElement(tag);
-  Object.entries(attributes).forEach(([key, value]) => el.setAttribute(toKebabCase(key), value));
+  Object.entries(attributes).forEach(([key, value]) =>
+    el.setAttribute(toKebabCase(key), value)
+  );
   appendTo?.appendChild(el);
   return el;
 }
