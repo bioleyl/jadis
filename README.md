@@ -7,12 +7,14 @@
 ## 🤔 Why Jadis?
 
 Modern frontend frameworks are powerful, but they come at a cost:
+
 - Complex tooling and configuration
 - Steep learning curves
 - Bloated bundles
 - Fragile abstractions
 
 **Jadis** is for developers who are tired of that. It brings things back to the basics:
+
 - ✅ Native Web Components
 - ✅ No framework-specific syntax
 - ✅ Zero dependencies
@@ -37,16 +39,17 @@ npm install @jadis/core
 import { Jadis } from '@jadis/core';
 
 class HelloWorld extends Jadis {
-    static selector = 'hello-world';
-    static template = '<p>Hello, <span id="name"></span></p>';
+  static selector = 'hello-world';
+  static template = '<p>Hello, <span id="name"></span></p>';
 
-    onConnect() {
-        this.getElement('#name').textContent = 'Jadis developers';
-    }
+  onConnect() {
+    this.getElement('#name').textContent = 'Jadis developers';
+  }
 }
 
 HelloWorld.register();
 ```
+
 Then in your HTML:
 
 ```html
@@ -56,6 +59,7 @@ Then in your HTML:
 ## 🧠 Philosophy
 
 **Jadis** isn't trying to replace React or Vue. It's here for when you want to:
+
 - Build small, fast, maintainable UI pieces
 - Avoid a bloated toolchain
 - Use the platform, not fight it
@@ -63,16 +67,19 @@ Then in your HTML:
 ## 🔍 When to Use Jadis
 
 Use it when you:
+
 - Want simplicity and speed
 - Build micro-frontends, design systems, or widgets
 - Miss the days when you could understand your app in one file
 
 Avoid it if you need:
+
 - Complex state management
 - Large-scale SPA routing
 - SSR or hydration
 
 ## 🚫 What Jadis doesn’t do (on purpose)
+
 Jadis is intentionally boring — in the best way.
 
 - ❌ No virtual DOM  
@@ -110,4 +117,4 @@ Feel free to open issues or submit PRs. Simplicity is key!
 
 ## 📜 License
 
-MIT — Made with ❤️,  ☕, a bit of 🧠 and Noevim.
+MIT — Made with ❤️, ☕, a bit of 🧠 and Neovim.
