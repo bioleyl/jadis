@@ -1,5 +1,9 @@
 import { Constructor, OptionalIfUndefined, Primitive } from './type.helper';
 
+/**
+ * A bus for handling events in a type-safe manner.
+ * It allows registering and emitting events with specific types.
+ */
 export class Bus<T> {
   private readonly domElement = document.createElement('div');
 
@@ -7,6 +11,12 @@ export class Bus<T> {
     // only for typing
   }
 
+  /**
+   * Registers a callback for a specific event.
+   * @param event The event key to listen for
+   * @param callback The callback to invoke when the event is emitted
+   * @param signal The AbortSignal to cancel the listener
+   */
   register<K extends keyof T>(
     event: K,
     callback: (detail: Primitive<T[K]>) => void,
@@ -21,6 +31,11 @@ export class Bus<T> {
     );
   }
 
+  /**
+   * Emits an event on the bus.
+   * @param event The event key to emit
+   * @param params The parameters to include with the event
+   */
   emit<K extends keyof T>(
     event: K,
     ...params: OptionalIfUndefined<Primitive<T[K]>>
