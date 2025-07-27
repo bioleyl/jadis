@@ -43,6 +43,13 @@ export class Router {
     });
   }
 
+  get config(): Required<RouterOptions> {
+    return {
+      mode: this._mode,
+      baseUrl: this._baseUrl,
+    };
+  }
+
   /**
    * Gets the current route.
    * @throws Will throw an error if no route is found
