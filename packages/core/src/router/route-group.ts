@@ -37,9 +37,9 @@ export class RouteGroup {
    */
   addRoute(path: string, componentSelector: string, name?: string) {
     this._routes.push({
-      path: `${this.routePrefix}${path.startsWith('/') ? path.slice(1) : path}`,
       componentSelector,
-      name: `${this.namePrefix}${name}`,
+      path: `${this.routePrefix}${path.startsWith('/') ? path.slice(1) : path}`,
+      name: name ? `${this.namePrefix}${name}` : undefined,
     });
     return this;
   }

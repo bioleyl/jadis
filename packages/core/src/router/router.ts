@@ -127,7 +127,11 @@ export class Router {
    */
   gotoPath(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState({}, '', `${this.baseUrl}${urlPath}`);
+    window.history.pushState(
+      {},
+      '',
+      `${this.baseUrl}/${urlPath}`.replace(/\/{2,}/g, '/')
+    );
     this.onUrlChange();
   }
 
@@ -147,10 +151,11 @@ export class Router {
   }
 
   private get currentUrlPath() {
+    const formattedPath = window.location.pathname.startsWith(this.baseUrl)
+      ? window.location.pathname.slice(this.baseUrl.length)
+      : window.location.pathname;
     const path =
-      this._mode === 'hash'
-        ? window.location.hash.slice(1)
-        : window.location.pathname.replace(this.baseUrl, '');
+      this._mode === 'hash' ? window.location.hash.slice(1) : formattedPath;
     return path.startsWith('/') ? path : `/${path}`;
   }
 

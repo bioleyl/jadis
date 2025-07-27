@@ -162,7 +162,7 @@ describe('Router', () => {
         router.addRoute('/dashboard', 'dashboard-component');
         router.gotoPath('/dashboard');
 
-        expect(window.location.pathname).toBe('/app');
+        expect(window.location.pathname).toBe('/app/');
         expect(window.location.hash).toBe('#/dashboard');
         const component = container.querySelector('dashboard-component');
         expect(component).toBeTruthy();
@@ -176,7 +176,7 @@ describe('Router', () => {
         router.addRoute('/settings', 'settings-component', 'settings');
         router.gotoName('settings');
 
-        expect(window.location.pathname).toBe('/app');
+        expect(window.location.pathname).toBe('/app/');
         expect(window.location.hash).toBe('#/settings');
         const component = container.querySelector('settings-component');
         expect(component).toBeTruthy();
