@@ -1,5 +1,5 @@
-import { assert } from './helpers/assert.helper';
-import { createElement } from './helpers/element.helper';
+import { assert } from '../helpers/assert.helper';
+import { createElement } from '../helpers/element.helper';
 
 import {
   InternalRoute,
@@ -7,12 +7,14 @@ import {
   Route,
   RouterMode,
   RouterOptions,
-} from './types/router.type';
+} from '../types/router.type';
+import { RouteGroup } from './route-group';
 
 const ROUTER_PARAMETER_PREFIX = ':';
 
 const defaultOptions: Required<RouterOptions> = {
   mode: 'history',
+  baseUrl: '/',
 };
 
 /**
@@ -23,6 +25,7 @@ const defaultOptions: Required<RouterOptions> = {
 export class Router {
   private readonly _routes: Array<InternalRoute> = [];
   private readonly _mode: RouterMode;
+  private readonly _baseUrl: string;
   private readonly _parametersRegexp = new RegExp(
     `${ROUTER_PARAMETER_PREFIX}\\w+`,
     'g'
@@ -32,6 +35,7 @@ export class Router {
 
   constructor(options?: RouterOptions) {
     this._mode = options?.mode ?? defaultOptions.mode;
+    this._baseUrl = options?.baseUrl ?? defaultOptions.baseUrl;
 
     window.addEventListener(this.eventName, (evt) => {
       evt.preventDefault();
@@ -54,8 +58,11 @@ export class Router {
    * @param path The path of the route
    * @param componentSelector The selector of the component to mount for this route
    * @param name An optional name for the route
+   * @example
+   * router.addRoute('/home', 'home-component', 'home');
+   * @returns this
    */
-  addRoute(path: string, componentSelector: string, name?: string) {
+  addRoute(path: string, componentSelector: string, name?: string): this {
     const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
     this._routes.push({
       name,
@@ -63,6 +70,27 @@ export class Router {
       componentSelector,
       regexp: new RegExp(`^${pathWithoutParameters}$`),
     });
+    return this;
+  }
+
+  /**
+   *  Adds a group of routes defined in a RouteGroup.
+   * This allows for organizing routes under a common prefix.
+   * @param routeGroup The RouteGroup containing routes to add
+   * @example
+   * const group = RouteGroup.create('/api')
+   *   .addRoute('/users', 'user-list')
+   *   .addRoute('/users/:id', 'user-detail');
+   * router.addGroup(group);
+   * @returns this
+   */
+  addGroup(routeGroup: RouteGroup): this {
+    routeGroup
+      .getRoutes()
+      .forEach(({ path, componentSelector, name }) =>
+        this.addRoute(path, componentSelector, name)
+      );
+    return this;
   }
 
   /**
@@ -92,8 +120,14 @@ export class Router {
    */
   gotoPath(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState({}, '', urlPath);
+    window.history.pushState({}, '', `${this.baseUrl}${urlPath}`);
     this.onUrlChange();
+  }
+
+  private get baseUrl(): string {
+    return this._baseUrl.endsWith('/')
+      ? this._baseUrl.slice(0, -1)
+      : this._baseUrl;
   }
 
   private get mountPoint(): HTMLElement {
@@ -109,7 +143,7 @@ export class Router {
     const path =
       this._mode === 'hash'
         ? window.location.hash.slice(1)
-        : window.location.pathname;
+        : window.location.pathname.replace(this.baseUrl, '');
     return path.startsWith('/') ? path : `/${path}`;
   }
 

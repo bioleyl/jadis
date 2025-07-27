@@ -2,18 +2,18 @@ export type Constructor<T> = new (...args: any[]) => T;
 
 export type Primitive<T> = T extends Number
   ? number
-  : T extends String
+  : T extends StringConstructor
   ? string
-  : T extends Boolean
+  : T extends BooleanConstructor
   ? boolean
-  : T extends BigInt
+  : T extends BigIntConstructor
   ? bigint
-  : T extends Symbol
+  : T extends SymbolConstructor
   ? symbol
-  : T extends Function
+  : T extends FunctionConstructor
   ? Function
-  : T extends Array<infer U>
-  ? U[]
+  : T extends ArrayConstructor
+  ? Array<unknown>
   : T;
 
 export type OptionalIfUndefined<T> = undefined extends T
