@@ -15,6 +15,11 @@ const defaultOptions: Required<RouterOptions> = {
   mode: 'history',
 };
 
+/**
+ * Router class for managing navigation and routing in a web application.
+ * It supports both hash and history modes for navigation.
+ * It allows defining routes, navigating to them, and mounting components based on the current URL.
+ */
 export class Router {
   private readonly _routes: Array<InternalRoute> = [];
   private readonly _mode: RouterMode;
@@ -34,11 +39,22 @@ export class Router {
     });
   }
 
+  /**
+   * Gets the current route.
+   * @throws Will throw an error if no route is found
+   * @returns The current route
+   */
   get currentRoute(): Route {
     assert(this._currentRoute, 'No route found');
     return this._currentRoute;
   }
 
+  /**
+   * Adds a new route to the router.
+   * @param path The path of the route
+   * @param componentSelector The selector of the component to mount for this route
+   * @param name An optional name for the route
+   */
   addRoute(path: string, componentSelector: string, name?: string) {
     const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
     this._routes.push({
@@ -49,11 +65,20 @@ export class Router {
     });
   }
 
+  /**
+   * Mounts the router on a specific HTML element.
+   * @param el The element to mount the router on
+   */
   mountOn(el: HTMLElement) {
     this._mount = el;
     this.onUrlChange();
   }
 
+  /**
+   * Navigates to a route by its name.
+   * @param name The name of the route to navigate to
+   * @param params The parameters to include with the route
+   */
   gotoName(name: string, params?: Record<string, string>) {
     const route = this.getRouteByName(name);
     assert(route, `No route found for name: ${name}`);
@@ -61,6 +86,10 @@ export class Router {
     this.gotoPath(this.formatPath(route.path, params));
   }
 
+  /**
+   * Navigates to a route by its path.
+   * @param path The path of the route to navigate to
+   */
   gotoPath(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
     window.history.pushState({}, '', urlPath);
@@ -123,12 +152,9 @@ export class Router {
     const match = regexp.exec(urlPath);
     assert(match, `No match found for path: ${urlPath}`);
 
-    return this.extractPathParams(path).reduce(
-      (acc, param, index) => {
-        return { ...acc, [param]: match[index + 1] };
-      },
-      {} as Record<string, string>
-    );
+    return this.extractPathParams(path).reduce((acc, param, index) => {
+      return { ...acc, [param]: match[index + 1] };
+    }, {} as Record<string, string>);
   }
 
   private getRouteByName(name: string): InternalRoute | null {

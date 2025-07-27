@@ -19,6 +19,11 @@ interface JadisConstructor {
 
 type InferAttributes<T> = T extends (infer U)[] ? U : never;
 
+/**
+ * Base class for all Jadis components.
+ * It provides a structure for creating web components with a shadow DOM,
+ * event handling, and attribute management.
+ */
 export abstract class Jadis extends HTMLElement {
   static readonly selector: `${string}-${string}`;
   static readonly template: string = '';
@@ -34,7 +39,13 @@ export abstract class Jadis extends HTMLElement {
 
   private _isConnected = false;
 
+  /**
+   * Callback invoked when the component is connected to the DOM.
+   */
   onConnect?(): void;
+  /**
+   * Callback invoked when the component is disconnected from the DOM.
+   */
   onDisconnect?(): void;
 
   constructor() {
@@ -43,6 +54,12 @@ export abstract class Jadis extends HTMLElement {
     this.shadowRoot.appendChild(this.buildTemplate().content.cloneNode(true));
   }
 
+  /**
+   * Creates a new instance of the component.
+   * @param attributes The attributes to set on the component
+   * @param appendTo The element to append the component to
+   * @returns The created component instance
+   */
   static createElement<T extends JadisConstructor>(
     this: T,
     attributes: Partial<
@@ -57,6 +74,12 @@ export abstract class Jadis extends HTMLElement {
     );
   }
 
+  /**
+   * Registers the component as a custom element.
+   * This method should be called once to define the custom element in the browser.
+   * It checks if the selector is defined and if the custom element is not already registered.
+   * @throws Will throw an error if the selector is not defined for the component
+   */
   static register(): void {
     assert(this.selector, `selector is not defined for ${this.name}`);
     if (!customElements.get(this.typeOfClass.selector)) {
@@ -64,6 +87,10 @@ export abstract class Jadis extends HTMLElement {
     }
   }
 
+  /**
+   * Checks if the component is connected to the DOM.
+   * @returns True if the component is connected, false otherwise
+   */
   get isConnected(): boolean {
     return this._isConnected;
   }
@@ -86,10 +113,21 @@ export abstract class Jadis extends HTMLElement {
     this.attributesCallback[name]?.(newValue, oldValue);
   }
 
+  /**
+   * Returns the AbortSignal associated with this component.
+   * This signal can be used to cancel ongoing operations or event listeners.
+   * @returns The AbortSignal for this component
+   */
   protected get killSignal(): AbortSignal {
     return this._abortController.signal;
   }
 
+  /**
+   * Retrieves an element from the component's template.
+   * @param query The query string to find the element
+   * @returns The found element
+   * @throws Will throw an error if the element is not found
+   */
   protected getElement<Element extends HTMLElement>(query: string): Element {
     const el = query
       .split('>>>')
@@ -101,12 +139,24 @@ export abstract class Jadis extends HTMLElement {
     return el as Element;
   }
 
+  /**
+   * Toggles a class on the component based on a condition.
+   * If the condition is true, the class will be added; if false, it will be removed.
+   * @param className The name of the class to toggle
+   * @param condition The binary condition to determine whether to add or remove the class
+   */
   protected toggleClass(className: string, condition: boolean): void {
     condition
       ? this.classList.add(className)
       : this.classList.remove(className);
   }
 
+  /**
+   * Registers a callback for a specific event on a bus.
+   * @param bus The event bus to register the callback on
+   * @param event The event key to listen for
+   * @param callback The callback to invoke when the event is emitted
+   */
   protected onBus<BusType, BusEventKey extends keyof BusType>(
     bus: Bus<BusType>,
     event: BusEventKey,
@@ -115,6 +165,26 @@ export abstract class Jadis extends HTMLElement {
     bus.register(event, callback, this.killSignal);
   }
 
+  /**
+   * Creates a handler for events on the component.
+   * This handler allows registering and emitting events in a type-safe manner.
+   * @template EventType The type of events to handle
+   * @returns An object with methods to register and emit events
+   * @example
+   * // Typescript usage:
+   * const events = this.useEvents<{ someEvent: string }>();
+   * events.register('someEvent', (detail) => {
+   *   console.log('Event detail:', detail);
+   * });
+   * events.emit('someEvent', 'Hello World');
+   *
+   * // Javascript usage:
+   * const events = this.useEvents({someEvent: String});
+   * events.register('someEvent', (detail) => {
+   *   console.log('Event detail:', detail);
+   * });
+   * events.emit('someEvent', 'Hello World');
+   */
   protected useEvents<EventType>(_schema?: {
     [EventKey in keyof EventType]: Constructor<EventType[EventKey]> | undefined;
   }): UseEventsHandler<EventType> {
@@ -141,9 +211,15 @@ export abstract class Jadis extends HTMLElement {
     };
   }
 
+  /**
+   * Registers a callback for a specific event on an element.
+   * @param element The element to listen for events on
+   * @param event The event key to listen for
+   * @param callback The callback to invoke when the event is emitted
+   */
   protected on<
     Element extends HTMLElement,
-    Event extends keyof HTMLElementEventMap,
+    Event extends keyof HTMLElementEventMap
   >(
     element: Element,
     event: Event,
