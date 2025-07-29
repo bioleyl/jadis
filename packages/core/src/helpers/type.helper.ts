@@ -1,6 +1,6 @@
 export type Constructor<T> = new (...args: any[]) => T;
 
-export type Primitive<T> = T extends Number
+export type Primitive<T> = T extends NumberConstructor
   ? number
   : T extends StringConstructor
   ? string

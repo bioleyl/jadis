@@ -21,7 +21,6 @@
     "clean": "rimraf dist && rimraf build",
     "prepack": "npm run clean && npm run build"
   },
-  "keywords": [],
   "author": "Leal Bioley <lb@syware.ch>",
   "license": "MIT",
   "repository": {
