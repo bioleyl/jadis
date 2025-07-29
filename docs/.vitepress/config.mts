@@ -43,6 +43,7 @@ export default defineConfig({
       {
         text: 'Routing',
         items: [
+          { text: 'Configuration', link: '/pages/routing/configuration' },
           { text: 'Declaring routes', link: '/pages/routing/declaring-routes' },
           { text: 'Navigating', link: '/pages/routing/navigating' },
         ],
