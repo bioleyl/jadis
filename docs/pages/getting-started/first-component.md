@@ -9,7 +9,7 @@ We’ll create a reusable button that shows a label and keeps track of how many 
 ::: code-group
 
 ```javascript
-import { Jadis, html } from '@jadis/core';
+import { Jadis, html, createSelector } from '@jadis/core';
 
 const template = html`
   <button id="btn"></button>
@@ -17,7 +17,7 @@ const template = html`
 `;
 
 class ClickButton extends Jadis {
-  static selector = 'click-button';
+  static selector = createSelector('click-button');
   static template = template;
 
   count = 0;
@@ -68,7 +68,7 @@ ClickButton.register();
 
 ```javascript [js-doc]
 // @ts-check
-import { Jadis, html } from '@jadis/core';
+import { Jadis, html, createSelector } from '@jadis/core';
 
 const template = html`
   <button id="btn"></button>
@@ -76,8 +76,7 @@ const template = html`
 `;
 
 class ClickButton extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'click-button';
+  static selector = createSelector('click-button');
   static template = template;
 
   count = 0;
@@ -110,12 +109,12 @@ Then in your HTML:
 You can style your component by adding a `static style` property:
 
 ```javascript
-import { Jadis, html, css } from '@jadis/core';
+import { Jadis, html, css, createSelector } from '@jadis/core';
 
 ...
 
 class ClickButton extends Jadis {
-  static selector = 'click-button';
+  static selector = createSelector('click-button');
   static template = template;
   static style = css`button { padding: 0.5rem; font-size: 1rem; }`;
 

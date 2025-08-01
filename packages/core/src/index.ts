@@ -10,3 +10,7 @@ export { toKebabCase } from './helpers/string.helper';
 export { assert } from './helpers/assert.helper';
 export { html, css } from './helpers/template.helper';
 export { Bus } from './helpers/bus.helper';
+export {
+  createSelector,
+  isComponentSelector,
+} from './helpers/component.helper';

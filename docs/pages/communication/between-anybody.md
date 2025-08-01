@@ -44,7 +44,7 @@ Once the bus is defined, you can **register listeners** or **emit events** freel
 ::: code-group
 
 ```javascript
-import { Bus, Jadis, html } from '@jadis/core';
+import { Bus, Jadis, html, createSelector } from '@jadis/core';
 
 const myBus = new Bus({
   someEvent: String,
@@ -53,7 +53,7 @@ const myBus = new Bus({
 });
 
 class ReceiverComponent extends Jadis {
-  static selector = 'receiver-component';
+  static selector = createSelector('receiver-component');
   static template = html`<p></p>`;
 
   onConnect() {
@@ -64,7 +64,7 @@ class ReceiverComponent extends Jadis {
 }
 
 class EmitterComponent extends Jadis {
-  static selector = 'emitter-component';
+  static selector = createSelector('emitter-component');
   static template = html`<button>ClickMe</button>`;
 
   onConnect() {
@@ -115,14 +115,13 @@ EmitterComponent.register();
 
 ```javascript [js-doc]
 // @ts-check
-import { Bus, Jadis, html } from '@jadis/core';
+import { Bus, Jadis, html, createSelector } from '@jadis/core';
 
 /** @type {Bus<{ someEvent: string, anotherEvent: number, noPayloadEvent: undefined }>} */
 const myBus = new Bus();
 
 class ReceiverComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'receiver-component';
+  static selector = createSelector('receiver-component');
   static template = html`<p></p>`;
 
   onConnect() {
@@ -133,8 +132,7 @@ class ReceiverComponent extends Jadis {
 }
 
 class EmitterComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'emitter-component';
+  static selector = createSelector('emitter-component');
   static template = html`<button>ClickMe</button>`;
 
   onConnect() {
