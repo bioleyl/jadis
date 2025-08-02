@@ -19,3 +19,5 @@ export type Primitive<T> = T extends NumberConstructor
 export type OptionalIfUndefined<T> = undefined extends T
   ? [param?: T]
   : [param: T];
+
+export type ComponentSelector = `${string}-${string}`;

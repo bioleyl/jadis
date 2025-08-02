@@ -11,10 +11,10 @@ You can implement your own event system if you prefer, but **Jadis includes a bu
 ::: code-group
 
 ```javascript
-import { Jadis, html } from '@jadis/core';
+import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
-  static selector = 'child-component';
+  static selector = createSelector('child-component');
   static template = html`<button id="btn">Click me</button>`;
 
   events = this.useEvents({ someEvent: String });
@@ -27,7 +27,7 @@ class ChildComponent extends Jadis {
 }
 
 class ParentComponent extends Jadis {
-  static selector = 'parent-component';
+  static selector = createSelector('parent-component');
   static template = html`
     <child-component></child-component>
     <p id="message"></p>
@@ -98,11 +98,10 @@ ParentComponent.register();
 
 ```javascript [js-doc]
 // @ts-check
-import { Jadis, html } from '@jadis/core';
+import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'child-component';
+  static selector = createSelector('child-component');
   static template = html`<button id="btn">Click me</button>`;
 
   /** @type {import('@jadis/core').UseEventsHandler<{someEvent: string}>} */
@@ -116,8 +115,7 @@ class ChildComponent extends Jadis {
 }
 
 class ParentComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'parent-component';
+  static selector = createSelector('parent-component');
   static template = html`
     <child-component></child-component>
     <p id="message"></p>

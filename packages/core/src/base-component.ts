@@ -6,12 +6,13 @@ import type {
   OptionalIfUndefined,
   Primitive,
   Constructor,
+  ComponentSelector,
 } from './helpers/type.helper.ts';
 import { UseEventsHandler } from './types/jadis.type';
 
 interface JadisConstructor {
   new (): Jadis;
-  readonly selector: `${string}-${string}`;
+  readonly selector: ComponentSelector;
   readonly template: string;
   readonly style: string;
   readonly observedAttributes: Array<string>;
@@ -25,7 +26,7 @@ type InferAttributes<T> = T extends (infer U)[] ? U : never;
  * event handling, and attribute management.
  */
 export abstract class Jadis extends HTMLElement {
-  static readonly selector: `${string}-${string}`;
+  static readonly selector: ComponentSelector;
   static readonly template: string = '';
   static readonly style: string = '';
   static readonly observedAttributes: Array<string> = [];

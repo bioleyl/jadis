@@ -13,10 +13,10 @@ The return value is always an `HTMLElement`. You can cast it to a more specific 
 ::: code-group
 
 ```javascript
-import { html, Jadis } from '@jadis/core';
+import { html, Jadis, createSelector } from '@jadis/core';
 
 class ButtonComponent extends Jadis {
-  static selector = 'button-component';
+  static selector = createSelector('button-component');
   static template = html`<button>Click me</button>`;
 
   get buttonElement() {
@@ -25,7 +25,7 @@ class ButtonComponent extends Jadis {
 }
 
 class ParentComponent extends Jadis {
-  static selector = 'parent-component';
+  static selector = createSelector('parent-component');
   static template = html`<button-component></button-component>`;
 
   get childButtonComponent() {
@@ -58,11 +58,10 @@ class ParentComponent extends Jadis {
 
 ```javascript [js-doc]
 // @ts-check
-import { html, Jadis } from '@jadis/core';
+import { html, Jadis, createSelector } from '@jadis/core';
 
 class ButtonComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'button-component';
+  static selector = createSelector('button-component');
   static template = html`<button>Click me</button>`;
 
   /** @returns {HTMLButtonElement} */
@@ -72,8 +71,7 @@ class ButtonComponent extends Jadis {
 }
 
 class ParentComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'parent-component';
+  static selector = createSelector('parent-component');
   static template = html`<button-component></button-component>`;
 
   /** @returns {HTMLButtonElement} */

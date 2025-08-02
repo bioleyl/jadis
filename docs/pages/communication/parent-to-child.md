@@ -9,10 +9,10 @@ The most straightforward way for a parent to interact with a child is by calling
 ::: code-group
 
 ```javascript
-import { Jadis, html } from '@jadis/core';
+import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
-  static selector = 'child-component';
+  static selector = createSelector('child-component');
   static template = html`<p></p>`;
 
   set textValue(value) {
@@ -21,7 +21,7 @@ class ChildComponent extends Jadis {
 }
 
 class ParentComponent extends Jadis {
-  static selector = 'parent-component';
+  static selector = createSelector('parent-component');
   static template = html`<child-component></child-component>`;
 
   onConnect() {
@@ -68,11 +68,10 @@ ParentComponent.register();
 
 ```javascript [js-doc]
 // @ts-check
-import { Jadis, html } from '@jadis/core';
+import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'child-component';
+  static selector = createSelector('child-component');
   static template = html`<p></p>`;
 
   /** @param {string} value */
@@ -82,8 +81,7 @@ class ChildComponent extends Jadis {
 }
 
 class ParentComponent extends Jadis {
-  /** @type {`${string}-${string}`} */
-  static selector = 'parent-component';
+  static selector = createSelector('parent-component');
   static template = html`<child-component></child-component>`;
 
   onConnect() {
