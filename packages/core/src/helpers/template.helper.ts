@@ -3,7 +3,7 @@ import { HtmlMarkupValue } from './type.helper';
 
 type HtmlMarkupResult = {
   markup: string;
-  markers: Array<{ key: string; node: Node }>;
+  markers: Record<string, Node>;
 };
 
 /**
@@ -32,9 +32,9 @@ export function html(
 
   while (walker.nextNode()) {
     const node = walker.currentNode;
-    const match = markers.find((m) => m.key === node.nodeValue?.trim());
+    const match = markers[node.nodeValue?.trim() ?? ''];
     if (match && node.parentNode) {
-      updates.push({ target: node, replacement: match.node });
+      updates.push({ target: node, replacement: match });
     }
   }
 
@@ -66,16 +66,19 @@ export const css = (
   );
 };
 
-function createMarker(node: Node | Array<Node>, i: number): HtmlMarkupResult {
-  const key = `marker-${i}`;
+function createMarker(node: Node | Array<Node>, k1: number): HtmlMarkupResult {
+  const key = `marker-${k1}`;
 
   return Array.isArray(node)
-    ? {
-        markers: node.map((n, j) => ({ key: `${key}-${j}`, node: n })),
-        markup: node.map((_, j) => `<!--${key}-${j}-->`).join(''),
-      }
+    ? node.reduce(
+        (acc, n, k2) => ({
+          markers: { ...acc.markers, [`${key}-${k2}`]: n },
+          markup: `${acc.markup}<!--${key}-${k2}-->`,
+        }),
+        { markup: '', markers: {} }
+      )
     : {
-        markers: [{ key, node }],
+        markers: { [key]: node },
         markup: `<!--${key}-->`,
       };
 }
@@ -85,18 +88,18 @@ function htmlMarkup(
   ...values: Array<HtmlMarkupValue>
 ): HtmlMarkupResult {
   if (typeof strings === 'string') {
-    return { markup: strings, markers: [] };
+    return { markup: strings, markers: {} };
   }
 
   return strings.reduce(
-    (acc: HtmlMarkupResult, str, i) => {
-      const val = values[i];
+    (acc: HtmlMarkupResult, str, k1) => {
+      const val = values[k1];
 
       if (val instanceof Node || Array.isArray(val)) {
-        const { markers, markup } = createMarker(val, i);
+        const { markers, markup } = createMarker(val, k1);
         return {
           markup: `${acc.markup}${str}${markup}`,
-          markers: [...acc.markers, ...markers],
+          markers: { ...acc.markers, ...markers },
         };
       }
 
@@ -105,6 +108,6 @@ function htmlMarkup(
         markers: acc.markers,
       };
     },
-    { markup: '', markers: [] }
+    { markup: '', markers: {} }
   );
 }
