@@ -1,23 +1,25 @@
 import { css, html, Jadis } from '@jadis/core';
 import { myRouter } from '../../router';
 
-const template = html`
-  <h1>Hello, <span></span>!</h1>
-  <p>Welcome to the Hello Page.</p>
-  <p>Click the button to go back to the main page.</p>
-  <button>Go Back</button>
-`;
-
-const style = css`
-  h1 {
-    color: blue;
-  }
-`;
-
 class HelloPage extends Jadis {
   static readonly selector = 'hello-page';
-  static readonly template = template;
-  static readonly style = style;
+
+  templateHtml(): DocumentFragment {
+    return html`
+      <h1>Hello, <span></span>!</h1>
+      <p>Welcome to the Hello Page.</p>
+      <p>Click the button to go back to the main page.</p>
+      <button>Go Back</button>
+    `;
+  }
+
+  templateCss(): string {
+    return css`
+      h1 {
+        color: blue;
+      }
+    `;
+  }
 
   onConnect(): void {
     this.spanElement.textContent = this.getAttribute('name') ?? '';
@@ -25,7 +27,7 @@ class HelloPage extends Jadis {
     this.on(this.buttonElement, 'click', () => this.#onButtonClick());
   }
 
-  #onButtonClick() {
+  #onButtonClick(): void {
     myRouter.gotoName('main');
   }
 

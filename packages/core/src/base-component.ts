@@ -13,8 +13,6 @@ import { UseEventsHandler } from './types/jadis.type';
 interface JadisConstructor {
   new (): Jadis;
   readonly selector: ComponentSelector;
-  readonly template: string;
-  readonly style: string;
   readonly observedAttributes: Array<string>;
 }
 
@@ -28,7 +26,6 @@ type InferAttributes<T> = T extends (infer U)[] ? U : never;
 export abstract class Jadis extends HTMLElement {
   static readonly selector: ComponentSelector;
   static readonly template: string = '';
-  static readonly style: string = '';
   static readonly observedAttributes: Array<string> = [];
   readonly shadowRoot: ShadowRoot;
 
@@ -42,6 +39,8 @@ export abstract class Jadis extends HTMLElement {
 
   /**
    * Callback invoked when the component is connected to the DOM.
+   * This method can be overridden to perform actions when the component is added to the document.
+   * This is the place to initialize component state, start any necessary processes and add event listeners.
    */
   onConnect?(): void;
   /**
@@ -49,10 +48,38 @@ export abstract class Jadis extends HTMLElement {
    */
   onDisconnect?(): void;
 
+  /**
+   * The HTML template for the component.
+   * This method should return a string containing the HTML structure of the component.
+   * It can be overridden to provide custom templates.
+   * @returns The HTML template as a string
+   * @example
+   * ```typescript
+   * templateHtml() {
+   *   return `<div>Hello, World!</div>`;
+   * }
+   * ```
+   */
+  templateHtml?(): DocumentFragment;
+
+  /**
+   * The CSS styles for the component.
+   * This method should return a string containing the CSS styles for the component.
+   * It can be overridden to provide custom styles.
+   * @returns The CSS styles as a string
+   * @example
+   * ```typescript
+   * templateCss() {
+   *   return `:host { display: block; }`;
+   * }
+   * ```
+   */
+  templateCss?(): string;
+
   constructor() {
     super();
     this.shadowRoot = this.attachShadow({ mode: 'open' });
-    this.shadowRoot.appendChild(this.buildTemplate().content.cloneNode(true));
+    this.shadowRoot.appendChild(this.buildTemplate());
   }
 
   /**
@@ -231,12 +258,19 @@ export abstract class Jadis extends HTMLElement {
     });
   }
 
-  private buildTemplate(): HTMLTemplateElement {
-    const template = document.createElement('template');
-    template.innerHTML = html`<style>
-        ${this.typeOfConstructor.style}</style
-      >${this.typeOfConstructor.template}`;
-    return template;
+  private buildTemplate(): DocumentFragment {
+    const style = document.createElement('style');
+    style.textContent = this.templateCss?.() ?? '';
+
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(style);
+
+    const htmlContent = this.templateHtml?.();
+    if (htmlContent) {
+      fragment.appendChild(htmlContent);
+    }
+
+    return fragment;
   }
 
   private static get typeOfClass(): JadisConstructor {

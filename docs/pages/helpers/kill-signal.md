@@ -6,7 +6,9 @@ Here’s how you might use it to bind a DOM event:
 
 ```javascript
 class ButtonComponent extends Jadis {
-  static template = html`<button>Click me</button>`;
+  templateHtml() {
+    return html`<button>Click me</button>`;
+  }
 
   onConnect() {
     this.getElement('button').addEventListener(
@@ -24,7 +26,9 @@ For typical DOM event listeners, Jadis offers a built-in `on` method that simpli
 
 ```javascript
 class ButtonComponent extends Jadis {
-  static template = html`<button>Click me</button>`;
+  templateHtml() {
+    return html`<button>Click me</button>`;
+  }
 
   onConnect() {
     this.on(this.getElement('button'), 'click', () => {

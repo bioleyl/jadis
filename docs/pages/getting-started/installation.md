@@ -34,11 +34,14 @@ npm install @jadis/core
 Then create a file named `index.js` with the following content:
 
 ```javascript
-import { Jadis } from '@jadis/core';
+import { Jadis, createSelector, html } from '@jadis/core';
 
 class HelloWorld extends Jadis {
-  static selector = 'hello-world';
-  static template = '<p>Hello, <span id="name"></span></p>';
+  static selector = createSelector('hello-world');
+
+  templateHtml() {
+    return html`<p>Hello, <span id="name"></span></p>`;
+  }
 
   onConnect() {
     this.getElement('#name').textContent = 'Jadis developers';
@@ -55,7 +58,7 @@ Then in your HTML:
 
 ## 🌐 Using a CDN
 
-You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis/core/dist/umd/index.js):
+You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis/core/dist/umd/index.js) or [esm](https://esm.sh/@jadis/core@0.5.0):
 
 ```html
 <!DOCTYPE html>
@@ -64,19 +67,31 @@ You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jadis Example</title>
-    <script src="https://unpkg.com/@jadis/core/dist/umd/index.js"></script>
   </head>
   <body>
     <hello-world></hello-world>
-    <script>
-      class HelloWorld extends Jadis.Jadis {
-        static selector = 'hello-world';
-        static template = '<p>Hello, <span id="name"></span></p>';
+    <script type="importmap">
+      {
+        "imports": {
+          "jadis": "https://esm.sh/@jadis/core@0.5.0"
+        }
+      }
+    </script>
+    <script type="module">
+      import { Jadis, createSelector, html } from 'jadis';
+
+      class HelloWorld extends Jadis {
+        static selector = createSelector('hello-world');
+
+        templateHtml() {
+          return html`<p>Hello, <span id="name"></span></p>`;
+        }
 
         onConnect() {
           this.getElement('#name').textContent = 'Jadis developers';
         }
       }
+
       HelloWorld.register();
     </script>
   </body>

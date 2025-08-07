@@ -21,3 +21,14 @@ export type OptionalIfUndefined<T> = undefined extends T
   : [param: T];
 
 export type ComponentSelector = `${string}-${string}`;
+
+export type HtmlMarkupValue =
+  | string
+  | number
+  | boolean
+  | Node
+  | Node[]
+  | null
+  | undefined;
+
+export type AppendableElement = HTMLElement | ShadowRoot | DocumentFragment;

@@ -54,7 +54,10 @@ const myBus = new Bus({
 
 class ReceiverComponent extends Jadis {
   static selector = createSelector('receiver-component');
-  static template = html`<p></p>`;
+
+  templateHtml() {
+    return html`<p></p>`;
+  }
 
   onConnect() {
     this.onBus(myBus, 'someEvent', (value) => {
@@ -65,7 +68,10 @@ class ReceiverComponent extends Jadis {
 
 class EmitterComponent extends Jadis {
   static selector = createSelector('emitter-component');
-  static template = html`<button>ClickMe</button>`;
+
+  templateHtml() {
+    return html`<button>ClickMe</button>`;
+  }
 
   onConnect() {
     this.getElement('button').addEventListener('click', () => {
@@ -89,9 +95,12 @@ const myBus = new Bus<{
 
 class ReceiverComponent extends Jadis {
   static readonly selector = 'receiver-component';
-  static readonly template = html`<p></p>`;
 
-  onConnect() {
+  templateHtml(): DocumentFragment {
+    return html`<p></p>`;
+  }
+
+  onConnect(): void {
     this.onBus(myBus, 'someEvent', (value) => {
       this.getElement('p').textContent = `Received: ${value}`;
     });
@@ -100,9 +109,12 @@ class ReceiverComponent extends Jadis {
 
 class EmitterComponent extends Jadis {
   static readonly selector = 'emitter-component';
-  static readonly template = html`<button>ClickMe</button>`;
 
-  onConnect() {
+  templateHtml(): DocumentFragment {
+    return html`<button>ClickMe</button>`;
+  }
+
+  onConnect(): void {
     this.getElement('button').addEventListener('click', () => {
       myBus.emit('someEvent', 'Hello from EmitterComponent!');
     });
@@ -122,7 +134,10 @@ const myBus = new Bus();
 
 class ReceiverComponent extends Jadis {
   static selector = createSelector('receiver-component');
-  static template = html`<p></p>`;
+
+  templateHtml() {
+    return html`<p></p>`;
+  }
 
   onConnect() {
     this.onBus(myBus, 'someEvent', (value) => {

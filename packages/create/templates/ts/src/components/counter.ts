@@ -1,17 +1,20 @@
 import { html, Jadis } from '@jadis/core';
 
-const template = html`
-  <p>Count: <span></span></p>
-  <button id="increment">Increment</button>
-`;
-
 class Counter extends Jadis {
   static readonly selector = 'counter-component';
-  static readonly template = template;
+
   events = this.useEvents<{
     change: number;
   }>();
+
   private count = 0;
+
+  templateHtml(): DocumentFragment {
+    return html`
+      <p>Count: <span></span></p>
+      <button id="increment">Increment</button>
+    `;
+  }
 
   onConnect(): void {
     this.updateCount();

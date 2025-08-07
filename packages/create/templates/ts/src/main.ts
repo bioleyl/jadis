@@ -1,5 +1,5 @@
-import HelloPage from './pages/hello/hello';
-import MainPage from './pages/main/main-page';
+import HelloPage from './pages/hello/HelloPage';
+import MainPage from './pages/main/MainPage';
 import { myRouter } from './router';
 
 myRouter.addRoute('/', MainPage.selector, 'main');
