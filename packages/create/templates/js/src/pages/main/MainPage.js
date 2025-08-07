@@ -1,14 +1,28 @@
-import { createElement, Jadis } from '@jadis/core';
-import template from './main-page.html?raw';
-import style from './main-page.css?inline';
+import { createElement, createSelector, html, Jadis } from '@jadis/core';
+import style from './MainPage.css?inline';
 import { myRouter } from '../../router';
 import Counter from '../../components/counter';
 import logo from '../../assets/logo.svg';
 
 class MainPage extends Jadis {
-  static selector = 'main-page';
-  static template = template;
-  static style = style;
+  static selector = createSelector('main-page');
+
+  templateHtml() {
+    return html`
+      <div class="header"></div>
+
+      <div>
+        <input type="text" placeholder="Enter your name" id="nameInput" />
+        <button id="greetButton">Greet</button>
+      </div>
+
+      <div class="wrapper"></div>
+    `;
+  }
+
+  templateCss() {
+    return style;
+  }
 
   onConnect() {
     createElement('img', { src: logo }, this.headerElement);
