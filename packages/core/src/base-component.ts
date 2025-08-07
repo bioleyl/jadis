@@ -259,9 +259,8 @@ export abstract class Jadis extends HTMLElement {
   }
 
   private buildTemplate(): DocumentFragment {
-    const style = html`<style>
-      ${this.templateCss?.() ?? ''}
-    </style>`;
+    const style = document.createElement('style');
+    style.textContent = this.templateCss?.() ?? '';
 
     const fragment = document.createDocumentFragment();
     fragment.appendChild(style);
