@@ -52,11 +52,14 @@ Every Jadis component includes a static `createElement` method with the same sig
 This makes it easy to instantiate components programmatically with attributes and a parent container.
 
 ```javascript
-import { createElement } from '@jadis/core';
+import { createElement, createSelector } from '@jadis/core';
 
 class MyComponent extends Jadis {
-  static selector = 'my-component';
-  static template = html`<h1>My Title</h1>`;
+  static selector = createSelector('my-component');
+
+  templateHtml() {
+    return html`<h1>My Title</h1>`;
+  }
 }
 
 MyComponent.register();

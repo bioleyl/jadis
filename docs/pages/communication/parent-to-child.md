@@ -13,7 +13,10 @@ import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
-  static template = html`<p></p>`;
+
+  templateHtml() {
+    return html`<p></p>`;
+  }
 
   set textValue(value) {
     this.getElement('p').textContent = value;
@@ -22,7 +25,10 @@ class ChildComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
-  static template = html`<child-component></child-component>`;
+
+  templateHtml() {
+    return html`<child-component></child-component>`;
+  }
 
   onConnect() {
     this.childComponent.textValue = 'Hello from Parent Component!';
@@ -42,18 +48,24 @@ import { Jadis, html } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static readonly selector = 'child-component';
-  static readonly template = html`<p></p>`;
 
-  set textValue(value: string) {
+  templateHtml(): DocumentFragment {
+    return html`<p></p>`;
+  }
+
+  set textValue(value: string): void {
     this.getElement('p').textContent = value;
   }
 }
 
 class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
-  static readonly template = html`<child-component></child-component>`;
 
-  onConnect() {
+  templateHtml(): DocumentFragment {
+    return html`<child-component></child-component>`;
+  }
+
+  onConnect(): void {
     this.childComponent.textValue = 'Hello from Parent Component!';
   }
 
@@ -72,7 +84,10 @@ import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
-  static template = html`<p></p>`;
+
+  templateHtml() {
+    return html`<p></p>`;
+  }
 
   /** @param {string} value */
   set textValue(value) {
@@ -82,7 +97,10 @@ class ChildComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
-  static template = html`<child-component></child-component>`;
+
+  templateHtml() {
+    return html`<child-component></child-component>`;
+  }
 
   onConnect() {
     this.childComponent.textValue = 'Hello from Parent Component!';
