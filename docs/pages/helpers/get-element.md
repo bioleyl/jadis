@@ -17,7 +17,10 @@ import { html, Jadis, createSelector } from '@jadis/core';
 
 class ButtonComponent extends Jadis {
   static selector = createSelector('button-component');
-  static template = html`<button>Click me</button>`;
+
+  templateHtml() {
+    return html`<button>Click me</button>`;
+  }
 
   get buttonElement() {
     return this.getElement('button');
@@ -26,7 +29,10 @@ class ButtonComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
-  static template = html`<button-component></button-component>`;
+
+  templateHtml() {
+    return html`<button-component></button-component>`;
+  }
 
   get childButtonComponent() {
     return this.getElement('button-component >>> button');
@@ -39,7 +45,10 @@ import { html, Jadis } from '@jadis/core';
 
 class ButtonComponent extends Jadis {
   static readonly selector = 'button-component';
-  static readonly template = html`<button>Click me</button>`;
+
+  templateHtml(): DocumentFragment {
+    return html`<button>Click me</button>`;
+  }
 
   get buttonElement(): HTMLButtonElement {
     return this.getElement('button');
@@ -48,7 +57,10 @@ class ButtonComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
-  static readonly template = html`<button-component></button-component>`;
+
+  templateHtml(): DocumentFragment {
+    return html`<button-component></button-component>`;
+  }
 
   get childButtonComponent(): HTMLButtonElement {
     return this.getElement('button-component >>> button');
@@ -62,7 +74,10 @@ import { html, Jadis, createSelector } from '@jadis/core';
 
 class ButtonComponent extends Jadis {
   static selector = createSelector('button-component');
-  static template = html`<button>Click me</button>`;
+
+  templateHtml() {
+    return html`<button>Click me</button>`;
+  }
 
   /** @returns {HTMLButtonElement} */
   get buttonElement() {
@@ -72,7 +87,10 @@ class ButtonComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
-  static template = html`<button-component></button-component>`;
+
+  templateHtml() {
+    return html`<button-component></button-component>`;
+  }
 
   /** @returns {HTMLButtonElement} */
   get childButtonComponent() {

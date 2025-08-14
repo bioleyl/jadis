@@ -15,9 +15,12 @@ import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
-  static template = html`<button id="btn">Click me</button>`;
 
   events = this.useEvents({ someEvent: String });
+
+  templateHtml() {
+    return html`<button id="btn">Click me</button>`;
+  }
 
   onConnect() {
     this.getElement('#btn').addEventListener('click', () => {
@@ -28,10 +31,13 @@ class ChildComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
-  static template = html`
-    <child-component></child-component>
-    <p id="message"></p>
-  `;
+
+  templateHtml() {
+    return html`
+      <child-component></child-component>
+      <p id="message"></p>
+    `;
+  }
 
   onConnect() {
     this.childComponent.events.register('someEvent', (data) => {
@@ -57,13 +63,16 @@ import { Jadis, html } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static readonly selector = 'child-component';
-  static readonly template = html`<button id="btn">Click me</button>`;
 
   events = this.useEvents<{
     someEvent: string;
   }>();
 
-  onConnect() {
+  templateHtml(): DocumentFragment {
+    return html`<button id="btn">Click me</button>`;
+  }
+
+  onConnect(): void {
     this.getElement('#btn').addEventListener('click', () => {
       this.events.emit('someEvent', 'Button clicked!');
     });
@@ -72,12 +81,15 @@ class ChildComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
-  static readonly template = html`
-    <child-component></child-component>
-    <p id="message"></p>
-  `;
 
-  onConnect() {
+  templateHtml(): DocumentFragment {
+    return html`
+      <child-component></child-component>
+      <p id="message"></p>
+    `;
+  }
+
+  onConnect(): void {
     this.childComponent.events.register('someEvent', (data) => {
       this.messageElement.textContent = data;
     });
@@ -102,10 +114,13 @@ import { Jadis, html, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
-  static template = html`<button id="btn">Click me</button>`;
 
   /** @type {import('@jadis/core').UseEventsHandler<{someEvent: string}>} */
   events = this.useEvents();
+
+  templateHtml() {
+    return html`<button id="btn">Click me</button>`;
+  }
 
   onConnect() {
     this.getElement('#btn').addEventListener('click', () => {
@@ -116,10 +131,13 @@ class ChildComponent extends Jadis {
 
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
-  static template = html`
-    <child-component></child-component>
-    <p id="message"></p>
-  `;
+
+  templateHtml() {
+    return html`
+      <child-component></child-component>
+      <p id="message"></p>
+    `;
+  }
 
   onConnect() {
     this.childComponent.events.register('someEvent', (data) => {

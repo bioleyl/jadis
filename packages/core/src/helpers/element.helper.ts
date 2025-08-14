@@ -1,4 +1,5 @@
 import { toKebabCase } from './string.helper';
+import { AppendableElement } from './type.helper';
 
 /**
  * Creates a new HTML element.
@@ -13,18 +14,18 @@ import { toKebabCase } from './string.helper';
  */
 export function createElement<Tag extends keyof HTMLElementTagNameMap>(
   tag: Tag,
-  attributes: Record<string, string>,
-  appendTo?: HTMLElement | ShadowRoot
+  attributes?: Record<string, string>,
+  appendTo?: AppendableElement
 ): HTMLElementTagNameMap[Tag];
 export function createElement<T extends HTMLElement>(
   tag: string,
   attributes?: Record<string, string>,
-  appendTo?: HTMLElement | ShadowRoot
+  appendTo?: AppendableElement
 ): T;
 export function createElement(
   tag: string,
   attributes: Record<string, string> = {},
-  appendTo?: HTMLElement | ShadowRoot
+  appendTo?: AppendableElement
 ): HTMLElement {
   const el = document.createElement(tag);
   Object.entries(attributes).forEach(([key, value]) =>
