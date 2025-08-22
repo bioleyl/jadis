@@ -1,22 +1,23 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "lib": [
-      "ES2020",
+      "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
-    "declaration": true,
-    "strict": true,
-    "esModuleInterop": true,
+    "moduleResolution": "node",
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node"
+    "strict": true
   },
   "exclude": [
     "**/dist",
     "**/node_modules",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "**/*.stub.ts"
+    "**/*.stub.ts",
+    "**/vitest.config.ts"
   ]
 }

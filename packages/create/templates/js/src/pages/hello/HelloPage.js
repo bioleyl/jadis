@@ -1,4 +1,5 @@
-import { Jadis, html, css, createSelector } from '@jadis/core';
+import { createSelector, css, html, Jadis } from '@jadis/core';
+
 import { myRouter } from '../../router';
 
 class HelloPage extends Jadis {

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              {
+                "source": [":URL:", ":NODE:"],
+                "type": false
+              },
+              ":BLANK_LINE:",
+              {
+                "source": [":PACKAGE:"],
+                "type": false
+              },
+              ":BLANK_LINE:",
+              {
+                "source": [":ALIAS:", ":PATH:"],
+                "type": false
+              },
+              ":BLANK_LINE:",
+              {
+                "source": [":URL:", ":NODE:", ":PACKAGE:", ":ALIAS:", ":PATH:"],
+                "type": true
+              }
+            ]
+          }
+        },
+        "useSortedKeys": "on"
+      }
+    },
+    "enabled": true
+  },
+  "css": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2
+    }
+  },
+  "formatter": {
+    "attributePosition": "auto",
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 115,
+    "useEditorconfig": true
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "always",
+      "attributePosition": "auto",
+      "bracketSameLine": true,
+      "bracketSpacing": true,
+      "expand": "auto",
+      "indentStyle": "space",
+      "operatorLinebreak": "before",
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "es5"
+    }
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "trailingCommas": "none"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noUnusedImports": {
+          "fix": "safe",
+          "level": "error",
+          "options": {}
+        }
+      },
+      "recommended": true,
+      "style": {
+        "useBlockStatements": {
+          "fix": "safe",
+          "level": "error",
+          "options": {}
+        },
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "conventions": [
+              {
+                "formats": ["camelCase"],
+                "match": "_(.+)",
+                "selector": {
+                  "kind": "classProperty",
+                  "modifiers": ["private"]
+                }
+              }
+            ],
+            "requireAscii": true,
+            "strictCase": false
+          }
+        }
+      }
+    }
+  }
+}

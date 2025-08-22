@@ -1,14 +1,10 @@
+/** biome-ignore-all lint/complexity/noThisInStatic: <explanation> */
 import { assert } from './helpers/assert.helper';
-import { Bus } from './helpers/bus.helper';
 import { createElement } from './helpers/element.helper';
-import { html } from './helpers/template.helper';
-import type {
-  OptionalIfUndefined,
-  Primitive,
-  Constructor,
-  ComponentSelector,
-} from './helpers/type.helper.ts';
-import { UseEventsHandler } from './types/jadis.type';
+
+import type { Bus } from './helpers/bus.helper';
+import type { ComponentSelector, Constructor, OptionalIfUndefined, Primitive } from './helpers/type.helper.ts';
+import type { UseEventsHandler } from './types/jadis.type';
 
 interface JadisConstructor {
   new (): Jadis;
@@ -29,12 +25,9 @@ export abstract class Jadis extends HTMLElement {
   static readonly observedAttributes: Array<string> = [];
   readonly shadowRoot: ShadowRoot;
 
-  protected readonly attributesCallback: Partial<
-    Record<string, (value: string, oldValue: string) => void>
-  > = {};
+  protected readonly attributesCallback: Partial<Record<string, (value: string, oldValue: string) => void>> = {};
 
   private readonly _abortController = new AbortController();
-
   private _isConnected = false;
 
   /**
@@ -43,6 +36,7 @@ export abstract class Jadis extends HTMLElement {
    * This is the place to initialize component state, start any necessary processes and add event listeners.
    */
   onConnect?(): void;
+
   /**
    * Callback invoked when the component is disconnected from the DOM.
    */
@@ -90,16 +84,10 @@ export abstract class Jadis extends HTMLElement {
    */
   static createElement<T extends JadisConstructor>(
     this: T,
-    attributes: Partial<
-      Record<InferAttributes<T['observedAttributes']>, string>
-    > = {},
+    attributes: Partial<Record<InferAttributes<T['observedAttributes']>, string>> = {},
     appendTo?: HTMLElement | ShadowRoot
   ): InstanceType<T> {
-    return createElement(
-      this.selector,
-      attributes as Record<string, string>,
-      appendTo
-    );
+    return createElement(this.selector, attributes as Record<string, string>, appendTo);
   }
 
   /**
@@ -133,11 +121,7 @@ export abstract class Jadis extends HTMLElement {
     this.onDisconnect?.();
   }
 
-  attributeChangedCallback(
-    name: string,
-    oldValue: string,
-    newValue: string
-  ): void {
+  attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
     this.attributesCallback[name]?.(newValue, oldValue);
   }
 
@@ -157,11 +141,11 @@ export abstract class Jadis extends HTMLElement {
    * @throws Will throw an error if the element is not found
    */
   protected getElement<Element extends HTMLElement>(query: string): Element {
-    const el = query
-      .split('>>>')
-      .reduce((nextEl: HTMLElement, nextQuery: string) => {
-        return (nextEl.shadowRoot ?? nextEl).querySelector<Element>(nextQuery)!;
-      }, this);
+    const el = query.split('>>>').reduce((nextEl: HTMLElement, nextQuery: string) => {
+      const found = (nextEl.shadowRoot ?? nextEl).querySelector<Element>(nextQuery);
+      assert(found, `Jadis.getElement: ${nextQuery} element is not reachable`);
+      return found;
+    }, this);
     assert(el, `${query} element is not reachable`);
 
     return el as Element;
@@ -174,9 +158,7 @@ export abstract class Jadis extends HTMLElement {
    * @param condition The binary condition to determine whether to add or remove the class
    */
   protected toggleClass(className: string, condition: boolean): void {
-    condition
-      ? this.classList.add(className)
-      : this.classList.remove(className);
+    this.classList[condition ? 'add' : 'remove'](className);
   }
 
   /**
@@ -213,28 +195,26 @@ export abstract class Jadis extends HTMLElement {
    * });
    * events.emit('someEvent', 'Hello World');
    */
-  protected useEvents<EventType>(_schema?: {
-    [EventKey in keyof EventType]: Constructor<EventType[EventKey]> | undefined;
-  }): UseEventsHandler<EventType> {
+  protected useEvents<EventType>(
+    _schema?: {
+      [EventKey in keyof EventType]: Constructor<EventType[EventKey]> | undefined;
+    }
+  ): UseEventsHandler<EventType> {
     return {
-      register: <EventKey extends keyof EventType>(
-        event: EventKey,
-        callback: (detail: Primitive<EventType[EventKey]>) => void
-      ): void => {
-        const listener = ({
-          detail,
-        }: CustomEvent<Primitive<EventType[EventKey]>>) => callback(detail);
-        this.addEventListener(event as string, listener as EventListener, {
-          signal: this.killSignal,
-        });
-      },
       emit: <EventKey extends keyof EventType>(
         event: EventKey,
         ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
       ): void => {
-        this.dispatchEvent(
-          new CustomEvent(event as string, { detail: params[0] })
-        );
+        this.dispatchEvent(new CustomEvent(event as string, { detail: params[0] }));
+      },
+      register: <EventKey extends keyof EventType>(
+        event: EventKey,
+        callback: (detail: Primitive<EventType[EventKey]>) => void
+      ): void => {
+        const listener = ({ detail }: CustomEvent<Primitive<EventType[EventKey]>>) => callback(detail);
+        this.addEventListener(event as string, listener as EventListener, {
+          signal: this.killSignal,
+        });
       },
     };
   }
@@ -245,10 +225,7 @@ export abstract class Jadis extends HTMLElement {
    * @param event The event key to listen for
    * @param callback The callback to invoke when the event is emitted
    */
-  protected on<
-    Element extends HTMLElement,
-    Event extends keyof HTMLElementEventMap
-  >(
+  protected on<Element extends HTMLElement, Event extends keyof HTMLElementEventMap>(
     element: Element,
     event: Event,
     callback: (event: HTMLElementEventMap[Event]) => void
@@ -275,9 +252,5 @@ export abstract class Jadis extends HTMLElement {
 
   private static get typeOfClass(): JadisConstructor {
     return this.prototype.constructor as JadisConstructor;
-  }
-
-  private get typeOfConstructor(): JadisConstructor {
-    return this.constructor as JadisConstructor;
   }
 }

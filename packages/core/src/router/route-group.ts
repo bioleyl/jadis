@@ -1,13 +1,13 @@
-import { Route } from '../types/router.type';
+import type { Route } from '../types/router.type';
 
 export class RouteGroup {
   private readonly _routes: Array<Route> = [];
-  private readonly routePrefix: string;
-  private readonly namePrefix: string;
+  private readonly _routePrefix: string;
+  private readonly _namePrefix: string;
 
   private constructor(routePrefix: string, namePrefix?: string) {
-    this.routePrefix = routePrefix;
-    this.namePrefix = namePrefix ?? '';
+    this._routePrefix = routePrefix;
+    this._namePrefix = namePrefix ?? '';
   }
 
   /**
@@ -17,9 +17,7 @@ export class RouteGroup {
    * @returns A new RouteGroup instance.
    */
   static create(routePrefix: string, namePrefix?: string): RouteGroup {
-    const prefixed = routePrefix.startsWith('/')
-      ? routePrefix
-      : `/${routePrefix}`;
+    const prefixed = routePrefix.startsWith('/') ? routePrefix : `/${routePrefix}`;
     const suffixed = prefixed.endsWith('/') ? prefixed : `${prefixed}/`;
     return new RouteGroup(suffixed, namePrefix);
   }
@@ -38,8 +36,8 @@ export class RouteGroup {
   addRoute(path: string, componentSelector: string, name?: string) {
     this._routes.push({
       componentSelector,
-      path: `${this.routePrefix}${path.startsWith('/') ? path.slice(1) : path}`,
-      name: name ? `${this.namePrefix}${name}` : undefined,
+      name: name ? `${this._namePrefix}${name}` : undefined,
+      path: `${this._routePrefix}${path.startsWith('/') ? path.slice(1) : path}`,
     });
     return this;
   }

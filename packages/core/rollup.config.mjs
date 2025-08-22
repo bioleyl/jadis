@@ -1,56 +1,55 @@
-import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import terser from '@rollup/plugin-terser';
-import dtsPlugin from 'rollup-plugin-dts';
-
-const dts = dtsPlugin.default || dtsPlugin;
-const name = 'Jadis';
+import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
+import del from 'rollup-plugin-delete';
+import dts from 'rollup-plugin-dts';
 
 export default [
   // ESM
   {
-    input: 'build/index.js',
+    external: [],
+    input: 'src/index.ts',
     output: {
-      file: 'dist/esm/index.mjs', // ✅ One single file
+      file: 'dist/esm/index.mjs',
       format: 'esm',
       sourcemap: true,
     },
-    plugins: [resolve(), commonjs()],
-    external: [],
+    plugins: [
+      resolve(),
+      commonjs(),
+      typescript({ declaration: false, tsconfig: './tsconfig.json' }),
+      del({ runOnce: true, targets: 'dist/esm' }),
+    ],
   },
 
   // CJS
   {
-    input: 'build/index.js',
+    external: [],
+    input: 'src/index.ts',
     output: {
-      file: 'dist/cjs/index.js', // ✅ One single file
+      file: 'dist/cjs/index.js',
       format: 'cjs',
       sourcemap: true,
     },
-    plugins: [resolve(), commonjs()],
-    external: [],
-  },
-
-  // UMD stays the same
-  {
-    input: 'build/index.js',
-    output: {
-      file: 'dist/umd/index.js',
-      format: 'umd',
-      name,
-      sourcemap: true,
-    },
-    plugins: [resolve(), commonjs(), terser()],
-    external: [],
+    plugins: [
+      resolve(),
+      commonjs(),
+      typescript({ declaration: false, tsconfig: './tsconfig.json' }),
+      del({ runOnce: true, targets: 'dist/cjs' }),
+    ],
   },
 
   // Types
   {
-    input: 'build/index.d.ts',
+    input: 'dist/dts/index.d.ts',
     output: {
       file: 'dist/types/index.d.ts',
       format: 'es',
     },
-    plugins: [dts()],
+    plugins: [
+      dts(),
+      del({ runOnce: true, targets: 'dist/types' }),
+      del({ hook: 'buildEnd', targets: 'dist/dts' }),
+    ],
   },
 ];

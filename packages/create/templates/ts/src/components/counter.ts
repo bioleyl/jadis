@@ -7,7 +7,7 @@ class Counter extends Jadis {
     change: number;
   }>();
 
-  private count = 0;
+  private _count = 0;
 
   templateHtml(): DocumentFragment {
     return html`
@@ -23,13 +23,13 @@ class Counter extends Jadis {
   }
 
   private increment(): void {
-    this.count++;
-    this.events.emit('change', this.count);
+    this._count++;
+    this.events.emit('change', this._count);
     this.updateCount();
   }
 
   private updateCount(): void {
-    this.countElement.textContent = this.count.toString();
+    this.countElement.textContent = this._count.toString();
   }
 
   private get countElement(): HTMLSpanElement {

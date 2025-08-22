@@ -1,0 +1,16 @@
+{
+  "author": "Leal Bioley <lb@syware.ch>",
+  "description": "Jadis documentation",
+  "devDependencies": {
+    "vitepress": "1.6.4"
+  },
+  "license": "ISC",
+  "main": "index.js",
+  "name": "@jadis/docs",
+  "scripts": {
+    "build": "vitepress build",
+    "dev": "vitepress dev",
+    "preview": "vitepress preview"
+  },
+  "version": "1.0.0"
+}

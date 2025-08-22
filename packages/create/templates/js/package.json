@@ -1,15 +1,15 @@
 {
-  "name": "jadis-js",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
   "devDependencies": {
     "@jadis/core": "^0.5.0",
     "vite": "^6.3.1"
-  }
+  },
+  "name": "jadis-js",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module",
+  "version": "0.0.0"
 }

@@ -12,9 +12,9 @@ if (!projectName) {
   process.exit(1);
 }
 
-const fs = require('fs');
+const fs = require('node:fs');
 const cwd = process.cwd();
-const path = require('path');
+const path = require('node:path');
 
 const templatePath = path.join(__dirname, 'templates', template);
 const projectPath = path.join(cwd, projectName);
@@ -42,9 +42,7 @@ createProject(templatePath, projectPath);
 
 console.log('\nCreating a new project...\n');
 
-console.log(
-  `✅ Project "${projectName}" created successfully with the "${template}" template.\n`
-);
+console.log(`✅ Project "${projectName}" created successfully with the "${template}" template.\n`);
 
 console.log('Next steps:\n');
 console.log(`  1. cd ${projectName}`);

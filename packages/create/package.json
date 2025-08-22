@@ -1,20 +1,12 @@
 {
-  "name": "@jadis/create",
-  "version": "1.1.0",
-  "description": "Jadis boilerplate generator",
-  "main": "index.js",
+  "author": "Leal Bioley <lb@syware.ch>",
   "bin": {
     "create-boilerplate": "./index.js"
-  },
-  "author": "Leal Bioley <lb@syware.ch>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bioleyl/jadis.git"
   },
   "bugs": {
     "url": "https://github.com/bioleyl/jadis/issues"
   },
+  "description": "Jadis boilerplate generator",
   "homepage": "https://bioleyl.github.io/jadis/",
   "keywords": [
     "jadis",
@@ -30,5 +22,13 @@
     "simplicity",
     "nostalgia",
     "no magic"
-  ]
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "@jadis/create",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bioleyl/jadis.git"
+  },
+  "version": "1.1.0"
 }
