@@ -2,62 +2,89 @@ import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'Jadis',
-  description: 'Jadis official documentation',
   base: '/jadis/',
+  description: 'Jadis official documentation',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/pages/examples/index' },
+      {
+        link: '/',
+        text: 'Home',
+      },
+      {
+        link: '/pages/examples/index',
+        text: 'Examples',
+      },
     ],
 
     sidebar: [
       {
-        text: 'Getting Started',
         items: [
-          { text: 'Installation', link: '/pages/getting-started/installation' },
           {
-            text: 'First component',
+            link: '/pages/getting-started/installation',
+            text: 'Installation',
+          },
+          {
             link: '/pages/getting-started/first-component',
+            text: 'First component',
           },
         ],
+        text: 'Getting Started',
       },
       {
-        text: 'Communication',
         items: [
           {
-            text: 'Parent to child',
             link: '/pages/communication/parent-to-child',
+            text: 'Parent to child',
           },
           {
-            text: 'Child to parent',
             link: '/pages/communication/child-to-parent',
+            text: 'Child to parent',
           },
           {
-            text: 'Between anybody',
             link: '/pages/communication/between-anybody',
+            text: 'Between anybody',
           },
         ],
+        text: 'Communication',
       },
       {
+        items: [
+          {
+            link: '/pages/routing/configuration',
+            text: 'Configuration',
+          },
+          {
+            link: '/pages/routing/declaring-routes',
+            text: 'Declaring routes',
+          },
+          {
+            link: '/pages/routing/navigating',
+            text: 'Navigating',
+          },
+        ],
         text: 'Routing',
-        items: [
-          { text: 'Configuration', link: '/pages/routing/configuration' },
-          { text: 'Declaring routes', link: '/pages/routing/declaring-routes' },
-          { text: 'Navigating', link: '/pages/routing/navigating' },
-        ],
       },
       {
-        text: 'Helpers',
         items: [
-          { text: 'createElement', link: '/pages/helpers/create-element' },
-          { text: 'killSignal', link: '/pages/helpers/kill-signal' },
-          { text: 'getElement', link: '/pages/helpers/get-element' },
+          {
+            link: '/pages/helpers/create-element',
+            text: 'createElement',
+          },
+          {
+            link: '/pages/helpers/kill-signal',
+            text: 'killSignal',
+          },
+          {
+            link: '/pages/helpers/get-element',
+            text: 'getElement',
+          },
         ],
+        text: 'Helpers',
       },
     ],
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/bioleyl/jadis' }],
   },
+  title: 'Jadis',
 });

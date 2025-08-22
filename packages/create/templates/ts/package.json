@@ -1,16 +1,16 @@
 {
-  "name": "jadis-ts",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
   "devDependencies": {
     "@jadis/core": "^0.5.0",
     "typescript": "~5.7.2",
     "vite": "^6.3.1"
-  }
+  },
+  "name": "jadis-ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module",
+  "version": "0.0.0"
 }

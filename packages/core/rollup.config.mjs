@@ -1,12 +1,13 @@
-import typescript from '@rollup/plugin-typescript';
-import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import dts from 'rollup-plugin-dts';
+import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
 import del from 'rollup-plugin-delete';
+import dts from 'rollup-plugin-dts';
 
 export default [
   // ESM
   {
+    external: [],
     input: 'src/index.ts',
     output: {
       file: 'dist/esm/index.mjs',
@@ -16,14 +17,14 @@ export default [
     plugins: [
       resolve(),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json', declaration: false }),
-      del({ targets: 'dist/esm', runOnce: true }),
+      typescript({ declaration: false, tsconfig: './tsconfig.json' }),
+      del({ runOnce: true, targets: 'dist/esm' }),
     ],
-    external: [],
   },
 
   // CJS
   {
+    external: [],
     input: 'src/index.ts',
     output: {
       file: 'dist/cjs/index.js',
@@ -33,10 +34,9 @@ export default [
     plugins: [
       resolve(),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json', declaration: false }),
-      del({ targets: 'dist/cjs', runOnce: true }),
+      typescript({ declaration: false, tsconfig: './tsconfig.json' }),
+      del({ runOnce: true, targets: 'dist/cjs' }),
     ],
-    external: [],
   },
 
   // Types
@@ -48,7 +48,7 @@ export default [
     },
     plugins: [
       dts(),
-      del({ targets: 'dist/types', runOnce: true }),
+      del({ runOnce: true, targets: 'dist/types' }),
       del({ hook: 'buildEnd', targets: 'dist/dts' }),
     ],
   },

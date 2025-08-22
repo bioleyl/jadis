@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Router } from './router';
-import { RouterOptions } from '../types/router.type';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-const InitiateRouter = (
-  options?: RouterOptions
-): { router: Router; container: HTMLDivElement } => {
+import { Router } from './router';
+
+import type { RouterOptions } from '../types/router.type';
+
+const InitiateRouter = (options?: RouterOptions): { router: Router; container: HTMLDivElement } => {
   const appContainer = document.createElement('div');
   appContainer.id = 'app';
   document.body.innerHTML = '';
@@ -14,7 +14,7 @@ const InitiateRouter = (
   routerInstance.addRoute('/', 'base-page', 'base');
   routerInstance.mountOn(appContainer);
 
-  return { router: routerInstance, container: appContainer };
+  return { container: appContainer, router: routerInstance };
 };
 
 describe('Router', () => {
@@ -150,14 +150,14 @@ describe('Router', () => {
 
     describe('With Base URL', () => {
       it('should initialize with a base URL in hash mode', () => {
-        const { router } = InitiateRouter({ mode: 'hash', baseUrl: '/app' });
+        const { router } = InitiateRouter({ baseUrl: '/app', mode: 'hash' });
         expect(router.config.baseUrl).toBe('/app');
       });
 
       it('should navigate to a route with base URL in hash mode', () => {
         const { router, container } = InitiateRouter({
-          mode: 'hash',
           baseUrl: '/app',
+          mode: 'hash',
         });
         router.addRoute('/dashboard', 'dashboard-component');
         router.gotoPath('/dashboard');
@@ -170,8 +170,8 @@ describe('Router', () => {
 
       it('should navigate to a route by name with base URL in hash mode', () => {
         const { router, container } = InitiateRouter({
-          mode: 'hash',
           baseUrl: '/app',
+          mode: 'hash',
         });
         router.addRoute('/settings', 'settings-component', 'settings');
         router.gotoName('settings');

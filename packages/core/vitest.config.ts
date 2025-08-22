@@ -2,10 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
-    globals: true,
     coverage: {
-      reporter: ['text', 'html'],
       exclude: [
         '**/*.test.ts',
         '**/node_modules/**',
@@ -15,6 +12,9 @@ export default defineConfig({
         '**/package.json',
         '**/docs/**',
       ],
+      reporter: ['text', 'html'],
     },
+    environment: 'jsdom',
+    globals: true,
   },
 });

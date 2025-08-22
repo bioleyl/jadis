@@ -1,5 +1,6 @@
 import { assert } from './assert.helper';
-import { ComponentSelector } from './type.helper';
+
+import type { ComponentSelector } from './type.helper';
 
 /**
  * Checks if a string is a valid component selector.
@@ -17,9 +18,6 @@ export function isComponentSelector(key: string): key is ComponentSelector {
  * @returns The component selector
  */
 export const createSelector = (name: string): ComponentSelector => {
-  assert(
-    isComponentSelector(name),
-    `Custom element name must contain a hyphen: ${name}`
-  );
+  assert(isComponentSelector(name), `Custom element name must contain a hyphen: ${name}`);
   return name;
 };

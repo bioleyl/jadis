@@ -1,24 +1,24 @@
 {
-  "private": true,
-  "packageManager": "npm@10.8.2",
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0"
+  },
+  "engineStrict": true,
   "engines": {
     "npm": ">=10.0.0"
   },
-  "engineStrict": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "name": "jadis",
+  "packageManager": "npm@10.8.2",
+  "private": true,
   "scripts": {
-    "docs:dev": "npm run dev --workspace=@jadis/docs",
     "docs:build": "npm run build --workspace=@jadis/docs",
+    "docs:dev": "npm run dev --workspace=@jadis/docs",
     "docs:preview": "npm run preview --workspace=@jadis/docs",
     "publish:core": "npm publish --workspace=packages/core --access public",
     "publish:create": "npm publish --workspace=packages/create --access public",
     "test": "npm run test --workspaces"
   },
-  "name": "jadis",
   "version": "1.0.0",
-  "devDependencies": {
-    "prettier": "3.6.2"
-  }
+  "workspaces": [
+    "packages/*"
+  ]
 }

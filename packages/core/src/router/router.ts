@@ -1,20 +1,14 @@
 import { assert } from '../helpers/assert.helper';
 import { createElement } from '../helpers/element.helper';
 
-import {
-  InternalRoute,
-  MatchedRoute,
-  Route,
-  RouterMode,
-  RouterOptions,
-} from '../types/router.type';
-import { RouteGroup } from './route-group';
+import type { InternalRoute, MatchedRoute, Route, RouterMode, RouterOptions } from '../types/router.type';
+import type { RouteGroup } from './route-group';
 
 const ROUTER_PARAMETER_PREFIX = ':';
 
 const defaultOptions: Required<RouterOptions> = {
-  mode: 'history',
   baseUrl: '/',
+  mode: 'history',
 };
 
 /**
@@ -26,10 +20,7 @@ export class Router {
   private readonly _routes: Array<InternalRoute> = [];
   private readonly _mode: RouterMode;
   private readonly _baseUrl: string;
-  private readonly _parametersRegexp = new RegExp(
-    `${ROUTER_PARAMETER_PREFIX}\\w+`,
-    'g'
-  );
+  private readonly _parametersRegexp = new RegExp(`${ROUTER_PARAMETER_PREFIX}\\w+`, 'g');
   private _mount?: HTMLElement;
   private _currentRoute?: Route;
 
@@ -45,8 +36,8 @@ export class Router {
 
   get config(): Required<RouterOptions> {
     return {
-      mode: this._mode,
       baseUrl: this._baseUrl,
+      mode: this._mode,
     };
   }
 
@@ -72,9 +63,9 @@ export class Router {
   addRoute(path: string, componentSelector: string, name?: string): this {
     const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
     this._routes.push({
+      componentSelector,
       name,
       path,
-      componentSelector,
       regexp: new RegExp(`^${pathWithoutParameters}$`),
     });
     return this;
@@ -92,11 +83,9 @@ export class Router {
    * @returns this
    */
   addGroup(routeGroup: RouteGroup): this {
-    routeGroup
-      .getRoutes()
-      .forEach(({ path, componentSelector, name }) =>
-        this.addRoute(path, componentSelector, name)
-      );
+    routeGroup.getRoutes().forEach(({ path, componentSelector, name }) => {
+      this.addRoute(path, componentSelector, name);
+    });
     return this;
   }
 
@@ -127,18 +116,12 @@ export class Router {
    */
   gotoPath(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState(
-      {},
-      '',
-      `${this.baseUrl}/${urlPath}`.replace(/\/{2,}/g, '/')
-    );
+    window.history.pushState({}, '', `${this.baseUrl}/${urlPath}`.replace(/\/{2,}/g, '/'));
     this.onUrlChange();
   }
 
   private get baseUrl(): string {
-    return this._baseUrl.endsWith('/')
-      ? this._baseUrl.slice(0, -1)
-      : this._baseUrl;
+    return this._baseUrl.endsWith('/') ? this._baseUrl.slice(0, -1) : this._baseUrl;
   }
 
   private get mountPoint(): HTMLElement {
@@ -154,8 +137,7 @@ export class Router {
     const formattedPath = window.location.pathname.startsWith(this.baseUrl)
       ? window.location.pathname.slice(this.baseUrl.length)
       : window.location.pathname;
-    const path =
-      this._mode === 'hash' ? window.location.hash.slice(1) : formattedPath;
+    const path = this._mode === 'hash' ? window.location.hash.slice(1) : formattedPath;
     return path.startsWith('/') ? path : `/${path}`;
   }
 
@@ -170,15 +152,9 @@ export class Router {
     this.mountPoint.replaceChildren(component);
   }
 
-  private formatPath(
-    routePath: string,
-    params: Record<string, string> = {}
-  ): string {
+  private formatPath(routePath: string, params: Record<string, string> = {}): string {
     return this.extractPathParams(routePath).reduce((acc, param) => {
-      assert(
-        params.hasOwnProperty(param),
-        `Missing parameter "${param}" for path: ${routePath}`
-      );
+      assert(Object.hasOwn(params, param), `Missing parameter "${param}" for path: ${routePath}`);
       return acc.replace(`${ROUTER_PARAMETER_PREFIX}${param}`, params[param]);
     }, routePath);
   }
@@ -190,23 +166,20 @@ export class Router {
     return createElement(componentSelector, params);
   }
 
-  private getRouteParameters(
-    matchedRoute: MatchedRoute
-  ): Record<string, string> {
+  private getRouteParameters(matchedRoute: MatchedRoute): Record<string, string> {
     const { urlPath, regexp, path } = matchedRoute;
 
     const match = regexp.exec(urlPath);
     assert(match, `No match found for path: ${urlPath}`);
 
-    return this.extractPathParams(path).reduce((acc, param, index) => {
-      return { ...acc, [param]: match[index + 1] };
-    }, {} as Record<string, string>);
+    return this.extractPathParams(path).reduce<Record<string, string>>((acc, param, index) => {
+      acc[param] = match[index + 1];
+      return acc;
+    }, {});
   }
 
   private getRouteByName(name: string): InternalRoute | null {
-    return (
-      this._routes.find(({ name: routeName }) => routeName === name) ?? null
-    );
+    return this._routes.find(({ name: routeName }) => routeName === name) ?? null;
   }
 
   private getRouteByPath(path: string): InternalRoute | null {
@@ -214,10 +187,11 @@ export class Router {
   }
 
   private extractPathParams(path: string): Array<string> {
-    return path.split('/').reduce((acc, part) => {
-      return part.startsWith(ROUTER_PARAMETER_PREFIX)
-        ? [...acc, part.slice(ROUTER_PARAMETER_PREFIX.length)]
-        : acc;
-    }, [] as Array<string>);
+    return path.split('/').reduce<Array<string>>((acc, part) => {
+      if (part.startsWith(ROUTER_PARAMETER_PREFIX)) {
+        acc.push(part.slice(ROUTER_PARAMETER_PREFIX.length));
+      }
+      return acc;
+    }, []);
   }
 }

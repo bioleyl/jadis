@@ -1,4 +1,4 @@
-import { OptionalIfUndefined, Primitive } from '../helpers/type.helper';
+import type { OptionalIfUndefined, Primitive } from '../helpers/type.helper';
 
 export type UseEventsHandler<EventType> = {
   /**
@@ -10,6 +10,7 @@ export type UseEventsHandler<EventType> = {
     event: EventKey,
     callback: (detail: Primitive<EventType[EventKey]>) => void
   ) => void;
+
   /**
    * Emits an event on the component.
    * @param event The event key to emit

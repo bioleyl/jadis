@@ -1,5 +1,6 @@
 import { toKebabCase } from './string.helper';
-import { AppendableElement } from './type.helper';
+
+import type { AppendableElement } from './type.helper';
 
 /**
  * Creates a new HTML element.
@@ -28,9 +29,9 @@ export function createElement(
   appendTo?: AppendableElement
 ): HTMLElement {
   const el = document.createElement(tag);
-  Object.entries(attributes).forEach(([key, value]) =>
-    el.setAttribute(toKebabCase(key), value)
-  );
+  Object.entries(attributes).forEach(([key, value]) => {
+    el.setAttribute(toKebabCase(key), value);
+  });
   appendTo?.appendChild(el);
   return el;
 }

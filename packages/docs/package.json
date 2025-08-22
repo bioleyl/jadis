@@ -1,16 +1,16 @@
 {
-  "name": "@jadis/docs",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vitepress dev",
-    "build": "vitepress build",
-    "preview": "vitepress preview"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "Leal Bioley <lb@syware.ch>",
+  "description": "Jadis documentation",
   "devDependencies": {
     "vitepress": "1.6.4"
-  }
+  },
+  "license": "ISC",
+  "main": "index.js",
+  "name": "@jadis/docs",
+  "scripts": {
+    "build": "vitepress build",
+    "dev": "vitepress dev",
+    "preview": "vitepress preview"
+  },
+  "version": "1.0.0"
 }

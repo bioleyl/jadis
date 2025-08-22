@@ -1,8 +1,9 @@
 import { createElement, html, Jadis } from '@jadis/core';
-import style from './MainPage.css?inline';
-import { myRouter } from '../../router';
-import Counter from '../../components/counter';
+
 import logo from '../../assets/logo.svg';
+import Counter from '../../components/counter';
+import { myRouter } from '../../router';
+import style from './MainPage.css?inline';
 
 class MainPage extends Jadis {
   static readonly selector = 'main-page';
@@ -27,9 +28,7 @@ class MainPage extends Jadis {
   onConnect(): void {
     createElement('img', { src: logo }, this.headerElement);
 
-    this.wrapperElement.replaceChildren(
-      ...Array.from({ length: 3 }).map((_, i) => this.createCounter(i))
-    );
+    this.wrapperElement.replaceChildren(...Array.from({ length: 3 }).map((_, i) => this.createCounter(i)));
 
     this.on(this.buttonElement, 'click', () => this.onButtonClick());
   }

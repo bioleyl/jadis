@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Router } from './router';
-import { RouterOptions } from '../types/router.type';
-import { RouteGroup } from './route-group';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-const InitiateRouter = (
-  options?: RouterOptions
-): { router: Router; container: HTMLDivElement } => {
+import { RouteGroup } from './route-group';
+import { Router } from './router';
+
+import type { RouterOptions } from '../types/router.type';
+
+const InitiateRouter = (options?: RouterOptions): { router: Router; container: HTMLDivElement } => {
   const appContainer = document.createElement('div');
   appContainer.id = 'app';
   document.body.innerHTML = '';
@@ -15,7 +15,7 @@ const InitiateRouter = (
   routerInstance.addRoute('/', 'base-page', 'base');
   routerInstance.mountOn(appContainer);
 
-  return { router: routerInstance, container: appContainer };
+  return { container: appContainer, router: routerInstance };
 };
 
 describe('Route Group', () => {
@@ -26,9 +26,7 @@ describe('Route Group', () => {
 
   it('should add a route group and navigate to it', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(
-      RouteGroup.create('group').addRoute('/item', 'item-component', 'item')
-    );
+    router.addGroup(RouteGroup.create('group').addRoute('/item', 'item-component', 'item'));
 
     router.gotoPath('/group/item');
 
@@ -39,9 +37,7 @@ describe('Route Group', () => {
 
   it('should add a route group with params and navigate to it', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(
-      RouteGroup.create('group').addRoute('/item/:id', 'item-component', 'item')
-    );
+    router.addGroup(RouteGroup.create('group').addRoute('/item/:id', 'item-component', 'item'));
 
     router.gotoPath('/group/item/456');
 
@@ -53,9 +49,7 @@ describe('Route Group', () => {
 
   it('should add a route group and navigate to by name', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(
-      RouteGroup.create('group').addRoute('/item', 'item-component', 'item')
-    );
+    router.addGroup(RouteGroup.create('group').addRoute('/item', 'item-component', 'item'));
 
     router.gotoName('item');
 
@@ -66,9 +60,7 @@ describe('Route Group', () => {
 
   it('should add a route group with params and navigate to by name', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(
-      RouteGroup.create('group').addRoute('/item/:id', 'item-component', 'item')
-    );
+    router.addGroup(RouteGroup.create('group').addRoute('/item/:id', 'item-component', 'item'));
 
     router.gotoName('item', { id: '456' });
 
@@ -83,13 +75,7 @@ describe('Route Group', () => {
     router.addGroup(
       RouteGroup.create('group', 'Main')
         .addRoute('/item', 'item-component', 'item')
-        .addGroup(
-          RouteGroup.create('subgroup', 'Sub').addRoute(
-            '/details',
-            'details-component',
-            'Details'
-          )
-        )
+        .addGroup(RouteGroup.create('subgroup', 'Sub').addRoute('/details', 'details-component', 'Details'))
     );
 
     router.gotoName('MainSubDetails');

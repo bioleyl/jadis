@@ -1,4 +1,4 @@
-import { Jadis, createSelector, html } from '@jadis/core';
+import { createSelector, html, Jadis } from '@jadis/core';
 
 class Counter extends Jadis {
   static selector = createSelector('counter-component');
