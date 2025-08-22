@@ -1,5 +1,5 @@
 {
-  "name": "jadis-documentation",
+  "name": "@jadis/docs",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {

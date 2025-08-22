@@ -2,8 +2,8 @@ export { Jadis } from './base-component';
 export { Router } from './router/router';
 export { RouteGroup } from './router/route-group';
 
-export { UseEventsHandler } from './types/jadis.type';
-export { RouterMode, Route, RouterOptions } from './types/router.type';
+export type { UseEventsHandler } from './types/jadis.type';
+export type { RouterMode, Route, RouterOptions } from './types/router.type';
 
 export { createElement } from './helpers/element.helper';
 export { toKebabCase } from './helpers/string.helper';

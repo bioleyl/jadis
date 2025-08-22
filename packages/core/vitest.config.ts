@@ -5,7 +5,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     coverage: {
-      reporter: ['text', 'html'], // or 'lcov', 'json' etc.
+      reporter: ['text', 'html'],
       exclude: [
         '**/*.test.ts',
         '**/node_modules/**',

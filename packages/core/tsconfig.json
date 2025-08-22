@@ -3,13 +3,22 @@
   "compilerOptions": {
     "rootDir": "./src",
     "module": "esnext",
-    "outDir": "./build",
-    "target": "esnext"
+    "outDir": "./dist",
+    "target": "esnext",
+    "removeComments": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": [
     "**/*.ts"
   ],
   "exclude": [
-    "build"
+    "build",
+    "dist",
+    "vitest.config.ts",
+    "build.config.ts"
   ]
 }
