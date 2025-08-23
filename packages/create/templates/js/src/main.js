@@ -4,4 +4,4 @@ import { myRouter } from './router';
 
 myRouter.addRoute('/', MainPage.selector, 'main');
 myRouter.addRoute('/hello/:name', HelloPage.selector, 'hello');
-myRouter.mountOn(document.getElementById('app'));
+myRouter.mountOn(document.getElementById('app') ?? document.body);

@@ -30,9 +30,7 @@
       "types": "./dist/types/index.d.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "homepage": "https://bioleyl.github.io/jadis/",
   "keywords": [
     "jadis",
@@ -75,5 +73,5 @@
   },
   "type": "module",
   "types": "./dist/types/index.d.ts",
-  "version": "0.5.0"
+  "version": "0.5.1"
 }

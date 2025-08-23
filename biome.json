@@ -40,6 +40,10 @@
       "indentWidth": 2
     }
   },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["packages/**/*.{ts,js,css,json}", "!**/node_modules", "!**/dist", "!**/build", "!**/coverage"]
+  },
   "formatter": {
     "attributePosition": "auto",
     "enabled": true,
@@ -65,6 +69,8 @@
   },
   "json": {
     "formatter": {
+      "bracketSpacing": true,
+      "expand": "auto",
       "indentStyle": "space",
       "indentWidth": 2,
       "trailingCommas": "none"
@@ -86,6 +92,12 @@
           "fix": "safe",
           "level": "error",
           "options": {}
+        },
+        "useImportType": {
+          "level": "error",
+          "options": {
+            "style": "separatedType"
+          }
         },
         "useNamingConvention": {
           "level": "error",

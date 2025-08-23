@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "@jadis/core": "^0.5.0",
+    "@jadis/core": "^0.5.1",
     "vite": "^6.3.1"
   },
   "name": "jadis-js",

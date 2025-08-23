@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/complexity/noThisInStatic: <explanation> */
+/** biome-ignore-all lint/complexity/noThisInStatic: I explicitly need to refer to "this" and not Jadis for code hint when creating components */
 import { assert } from './helpers/assert.helper';
 import { createElement } from './helpers/element.helper';
 
