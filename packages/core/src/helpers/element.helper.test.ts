@@ -20,5 +20,11 @@ describe('Element helper', () => {
       expect(child).toBeInstanceOf(HTMLDivElement);
       expect(parent.firstChild).toBe(child);
     });
+
+    it('should create an element with the given text content', () => {
+      const div = createElement('div', { textContent: 'Hello, world!' });
+      expect(div).toBeInstanceOf(HTMLDivElement);
+      expect(div.textContent).toBe('Hello, world!');
+    });
   });
 });

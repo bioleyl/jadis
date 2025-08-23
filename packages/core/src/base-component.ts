@@ -3,7 +3,13 @@ import { assert } from './helpers/assert.helper';
 import { createElement } from './helpers/element.helper';
 
 import type { Bus } from './helpers/bus.helper';
-import type { ComponentSelector, Constructor, OptionalIfUndefined, Primitive } from './helpers/type.helper.ts';
+import type {
+  ComponentSelector,
+  Constructor,
+  ElementAttributes,
+  OptionalIfUndefined,
+  Primitive,
+} from './helpers/type.helper.ts';
 import type { UseEventsHandler } from './types/jadis.type';
 
 interface JadisConstructor {
@@ -84,10 +90,10 @@ export abstract class Jadis extends HTMLElement {
    */
   static createElement<T extends JadisConstructor>(
     this: T,
-    attributes: Partial<Record<InferAttributes<T['observedAttributes']>, string>> = {},
+    attributes: ElementAttributes<InstanceType<T>> = {},
     appendTo?: HTMLElement | ShadowRoot
   ): InstanceType<T> {
-    return createElement(this.selector, attributes as Record<string, string>, appendTo);
+    return createElement(this.selector, attributes, appendTo);
   }
 
   /**

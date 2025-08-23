@@ -26,10 +26,9 @@ import { createElement } from '@jadis/core';
 
 const container = createElement('div', { class: 'container' });
 createElement('h1', {}, container).textContent = 'My Title';
-createElement('p', { dataTest: 'test' }, container).textContent =
-  'This is a paragraph.';
+createElement('p', { dataTest: 'test', textContent: 'This is a paragraph' }, container);
 Array.from({ length: 3 }, (_, i) => {
-  createElement('div', {}, container).textContent = `Item ${i + 1}`;
+  createElement('div', { textContent: `Item ${i + 1}` }, container);
 });
 ```
 
@@ -66,7 +65,7 @@ MyComponent.register();
 
 const container = createElement('div', { class: 'container' });
 const component = MyComponent.createElement({ theme: 'dark' }, container);
-createElement('h1', {}, component).textContent = 'My Title';
+createElement('h1', { textContent: 'My Title' }, component);
 ```
 
 This will render:
