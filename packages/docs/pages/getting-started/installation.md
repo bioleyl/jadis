@@ -73,7 +73,7 @@ You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis
     <script type="importmap">
       {
         "imports": {
-          "jadis": "https://esm.sh/@jadis/core@0.5.0"
+          "jadis": "https://esm.sh/@jadis/core@0.5.2"
         }
       }
     </script>

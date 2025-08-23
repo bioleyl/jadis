@@ -36,11 +36,14 @@ npm install @jadis/core
 ## 🧱 Example
 
 ```javascript
-import { Jadis } from '@jadis/core';
+import { Jadis, html, createSelector } from '@jadis/core';
 
 class HelloWorld extends Jadis {
-  static selector = 'hello-world';
-  static template = '<p>Hello, <span id="name"></span></p>';
+  static selector = createSelector('hello-world');
+  
+  templateHtml() {
+    return html`<p>Hello, <span id="name"></span></p>`;
+  }
 
   onConnect() {
     this.getElement('#name').textContent = 'Jadis developers';
