@@ -23,3 +23,9 @@ export type ComponentSelector = `${string}-${string}`;
 export type HtmlMarkupValue = string | number | boolean | Node | Node[] | null | undefined;
 
 export type AppendableElement = HTMLElement | ShadowRoot | DocumentFragment;
+
+export type ElementAttributes<T extends HTMLElement> = Partial<
+  {
+    [K in keyof T]: T[K];
+  } & Record<string, string>
+>;

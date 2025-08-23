@@ -1,6 +1,6 @@
 import { toKebabCase } from './string.helper';
 
-import type { AppendableElement } from './type.helper';
+import type { AppendableElement, ElementAttributes } from './type.helper';
 
 /**
  * Creates a new HTML element.
@@ -15,12 +15,12 @@ import type { AppendableElement } from './type.helper';
  */
 export function createElement<Tag extends keyof HTMLElementTagNameMap>(
   tag: Tag,
-  attributes?: Record<string, string>,
+  attributes?: ElementAttributes<HTMLElementTagNameMap[Tag]>,
   appendTo?: AppendableElement
 ): HTMLElementTagNameMap[Tag];
 export function createElement<T extends HTMLElement>(
   tag: string,
-  attributes?: Record<string, string>,
+  attributes?: ElementAttributes<T>,
   appendTo?: AppendableElement
 ): T;
 export function createElement(
@@ -30,7 +30,12 @@ export function createElement(
 ): HTMLElement {
   const el = document.createElement(tag);
   Object.entries(attributes).forEach(([key, value]) => {
-    el.setAttribute(toKebabCase(key), value);
+    // If the property exists on the element, set it directly
+    if (key in el && key !== 'class') {
+      (el as HTMLElement & Record<string, unknown>)[key] = value;
+    } else {
+      el.setAttribute(toKebabCase(key), String(value));
+    }
   });
   appendTo?.appendChild(el);
   return el;
