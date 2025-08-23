@@ -1,5 +1,6 @@
 import { assert } from '../helpers/assert.helper';
 import { createElement } from '../helpers/element.helper';
+import { normalizePath } from '../helpers/router.helper';
 
 import type { InternalRoute, MatchedRoute, Route, RouterMode, RouterOptions } from '../types/router.type';
 import type { RouteGroup } from './route-group';
@@ -107,7 +108,7 @@ export class Router {
     const route = this.getRouteByName(name);
     assert(route, `No route found for name: ${name}`);
 
-    this.gotoPath(this.formatPath(route.path, params));
+    this.gotoPath(this.buildPath(route.path, params));
   }
 
   /**
@@ -116,12 +117,12 @@ export class Router {
    */
   gotoPath(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState({}, '', `${this.baseUrl}/${urlPath}`.replace(/\/{2,}/g, '/'));
+    window.history.pushState({}, '', normalizePath(`${this.baseUrl}/${urlPath}`));
     this.onUrlChange();
   }
 
   private get baseUrl(): string {
-    return this._baseUrl.endsWith('/') ? this._baseUrl.slice(0, -1) : this._baseUrl;
+    return normalizePath(this._baseUrl);
   }
 
   private get mountPoint(): HTMLElement {
@@ -138,7 +139,7 @@ export class Router {
       ? window.location.pathname.slice(this.baseUrl.length)
       : window.location.pathname;
     const path = this._mode === 'hash' ? window.location.hash.slice(1) : formattedPath;
-    return path.startsWith('/') ? path : `/${path}`;
+    return normalizePath(path);
   }
 
   private onUrlChange() {
@@ -152,11 +153,12 @@ export class Router {
     this.mountPoint.replaceChildren(component);
   }
 
-  private formatPath(routePath: string, params: Record<string, string> = {}): string {
-    return this.extractPathParams(routePath).reduce((acc, param) => {
+  private buildPath(routePath: string, params: Record<string, string> = {}): string {
+    const path = this.extractPathParams(routePath).reduce((acc, param) => {
       assert(Object.hasOwn(params, param), `Missing parameter "${param}" for path: ${routePath}`);
       return acc.replace(`${ROUTER_PARAMETER_PREFIX}${param}`, params[param]);
     }, routePath);
+    return normalizePath(path);
   }
 
   private getComponentToLoad(matchedRoute: MatchedRoute): Node {

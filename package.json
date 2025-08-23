@@ -15,7 +15,8 @@
     "docs:preview": "npm run preview --workspace=@jadis/docs",
     "publish:core": "npm publish --workspace=packages/core --access public",
     "publish:create": "npm publish --workspace=packages/create --access public",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "check": "biome check"
   },
   "version": "1.0.0",
   "workspaces": [

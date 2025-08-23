@@ -9,7 +9,5 @@
     "target": "esnext"
   },
   "extends": "../../tsconfig.base.json",
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["**/*.ts"]
 }

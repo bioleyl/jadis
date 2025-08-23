@@ -1,3 +1,5 @@
+import { normalizePath } from '../helpers/router.helper';
+
 import type { Route } from '../types/router.type';
 
 export class RouteGroup {
@@ -17,9 +19,7 @@ export class RouteGroup {
    * @returns A new RouteGroup instance.
    */
   static create(routePrefix: string, namePrefix?: string): RouteGroup {
-    const prefixed = routePrefix.startsWith('/') ? routePrefix : `/${routePrefix}`;
-    const suffixed = prefixed.endsWith('/') ? prefixed : `${prefixed}/`;
-    return new RouteGroup(suffixed, namePrefix);
+    return new RouteGroup(routePrefix, namePrefix);
   }
 
   getRoutes(): Array<Route> {
@@ -37,7 +37,7 @@ export class RouteGroup {
     this._routes.push({
       componentSelector,
       name: name ? `${this._namePrefix}${name}` : undefined,
-      path: `${this._routePrefix}${path.startsWith('/') ? path.slice(1) : path}`,
+      path: normalizePath(`${this._routePrefix}/${path}`),
     });
     return this;
   }
