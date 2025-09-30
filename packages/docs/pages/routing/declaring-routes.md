@@ -44,69 +44,43 @@ Navigating to `/hello/john`, the router will render:
   </div>
 </body>
 ```
+## 🏷 Use Named Routes
 
-## 📦 Add Routes by Group
-
-Grouping routes under a shared prefix makes organization easier and keeps URLs clean. Use RouteGroup to create and register grouped routes:
+You can assign a **name** to a route and navigate to it by name instead of hardcoding the URL. This is especially useful when working with dynamic parameters.
 
 ```javascript
-import { RouteGroup, Router } from '@jadis/core';
-
-const myGroup = RouteGroup.create('common-prefix')
-  .addRoute('/route-a', 'route-a-component', 'RouteA')
-  .addRoute('/route-b', 'route-b-component', 'RouteB')
-  .addRoute('/route-c', 'route-c-component', 'RouteC');
-
 const myRouter = new Router();
 
-myRouter.addGroup(myGroup);
+myRouter.addRoute('/invoice/:id', InvoicePage.selector, { name: 'inv' });
+myRouter.mountOn(document.getElementById('app'));
 
-myRouter.mountOn(document.body);
+myRouter.gotoName('inv', { id: 'abcd' })
 ```
 
-This setup will result in routes like:
+This will navigate `/invoice/abcd`
 
-- `/common-prefix/route-a` → name `RouteA`
-- `/common-prefix/route-b` → name `RouteB`
-- `/common-prefix/route-c` → name `RouteC`
+## 🏗 Use a Root Component
 
-You can also add a name prefix to group routes logically:
+You can specify a root component (for example, a layout or wrapper) into which the route component will be injected. This is useful for shared layouts, navigation bars, or page wrappers.
 
 ```javascript
-const myGroup = RouteGroup.create('common-prefix', 'ModuleName')
-  .addRoute('/route-a', 'route-a-component', 'RouteA')
-  .addRoute('/route-b', 'route-b-component', 'RouteB')
-  .addRoute('/route-c', 'route-c-component', 'RouteC');
+const myRouter = new Router();
+
+myRouter.addRoute('/hello/:name', HelloPage.selector, {
+  rootComponentSelector: 'layout-component'
+});
+
+myRouter.mountOn(document.getElementById('app'));
 ```
 
-Resulting names:
+Navigating to `/hello/john`, the router will render:
 
-- `/common-prefix/route-a` → `ModuleNameRouteA`
-- `/common-prefix/route-b` → `ModuleNameRouteB`
-- `/common-prefix/route-c` → `ModuleNameRouteC`
-
-## 📝 Note on Nested Route Groups
-
-You can also nest a RouteGroup inside another RouteGroup, which helps when organizing modules or features with deeply structured paths. This is ideal for applications with layered routing logic.
-
-```javascript
-const subGroup = RouteGroup.create('sub-section')
-  .addRoute('/item-a', 'item-a-component', 'ItemA')
-  .addRoute('/item-b', 'item-b-component', 'ItemB');
-
-const mainGroup = RouteGroup.create('main-section')
-  .addGroup(subGroup)
-  .addRoute('/overview', 'overview-component', 'Overview');
-
-const router = new Router();
-router.addGroup(mainGroup);
-router.mountOn(document.body);
+```html
+<body>
+  <div id="app">
+    <layout-component name="john">
+      <hello-page name="john"></hello-page>
+    </layout-component>
+  </div>
+</body>
 ```
-
-This would result in:
-
-- `/main-section/sub-section/item-a` → `ItemA`
-- `/main-section/sub-section/item-b` → `ItemB`
-- `/main-section/overview` → `Overview`
-
-📌 Tip: When nesting groups, keep your route names consistent and concise to avoid confusion or use a name prefix on your groups.

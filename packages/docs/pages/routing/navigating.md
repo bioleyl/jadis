@@ -9,7 +9,7 @@ When defining a route, the third parameter assigns a **name** to the route. This
 ```javascript
 const myRouter = new Router();
 
-myRouter.addRoute('/hello/:name', HelloPage.selector, 'hello');
+myRouter.addRoute('/hello/:name', HelloPage.selector, { name: 'hello' });
 
 myRouter.gotoName('hello', { name: 'World' });
 ```

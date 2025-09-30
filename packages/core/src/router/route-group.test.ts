@@ -12,7 +12,7 @@ const InitiateRouter = (options?: RouterOptions): { router: Router; container: H
   document.body.appendChild(appContainer);
 
   const routerInstance = new Router(options);
-  routerInstance.addRoute('/', 'base-page', 'base');
+  routerInstance.addRoute('/', 'base-page', { name: 'base' });
   routerInstance.mountOn(appContainer);
 
   return { container: appContainer, router: routerInstance };
@@ -26,7 +26,7 @@ describe('Route Group', () => {
 
   it('should add a route group and navigate to it', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('/item', 'item-component', 'item'));
+    router.addGroup(RouteGroup.create('group').addRoute('item', 'item-component', { name: 'item' }));
 
     router.gotoPath('/group/item');
 
@@ -37,7 +37,7 @@ describe('Route Group', () => {
 
   it('should add a route group with params and navigate to it', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('/item/:id', 'item-component', 'item'));
+    router.addGroup(RouteGroup.create('group').addRoute('item/:id', 'item-component', { name: 'item' }));
 
     router.gotoPath('/group/item/456');
 
@@ -49,7 +49,7 @@ describe('Route Group', () => {
 
   it('should add a route group and navigate to by name', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('/item', 'item-component', 'item'));
+    router.addGroup(RouteGroup.create('group').addRoute('item', 'item-component', { name: 'item' }));
 
     router.gotoName('item');
 
@@ -60,7 +60,7 @@ describe('Route Group', () => {
 
   it('should add a route group with params and navigate to by name', () => {
     const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('/item/:id', 'item-component', 'item'));
+    router.addGroup(RouteGroup.create('group').addRoute('item/:id', 'item-component', { name: 'item' }));
 
     router.gotoName('item', { id: '456' });
 
@@ -73,9 +73,13 @@ describe('Route Group', () => {
   it('should handle nested route groups with names', () => {
     const { router, container } = InitiateRouter();
     router.addGroup(
-      RouteGroup.create('group', 'Main')
-        .addRoute('/item', 'item-component', 'item')
-        .addGroup(RouteGroup.create('subgroup', 'Sub').addRoute('/details', 'details-component', 'Details'))
+      RouteGroup.create('group', { name: 'Main' })
+        .addRoute('item', 'item-component', { name: 'item' })
+        .addGroup(
+          RouteGroup.create('subgroup', { name: 'Sub' }).addRoute('details', 'details-component', {
+            name: 'Details',
+          })
+        )
     );
 
     router.gotoName('MainSubDetails');
@@ -83,5 +87,28 @@ describe('Route Group', () => {
     expect(window.location.pathname).toBe('/group/subgroup/details');
     const component = container.querySelector('details-component');
     expect(component).toBeTruthy();
+  });
+
+  it('should handle nested route groups with component selectors', () => {
+    const { router, container } = InitiateRouter();
+    router.addGroup(
+      RouteGroup.create('group', {
+        rootComponentSelector: 'main-component',
+      }).addGroup(
+        RouteGroup.create('subgroup', {
+          rootComponentSelector: 'sub-component',
+        }).addRoute('details', 'details-component')
+      )
+    );
+
+    router.gotoPath('/group/subgroup/details');
+
+    expect(window.location.pathname).toBe('/group/subgroup/details');
+    const mainComponent = container.querySelector('main-component');
+    expect(mainComponent).toBeTruthy();
+    const subComponent = mainComponent?.querySelector('sub-component');
+    expect(subComponent).toBeTruthy();
+    const detailsComponent = subComponent?.querySelector('details-component');
+    expect(detailsComponent).toBeTruthy();
   });
 });
