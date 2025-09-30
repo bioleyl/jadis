@@ -1,8 +1,16 @@
 import { assert } from '../helpers/assert.helper';
 import { createElement } from '../helpers/element.helper';
 import { normalizePath } from '../helpers/router.helper';
+import { COMPONENT_SELECTOR_SEPARATOR } from './router-constants';
 
-import type { InternalRoute, MatchedRoute, Route, RouterMode, RouterOptions } from '../types/router.type';
+import type {
+  InternalRoute,
+  MatchedRoute,
+  Route,
+  RouteOptions,
+  RouterMode,
+  RouterOptions,
+} from '../types/router.type';
 import type { RouteGroup } from './route-group';
 
 const ROUTER_PARAMETER_PREFIX = ':';
@@ -61,12 +69,15 @@ export class Router {
    * router.addRoute('/home', 'home-component', 'home');
    * @returns this
    */
-  addRoute(path: string, componentSelector: string, name?: string): this {
-    const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
+  addRoute(path: string, componentSelector: string, options: RouteOptions = {}): this {
+    const normalizedPath = normalizePath(`/${path}`);
+    const pathWithoutParameters = normalizedPath.replace(this._parametersRegexp, '(.+)');
     this._routes.push({
-      componentSelector,
-      name,
-      path,
+      componentSelector: [options.rootComponentSelector, componentSelector]
+        .filter(Boolean)
+        .join(COMPONENT_SELECTOR_SEPARATOR),
+      name: options.name,
+      path: normalizedPath,
       regexp: new RegExp(`^${pathWithoutParameters}$`),
     });
     return this;
@@ -85,7 +96,7 @@ export class Router {
    */
   addGroup(routeGroup: RouteGroup): this {
     routeGroup.getRoutes().forEach(({ path, componentSelector, name }) => {
-      this.addRoute(path, componentSelector, name);
+      this.addRoute(path, componentSelector, { name });
     });
     return this;
   }
@@ -165,7 +176,10 @@ export class Router {
     const { componentSelector } = matchedRoute;
     const params = this.getRouteParameters(matchedRoute);
 
-    return createElement(componentSelector, params);
+    const [rootComponent, ...childComponents] = componentSelector.split(COMPONENT_SELECTOR_SEPARATOR);
+    const rootElement = createElement(rootComponent, params);
+    childComponents.reduce((parent, selector) => createElement(selector, params, parent), rootElement);
+    return rootElement;
   }
 
   private getRouteParameters(matchedRoute: MatchedRoute): Record<string, string> {

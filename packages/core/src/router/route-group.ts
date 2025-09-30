@@ -1,15 +1,18 @@
 import { normalizePath } from '../helpers/router.helper';
+import { COMPONENT_SELECTOR_SEPARATOR } from './router-constants';
 
-import type { Route } from '../types/router.type';
+import type { Route, RouteOptions } from '../types/router.type';
 
 export class RouteGroup {
   private readonly _routes: Array<Route> = [];
   private readonly _routePrefix: string;
   private readonly _namePrefix: string;
+  private readonly _rootComponentSelector?: string | null;
 
-  private constructor(routePrefix: string, namePrefix?: string) {
+  private constructor(routePrefix: string, options: RouteOptions = {}) {
     this._routePrefix = routePrefix;
-    this._namePrefix = namePrefix ?? '';
+    this._namePrefix = options.name ?? '';
+    this._rootComponentSelector = options.rootComponentSelector ?? null;
   }
 
   /**
@@ -18,8 +21,8 @@ export class RouteGroup {
    * @param namePrefix The prefix for the route names.
    * @returns A new RouteGroup instance.
    */
-  static create(routePrefix: string, namePrefix?: string): RouteGroup {
-    return new RouteGroup(routePrefix, namePrefix);
+  static create(routePrefix: string, options?: RouteOptions): RouteGroup {
+    return new RouteGroup(routePrefix, options);
   }
 
   getRoutes(): Array<Route> {
@@ -33,10 +36,12 @@ export class RouteGroup {
    * @param name The name of the route.
    * @returns The current RouteGroup instance.
    */
-  addRoute(path: string, componentSelector: string, name?: string) {
+  addRoute(path: string, componentSelector: string, options: RouteOptions = {}) {
     this._routes.push({
-      componentSelector,
-      name: name ? `${this._namePrefix}${name}` : undefined,
+      componentSelector: [this._rootComponentSelector, options.rootComponentSelector, componentSelector]
+        .filter(Boolean)
+        .join(COMPONENT_SELECTOR_SEPARATOR),
+      name: options.name ? `${this._namePrefix}${options.name}` : undefined,
       path: normalizePath(`${this._routePrefix}/${path}`),
     });
     return this;
@@ -49,7 +54,7 @@ export class RouteGroup {
    */
   addGroup(group: RouteGroup) {
     group.getRoutes().forEach(({ path, componentSelector, name }) => {
-      this.addRoute(path, componentSelector, name);
+      this.addRoute(path, componentSelector, { name });
     });
     return this;
   }

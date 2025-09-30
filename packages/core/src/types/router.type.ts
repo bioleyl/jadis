@@ -7,6 +7,13 @@ export interface RouterOptions {
   baseUrl?: string;
 }
 
+export interface RouteOptions {
+  /** The component selector for the route group, if applicable. */
+  rootComponentSelector?: string;
+  /** The prefix for the route names in the group. */
+  name?: string;
+}
+
 export interface Route {
   name?: string;
   path: string;
