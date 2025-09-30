@@ -1,5 +1,7 @@
 export type Constructor<T> = new (...args: unknown[]) => T;
 
+export type Callable = (...args: any[]) => any;
+
 export type Primitive<T> = T extends NumberConstructor
   ? number
   : T extends StringConstructor
@@ -11,7 +13,7 @@ export type Primitive<T> = T extends NumberConstructor
         : T extends SymbolConstructor
           ? symbol
           : T extends FunctionConstructor
-            ? (...args: unknown[]) => unknown
+            ? Callable
             : T extends ArrayConstructor
               ? Array<unknown>
               : T;
@@ -24,8 +26,8 @@ export type HtmlMarkupValue = string | number | boolean | Node | Node[] | null |
 
 export type AppendableElement = HTMLElement | ShadowRoot | DocumentFragment;
 
-export type ElementAttributes<T extends HTMLElement> = Partial<
-  {
-    [K in keyof T]: T[K];
-  } & Record<string, string>
->;
+export type ElementAttributes<T extends HTMLElement> =
+  | Partial<{
+      [K in keyof T as T[K] extends Callable ? never : K]: T[K];
+    }>
+  | Record<string, string>;

@@ -8,7 +8,7 @@ describe('Element helper', () => {
     });
 
     it('should create an element with the given attributes', () => {
-      const div = createElement('div', { class: 'my-class', id: 'my-div' });
+      const div = createElement('div', { autofocus: true, class: 'my-class', id: 'my-div' });
       expect(div).toBeInstanceOf(HTMLDivElement);
       expect(div.id).toBe('my-div');
       expect(div.className).toBe('my-class');

@@ -25,7 +25,7 @@ export function createElement<T extends HTMLElement>(
 ): T;
 export function createElement(
   tag: string,
-  attributes: Record<string, string> = {},
+  attributes: Record<string, unknown> = {},
   appendTo?: AppendableElement
 ): HTMLElement {
   const el = document.createElement(tag);
