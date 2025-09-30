@@ -17,26 +17,30 @@ export class RouteGroup {
 
   /**
    * Creates a new RouteGroup instance.
-   * @param routePrefix The prefix for the route paths.
-   * @param namePrefix The prefix for the route names.
-   * @returns A new RouteGroup instance.
+   * @param {string} routePrefix The prefix for the route paths.
+   * @param {RouteOptions} [options={}] - Optional route options including name and rootComponentSelector.
+   * @returns {RouteGroup} A new RouteGroup instance.
    */
   static create(routePrefix: string, options?: RouteOptions): RouteGroup {
     return new RouteGroup(routePrefix, options);
   }
 
+  /**
+   * Returns the routes in the group.
+   * @returns {Array<Route>} The routes in the group.
+   */
   getRoutes(): Array<Route> {
     return this._routes;
   }
 
   /**
    * Adds a route to the group.
-   * @param path The path of the route.
-   * @param componentSelector The component selector for the route.
-   * @param name The name of the route.
-   * @returns The current RouteGroup instance.
+   * @param {string} path - The path of the route.
+   * @param {string} componentSelector - The component selector for the route.
+   * @param {RouteOptions} [options={}] - Optional route options.
+   * @returns {RouteGroup} The current RouteGroup instance.
    */
-  addRoute(path: string, componentSelector: string, options: RouteOptions = {}) {
+  addRoute(path: string, componentSelector: string, options: RouteOptions = {}): this {
     this._routes.push({
       componentSelector: [this._rootComponentSelector, options.rootComponentSelector, componentSelector]
         .filter(Boolean)
@@ -49,10 +53,10 @@ export class RouteGroup {
 
   /**
    * Adds a group of routes to the current group.
-   * @param group The route group to add.
-   * @returns The current RouteGroup instance.
+   * @param {RouteGroup} group The route group to add.
+   * @returns {RouteGroup} The current RouteGroup instance.
    */
-  addGroup(group: RouteGroup) {
+  addGroup(group: RouteGroup): this {
     group.getRoutes().forEach(({ path, componentSelector, name }) => {
       this.addRoute(path, componentSelector, { name });
     });

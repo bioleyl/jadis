@@ -43,6 +43,10 @@ export class Router {
     });
   }
 
+  /**
+   * Gets the router configuration.
+   * @returns {Required<RouterOptions>} The router configuration including mode and baseUrl
+   */
   get config(): Required<RouterOptions> {
     return {
       baseUrl: this._baseUrl,
@@ -53,7 +57,7 @@ export class Router {
   /**
    * Gets the current route.
    * @throws Will throw an error if no route is found
-   * @returns The current route
+   * @returns {Route} The current route
    */
   get currentRoute(): Route {
     assert(this._currentRoute, 'No route found');
@@ -62,12 +66,12 @@ export class Router {
 
   /**
    * Adds a new route to the router.
-   * @param path The path of the route
-   * @param componentSelector The selector of the component to mount for this route
-   * @param name An optional name for the route
+   * @param {string} path The path of the route
+   * @param {string} componentSelector The selector of the component to mount for this route
+   * @param {RouteOptions} [options={}] - Optional route options including name and rootComponentSelector.
    * @example
-   * router.addRoute('/home', 'home-component', 'home');
-   * @returns this
+   * router.addRoute('/home', 'home-component', { name: 'home' });
+   * @returns {Router} The current Router instance
    */
   addRoute(path: string, componentSelector: string, options: RouteOptions = {}): this {
     const normalizedPath = normalizePath(`/${path}`);
@@ -86,13 +90,13 @@ export class Router {
   /**
    *  Adds a group of routes defined in a RouteGroup.
    * This allows for organizing routes under a common prefix.
-   * @param routeGroup The RouteGroup containing routes to add
+   * @param {RouteGroup} routeGroup The RouteGroup containing routes to add
    * @example
    * const group = RouteGroup.create('/api')
    *   .addRoute('/users', 'user-list')
    *   .addRoute('/users/:id', 'user-detail');
    * router.addGroup(group);
-   * @returns this
+   * @returns {Router} The current Router instance
    */
   addGroup(routeGroup: RouteGroup): this {
     routeGroup.getRoutes().forEach(({ path, componentSelector, name }) => {
@@ -103,7 +107,7 @@ export class Router {
 
   /**
    * Mounts the router on a specific HTML element.
-   * @param el The element to mount the router on
+   * @param {HTMLElement} el The element to mount the router on
    */
   mountOn(el: HTMLElement) {
     this._mount = el;
@@ -112,8 +116,8 @@ export class Router {
 
   /**
    * Navigates to a route by its name.
-   * @param name The name of the route to navigate to
-   * @param params The parameters to include with the route
+   * @param {string} name The name of the route to navigate to
+   * @param {Record<string, string>} [params] The parameters to include with the route
    */
   gotoName(name: string, params?: Record<string, string>) {
     const route = this.getRouteByName(name);
@@ -124,7 +128,8 @@ export class Router {
 
   /**
    * Navigates to a route by its path.
-   * @param path The path of the route to navigate to
+   * @warning This method is not recommended. Please prefer using `gotoName` for better maintainability.
+   * @param {string} path The path of the route to navigate to
    */
   gotoPath(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;

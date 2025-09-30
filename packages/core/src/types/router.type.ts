@@ -8,10 +8,10 @@ export interface RouterOptions {
 }
 
 export interface RouteOptions {
-  /** The component selector for the route group, if applicable. */
-  rootComponentSelector?: string;
   /** The prefix for the route names in the group. */
   name?: string;
+  /** The component selector for the route group, if applicable. */
+  rootComponentSelector?: string;
 }
 
 export interface Route {
