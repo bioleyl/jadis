@@ -54,7 +54,7 @@ const myRouter = new Router();
 myRouter.addRoute('/invoice/:id', InvoicePage.selector, { name: 'inv' });
 myRouter.mountOn(document.getElementById('app'));
 
-myRoute.gotoName('inv', { id: 'abcd' })
+myRouter.gotoName('inv', { id: 'abcd' })
 ```
 
 This will navigate `/invoice/abcd`
