@@ -6,7 +6,7 @@
     "outDir": "./dist",
     "removeComments": true,
     "rootDir": "./src",
-    "target": "esnext"
+    "target": "es2023"
   },
   "extends": "../../tsconfig.base.json",
   "include": ["**/*.ts"]
