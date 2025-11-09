@@ -87,7 +87,7 @@ class ClickButton extends Jadis {
 
   refs = this.useRefs((ref) => ({
     button: ref('button'),
-    /** @types HTMLSpanElement */
+    /** @type HTMLSpanElement */
     count: ref('#count'),
   }));
   

@@ -93,7 +93,7 @@ class FormComponent extends Jadis {
   }
 
   refs = this.useRefs((ref) => ({
-    /** @types HTMLInputElement */
+    /** @type HTMLInputElement */
     input: ref('input.my-input'),
     button: ref('button'),
   }));

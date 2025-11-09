@@ -127,9 +127,9 @@ class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
   refs = this.useRefs((ref) => ({
-    /** @types {HTMLParagraphElement} */
+    /** @type {HTMLParagraphElement} */
     message: ref('#message'),
-    /** @types {ChildComponent} */
+    /** @type {ChildComponent} */
     childComponent: ref('child-component'),
   }));
 

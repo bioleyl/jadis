@@ -99,7 +99,7 @@ class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
   refs = this.useRefs((ref) => ({
-    /** @types {ChildComponent} */
+    /** @type {ChildComponent} */
     childComponent: ref('child-component'),
   }));
 
