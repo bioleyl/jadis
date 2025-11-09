@@ -78,7 +78,6 @@ Use it when you:
 Avoid it if you need:
 
 - Complex state management
-- Large-scale SPA routing
 - SSR or hydration
 
 ## 🚫 What Jadis doesn’t do (on purpose)
