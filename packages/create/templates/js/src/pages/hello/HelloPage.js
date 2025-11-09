@@ -5,6 +5,11 @@ import { myRouter } from '../../router';
 class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
 
+  refs = this.useRefs((ref) => ({
+    button: ref('button'),
+    name: ref('span'),
+  }));
+
   templateHtml() {
     return html`
       <h1>Hello, <span></span>!</h1>
@@ -23,23 +28,14 @@ class HelloPage extends Jadis {
   }
 
   onConnect() {
-    this.spanElement.textContent = this.getAttribute('name');
+    const { name, button } = this.refs;
 
-    this.on(this.buttonElement, 'click', () => this.#onButtonClick());
+    name.textContent = this.getAttribute('name');
+    this.on(button, 'click', () => this.#onButtonClick());
   }
 
   #onButtonClick() {
     myRouter.gotoName('main');
-  }
-
-  /** @returns {HtmlButtonElement} */
-  get buttonElement() {
-    return this.getElement('button');
-  }
-
-  /** @returns {HTMLSpanElement} */
-  get spanElement() {
-    return this.getElement('span');
   }
 }
 
