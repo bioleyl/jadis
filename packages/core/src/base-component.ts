@@ -9,6 +9,7 @@ import type {
   ElementAttributes,
   OptionalIfUndefined,
   Primitive,
+  SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
 import type { UseEventsHandler } from './types/jadis.type';
 
@@ -17,8 +18,6 @@ interface JadisConstructor {
   readonly selector: ComponentSelector;
   readonly observedAttributes: Array<string>;
 }
-
-type InferAttributes<T> = T extends (infer U)[] ? U : never;
 
 /**
  * Base class for all Jadis components.
@@ -146,15 +145,17 @@ export abstract class Jadis extends HTMLElement {
    * @returns The found element
    * @throws Will throw an error if the element is not found
    */
-  protected getElement<Element extends HTMLElement>(query: string): Element {
+  protected getElement<Element extends HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+    query: Tag
+  ): SelectorToElementWithFallback<Tag, Element> {
     const el = query.split('>>>').reduce((nextEl: HTMLElement, nextQuery: string) => {
-      const found = (nextEl.shadowRoot ?? nextEl).querySelector<Element>(nextQuery);
+      const found = (nextEl.shadowRoot ?? nextEl).querySelector<HTMLElement>(nextQuery);
       assert(found, `Jadis.getElement: ${nextQuery} element is not reachable`);
       return found;
     }, this);
     assert(el, `${query} element is not reachable`);
 
-    return el as Element;
+    return el as SelectorToElementWithFallback<Tag, Element>;
   }
 
   /**
@@ -239,6 +240,47 @@ export abstract class Jadis extends HTMLElement {
     element.addEventListener(event as string, callback as EventListener, {
       signal: this.killSignal,
     });
+  }
+
+  /**
+   * Creates references to elements within the component's template.
+   * This method allows you to define a mapping of element names to query selectors,
+   * and it will return an object with getters for each element.
+   * @template ElementMap A record mapping element names to their corresponding HTMLElement types
+   * @param mapFn A function that takes a ref function and returns a mapping of element names to query selectors
+   * @returns An object with getters for each referenced element
+   * @throws Will throw an error if the element is not found
+   * @example
+   * const refs = this.useRefs((ref) => ({
+   *   button: ref('button'),
+   *   input: ref<HTMLInputElement>('input.my-input'),
+   * }));
+   *
+   * // Usage:
+   * refs.button.addEventListener('click', () => { ... });
+   */
+  protected useRefs<ElementMap extends Record<string, HTMLElement>>(
+    mapFn: (
+      ref: <Element extends HTMLElement = HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+        query: Tag
+      ) => SelectorToElementWithFallback<Tag, Element>
+    ) => ElementMap
+  ): ElementMap {
+    // Call mapFn with a dummy ref that just returns the query string
+    // This allows us to extract the structure of the queries
+    const structure = mapFn(
+      <Element extends HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(query: Tag) =>
+        query as unknown as Element
+    );
+
+    return Object.entries(structure).reduce((acc, [key, query]) => {
+      Object.defineProperty(acc, key as keyof ElementMap, {
+        configurable: false,
+        enumerable: true,
+        get: () => this.getElement(query as unknown as string),
+      });
+      return acc;
+    }, {} as ElementMap);
   }
 
   private buildTemplate(): DocumentFragment {

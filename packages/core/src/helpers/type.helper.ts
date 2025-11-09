@@ -31,3 +31,8 @@ export type ElementAttributes<T extends HTMLElement> =
       [K in keyof T as T[K] extends Callable ? never : K]: T[K];
     }>
   | Record<string, string>;
+
+export type SelectorToElementWithFallback<
+  S extends keyof HTMLElementTagNameMap | string,
+  Fallback extends HTMLElement = HTMLElement,
+> = S extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[S] : Fallback;
