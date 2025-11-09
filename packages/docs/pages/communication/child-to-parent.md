@@ -32,6 +32,11 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
+  refs = this.useRefs((ref) => ({
+    message: ref('#message'),
+    childComponent: ref('child-component'),
+  }));
+
   templateHtml() {
     return html`
       <child-component></child-component>
@@ -40,17 +45,9 @@ class ParentComponent extends Jadis {
   }
 
   onConnect() {
-    this.childComponent.events.register('someEvent', (data) => {
-      this.messageElement.textContent = data;
+    this.refs.childComponent.events.register('someEvent', (data) => {
+      this.refs.message.textContent = data;
     });
-  }
-
-  get messageElement() {
-    return this.getElement('#message');
-  }
-
-  get childComponent() {
-    return this.getElement('child-component');
   }
 }
 
@@ -82,6 +79,11 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
 
+  refs = this.useRefs((ref) => ({
+    message: ref<HTMLParagraphElement>('#message'),
+    childComponent: ref<ChildComponent>('child-component'),
+  }));
+
   templateHtml(): DocumentFragment {
     return html`
       <child-component></child-component>
@@ -90,17 +92,9 @@ class ParentComponent extends Jadis {
   }
 
   onConnect(): void {
-    this.childComponent.events.register('someEvent', (data) => {
-      this.messageElement.textContent = data;
+    this.refs.childComponent.events.register('someEvent', (data) => {
+      this.refs.message.textContent = data;
     });
-  }
-
-  private get messageElement(): HTMLParagraphElement {
-    return this.getElement('#message');
-  }
-
-  private get childComponent(): ChildComponent {
-    return this.getElement('child-component');
   }
 }
 
@@ -132,6 +126,13 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
+  refs = this.useRefs((ref) => ({
+    /** @type {HTMLParagraphElement} */
+    message: ref('#message'),
+    /** @type {ChildComponent} */
+    childComponent: ref('child-component'),
+  }));
+
   templateHtml() {
     return html`
       <child-component></child-component>
@@ -140,19 +141,9 @@ class ParentComponent extends Jadis {
   }
 
   onConnect() {
-    this.childComponent.events.register('someEvent', (data) => {
-      this.messageElement.textContent = data;
+    this.refs.childComponent.events.register('someEvent', (data) => {
+      this.refs.message.textContent = data;
     });
-  }
-
-  /** @returns {HTMLParagraphElement} */
-  get messageElement() {
-    return this.getElement('#message');
-  }
-
-  /** @returns {ChildComponent} */
-  get childComponent() {
-    return this.getElement('child-component');
   }
 }
 

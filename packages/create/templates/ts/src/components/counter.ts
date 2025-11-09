@@ -3,23 +3,28 @@ import { html, Jadis } from '@jadis/core';
 class Counter extends Jadis {
   static readonly selector = 'counter-component';
 
-  events = this.useEvents<{
+  readonly events = this.useEvents<{
     change: number;
   }>();
+
+  readonly refs = this.useRefs((ref) => ({
+    count: ref('span'),
+    incrementButton: ref('button'),
+  }));
 
   private _count = 0;
 
   templateHtml(): DocumentFragment {
     return html`
       <p>Count: <span></span></p>
-      <button id="increment">Increment</button>
+      <button>Increment</button>
     `;
   }
 
   onConnect(): void {
     this.updateCount();
 
-    this.on(this.incrementButtonElement, 'click', () => this.increment());
+    this.on(this.refs.incrementButton, 'click', () => this.increment());
   }
 
   private increment(): void {
@@ -29,15 +34,7 @@ class Counter extends Jadis {
   }
 
   private updateCount(): void {
-    this.countElement.textContent = this._count.toString();
-  }
-
-  private get countElement(): HTMLSpanElement {
-    return this.getElement('span');
-  }
-
-  private get incrementButtonElement(): HTMLButtonElement {
-    return this.getElement('#increment');
+    this.refs.count.textContent = this._count.toString();
   }
 }
 

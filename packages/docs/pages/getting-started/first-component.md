@@ -13,7 +13,13 @@ import { Jadis, html, createSelector } from '@jadis/core';
 
 class ClickButton extends Jadis {
   static selector = createSelector('click-button');
-  count = 0;
+
+  refs = this.useRefs((ref) => ({
+    button: ref('button'),
+    count: ref('#count'),
+  }));
+
+  #count = 0;
 
   templateHtml() {
     return html`
@@ -23,17 +29,14 @@ class ClickButton extends Jadis {
   }
 
   onConnect() {
-    this.buttonElement.textContent = this.getAttribute('label') || 'Click me';
-    this.on(this.buttonElement, 'click', () => this.increment());
+    const { button } = this.refs;
+    button.textContent = this.getAttribute('label') || 'Click me';
+    this.on(button, 'click', () => this.increment());
   }
 
   increment() {
-    this.count++;
-    this.getElement('#count').textContent = this.count.toString();
-  }
-
-  get buttonElement() {
-    return this.getElement('#btn');
+    this.#count++;
+    this.refs.count.textContent = this.#count.toString();
   }
 }
 
@@ -45,6 +48,12 @@ import { Jadis, html } from '@jadis/core';
 
 class ClickButton extends Jadis {
   static readonly selector = 'click-button';
+  
+  readonly refs = this.useRefs((ref) =>({
+    button: ref('button'),
+    count: ref<HTMLSpanElement>('#count'),
+  }));
+
   private count = 0;
 
   templateHtml(): DocumentFragment {
@@ -55,17 +64,14 @@ class ClickButton extends Jadis {
   }
 
   onConnect(): void {
-    this.buttonElement.textContent = this.getAttribute('label') || 'Click me';
-    this.on(this.buttonElement, 'click', () => this.increment());
+    const { button } = this.refs;
+    button.textContent = this.getAttribute('label') || 'Click me';
+    this.on(button, 'click', () => this.increment());
   }
 
   private increment(): void {
     this.count++;
-    this.getElement('#count').textContent = this.count.toString();
-  }
-
-  private get buttonElement(): HTMLButtonElement {
-    return this.getElement('#btn');
+    this.refs.count.textContent = this.count.toString();
   }
 }
 
@@ -78,7 +84,14 @@ import { Jadis, html, createSelector } from '@jadis/core';
 
 class ClickButton extends Jadis {
   static selector = createSelector('click-button');
-  count = 0;
+
+  refs = this.useRefs((ref) => ({
+    button: ref('button'),
+    /** @type HTMLSpanElement */
+    count: ref('#count'),
+  }));
+  
+  #count = 0;
 
   templateHtml() {
     return html`
@@ -88,18 +101,14 @@ class ClickButton extends Jadis {
   }
 
   onConnect() {
-    this.buttonElement.textContent = this.getAttribute('label') || 'Click me';
-    this.on(this.buttonElement, 'click', () => this.increment());
+    const { button } = this.refs;
+    button.textContent = this.getAttribute('label') || 'Click me';
+    this.on(button, 'click', () => this.increment());
   }
 
   increment() {
-    this.count++;
-    this.getElement('#count').textContent = this.count.toString();
-  }
-
-  /** @returns {HTMLButtonElement} */
-  get buttonElement() {
-    return this.getElement('#btn');
+    this.#count++;
+    this.refs.count.textContent = this.#count.toString();
   }
 }
 

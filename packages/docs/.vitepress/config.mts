@@ -83,6 +83,10 @@ export default defineConfig({
             link: '/pages/helpers/get-element',
             text: 'getElement',
           },
+          {
+            link: '/pages/helpers/use-refs',
+            text: 'useRefs',
+          },
         ],
         text: 'Helpers',
       },

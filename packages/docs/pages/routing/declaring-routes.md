@@ -12,17 +12,17 @@ import { Jadis, html, createSelector, Router } from '@jadis/core';
 class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
 
+  refs = this.useRefs((ref) => ({
+    name: ref('#name'),
+  }));
+
   templateHtml() {
     return html`<h1>Hello, <span id="name"></span>!</h1>`;
   }
 
   onConnect() {
     const name = this.getAttribute('name');
-    this.nameElement.textContent = name || 'Guest';
-  }
-
-  get nameElement() {
-    return this.getElement('#name');
+    this.refs.name.textContent = name || 'Guest';
   }
 }
 

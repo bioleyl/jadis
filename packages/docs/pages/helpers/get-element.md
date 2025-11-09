@@ -100,3 +100,7 @@ class ParentComponent extends Jadis {
 ```
 
 :::
+
+## 🧰 Related Helpers
+
+- [`useRefs()`](./use-refs.md) — Create multiple typed element references using a single mapping function.

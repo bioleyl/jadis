@@ -26,16 +26,16 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
+  refs = this.useRefs((ref) => ({
+    childComponent: ref('child-component'),
+  }));
+
   templateHtml() {
     return html`<child-component></child-component>`;
   }
 
   onConnect() {
-    this.childComponent.textValue = 'Hello from Parent Component!';
-  }
-
-  get childComponent() {
-    return this.getElement('child-component');
+    this.refs.childComponent.textValue = 'Hello from Parent Component!';
   }
 }
 
@@ -61,16 +61,16 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
 
+  readonly refs = this.useRefs((ref) => ({
+    childComponent: ref<ChildComponent>('child-component'),
+  }));
+
   templateHtml(): DocumentFragment {
     return html`<child-component></child-component>`;
   }
 
   onConnect(): void {
-    this.childComponent.textValue = 'Hello from Parent Component!';
-  }
-
-  get childComponent(): ChildComponent {
-    return this.getElement('child-component');
+    this.refs.childComponent.textValue = 'Hello from Parent Component!';
   }
 }
 
@@ -98,17 +98,17 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
+  refs = this.useRefs((ref) => ({
+    /** @type {ChildComponent} */
+    childComponent: ref('child-component'),
+  }));
+
   templateHtml() {
     return html`<child-component></child-component>`;
   }
 
   onConnect() {
-    this.childComponent.textValue = 'Hello from Parent Component!';
-  }
-
-  /** @returns {ChildComponent} */
-  get childComponent() {
-    return this.getElement('child-component');
+    this.refs.childComponent.textValue = 'Hello from Parent Component!';
   }
 }
 

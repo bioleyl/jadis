@@ -8,13 +8,22 @@ import style from './MainPage.css?inline';
 class MainPage extends Jadis {
   static selector = createSelector('main-page');
 
+  refs = this.useRefs((ref) => ({
+    greetButton: ref('button'),
+    /** @type {HTMLDivElement} */
+    header: ref('.header'),
+    nameInput: ref('input'),
+    /** @type {HTMLDivElement} */
+    wrapper: ref('.wrapper'),
+  }));
+
   templateHtml() {
     return html`
       <div class="header"></div>
 
       <div>
-        <input type="text" placeholder="Enter your name" id="nameInput" />
-        <button id="greetButton">Greet</button>
+        <input type="text" placeholder="Enter your name"/>
+        <button>Greet</button>
       </div>
 
       <div class="wrapper"></div>
@@ -26,15 +35,15 @@ class MainPage extends Jadis {
   }
 
   onConnect() {
-    createElement('img', { src: logo }, this.headerElement);
+    const { greetButton, header, wrapper } = this.refs;
 
-    this.wrapperElement.replaceChildren(...Array.from({ length: 3 }).map((_, i) => this.#createCounter(i)));
-
-    this.on(this.buttonElement, 'click', () => this.#onButtonClick());
+    createElement('img', { src: logo }, header);
+    wrapper.replaceChildren(...Array.from({ length: 3 }).map((_, i) => this.#createCounter(i)));
+    this.on(greetButton, 'click', () => this.#onButtonClick());
   }
 
   #onButtonClick() {
-    myRouter.gotoName('hello', { name: this.inputElement.value });
+    myRouter.gotoName('hello', { name: this.refs.nameInput.value });
   }
 
   #createCounter(id) {
@@ -43,26 +52,6 @@ class MainPage extends Jadis {
       return console.log(`Counter id ${id}:`, count);
     });
     return counter;
-  }
-
-  /** @returns {HTMLInputElement} */
-  get inputElement() {
-    return this.getElement('input');
-  }
-
-  /** @returns {HtmlButtonElement} */
-  get buttonElement() {
-    return this.getElement('button');
-  }
-
-  /** @returns {HTMLDivElement} */
-  get wrapperElement() {
-    return this.getElement('.wrapper');
-  }
-
-  /** @returns {HTMLDivElement} */
-  get headerElement() {
-    return this.getElement('.header');
   }
 }
 

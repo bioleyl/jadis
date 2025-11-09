@@ -8,13 +8,21 @@ import style from './MainPage.css?inline';
 class MainPage extends Jadis {
   static readonly selector = 'main-page';
 
+  readonly refs = this.useRefs((ref) => ({
+    greetButton: ref('button'),
+    header: ref<HTMLDivElement>('.header'),
+    input: ref('input'),
+    wrapper: ref<HTMLDivElement>('.wrapper'),
+  }));
+
   templateHtml(): DocumentFragment {
     return html`
       <div class="header"></div>
 
       <div>
-        <input type="text" placeholder="Enter your name" id="nameInput" />
-        <button id="greetButton">Greet</button>
+        <label for="nameInput">Your Name:</label>
+        <input type="text" placeholder="Enter your name"/>
+        <button>Greet</button>
       </div>
 
       <div class="wrapper"></div>
@@ -26,15 +34,15 @@ class MainPage extends Jadis {
   }
 
   onConnect(): void {
-    createElement('img', { src: logo }, this.headerElement);
+    const { greetButton, header, wrapper } = this.refs;
 
-    this.wrapperElement.replaceChildren(...Array.from({ length: 3 }).map((_, i) => this.createCounter(i)));
-
-    this.on(this.buttonElement, 'click', () => this.onButtonClick());
+    createElement('img', { src: logo }, header);
+    wrapper.replaceChildren(...Array.from({ length: 3 }).map((_, i) => this.createCounter(i)));
+    this.on(greetButton, 'click', () => this.onButtonClick());
   }
 
   private onButtonClick(): void {
-    myRouter.gotoName('hello', { name: this.inputElement.value });
+    myRouter.gotoName('hello', { name: this.refs.input.value });
   }
 
   private createCounter(id: number): Counter {
@@ -43,22 +51,6 @@ class MainPage extends Jadis {
       return console.log(`Counter id ${id}:`, count);
     });
     return counter;
-  }
-
-  get inputElement(): HTMLInputElement {
-    return this.getElement('input');
-  }
-
-  get buttonElement(): HTMLButtonElement {
-    return this.getElement('button');
-  }
-
-  get wrapperElement(): HTMLDivElement {
-    return this.getElement('.wrapper');
-  }
-
-  get headerElement(): HTMLDivElement {
-    return this.getElement('.header');
   }
 }
 
