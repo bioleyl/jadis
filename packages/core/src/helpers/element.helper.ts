@@ -1,5 +1,6 @@
 import { toKebabCase } from './string.helper';
 
+import type { JadisConstructor } from '../base-component';
 import type { AppendableElement, ElementAttributes } from './type.helper';
 
 /**
@@ -23,12 +24,17 @@ export function createElement<T extends HTMLElement>(
   attributes?: ElementAttributes<T>,
   appendTo?: AppendableElement
 ): T;
+export function createElement<T extends JadisConstructor>(
+  tag: T,
+  attributes?: ElementAttributes<InstanceType<T>>,
+  appendTo?: AppendableElement
+): InstanceType<T>;
 export function createElement(
   tag: string,
   attributes: Record<string, unknown> = {},
   appendTo?: AppendableElement
 ): HTMLElement {
-  const el = document.createElement(tag);
+  const el = document.createElement(tag.toString());
   Object.entries(attributes).forEach(([key, value]) => {
     // If the property exists on the element, set it directly
     if (key in el && key !== 'class') {

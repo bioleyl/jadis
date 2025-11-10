@@ -13,7 +13,7 @@ import type {
 } from './helpers/type.helper.ts';
 import type { UseEventsHandler } from './types/jadis.type';
 
-interface JadisConstructor {
+export interface JadisConstructor {
   new (): Jadis;
   readonly selector: ComponentSelector;
   readonly observedAttributes: Array<string>;
@@ -82,17 +82,19 @@ export abstract class Jadis extends HTMLElement {
   }
 
   /**
-   * Creates a new instance of the component.
-   * @param attributes The attributes to set on the component
-   * @param appendTo The element to append the component to
+   * Creates a new instance with the defined children
+   * @param attributes The attributes and setters to set on the component
+   * @param children The children to append to the component
    * @returns The created component instance
    */
-  static createElement<T extends JadisConstructor>(
+  static toTemplate<T extends JadisConstructor>(
     this: T,
     attributes: ElementAttributes<InstanceType<T>> = {},
-    appendTo?: HTMLElement | ShadowRoot
+    children: DocumentFragment = document.createDocumentFragment()
   ): InstanceType<T> {
-    return createElement(this.selector, attributes, appendTo);
+    const element = createElement(this.selector, attributes);
+    element.appendChild(children.cloneNode(true));
+    return element;
   }
 
   /**
@@ -106,6 +108,14 @@ export abstract class Jadis extends HTMLElement {
     if (!customElements.get(this.typeOfClass.selector)) {
       customElements.define(this.typeOfClass.selector, this.typeOfClass);
     }
+  }
+
+  static toString(): string {
+    return this.selector;
+  }
+
+  toString(): string {
+    return this.typeOfConstructor.selector;
   }
 
   /**
@@ -300,5 +310,9 @@ export abstract class Jadis extends HTMLElement {
 
   private static get typeOfClass(): JadisConstructor {
     return this.prototype.constructor as JadisConstructor;
+  }
+
+  private get typeOfConstructor(): JadisConstructor {
+    return this.constructor as JadisConstructor;
   }
 }
