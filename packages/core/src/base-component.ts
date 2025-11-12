@@ -6,8 +6,9 @@ import type { Bus } from './helpers/bus.helper';
 import type {
   ComponentSelector,
   Constructor,
-  ElementAttributes,
+  ElementValues,
   OptionalIfUndefined,
+  OptionsWithProps,
   Primitive,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
@@ -83,16 +84,16 @@ export abstract class Jadis extends HTMLElement {
 
   /**
    * Creates a new instance with the defined children
-   * @param attributes The attributes and setters to set on the component
+   * @param options An optional set of properties and attributes to set on the component
    * @param children The children to append to the component
    * @returns The created component instance
    */
   static toTemplate<T extends JadisConstructor>(
     this: T,
-    attributes: ElementAttributes<InstanceType<T>> = {},
+    options: OptionsWithProps<ElementValues<InstanceType<T>>> = {},
     children: DocumentFragment = document.createDocumentFragment()
   ): InstanceType<T> {
-    const element = createElement(this.selector, attributes);
+    const element = createElement(this.selector, options);
     element.appendChild(children.cloneNode(true));
     return element;
   }
@@ -112,10 +113,6 @@ export abstract class Jadis extends HTMLElement {
 
   static toString(): string {
     return this.selector;
-  }
-
-  toString(): string {
-    return this.typeOfConstructor.selector;
   }
 
   /**
