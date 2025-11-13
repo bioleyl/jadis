@@ -21,3 +21,7 @@ export type UseEventsHandler<EventType> = {
     ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
   ) => void;
 };
+
+export interface ChangeOptions {
+  immediate?: boolean;
+}

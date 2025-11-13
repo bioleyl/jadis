@@ -1,5 +1,6 @@
 /** biome-ignore-all lint/complexity/noThisInStatic: I explicitly need to refer to "this" and not Jadis for code hint when creating components */
 import { assert } from './helpers/assert.helper';
+import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
 
 import type { Bus } from './helpers/bus.helper';
@@ -12,10 +13,10 @@ import type {
   Primitive,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
-import type { UseEventsHandler } from './types/jadis.type';
+import type { ChangeOptions, UseEventsHandler } from './types/jadis.type';
 
-export interface JadisConstructor {
-  new (): Jadis;
+export interface JadisConstructor<T extends Jadis = Jadis> {
+  new (): T;
   readonly selector: ComponentSelector;
   readonly observedAttributes: Array<string>;
 }
@@ -35,6 +36,7 @@ export abstract class Jadis extends HTMLElement {
 
   private readonly _abortController = new AbortController();
   private _isConnected = false;
+  private _onConnectActions: Array<() => void> = [];
 
   /**
    * Callback invoked when the component is connected to the DOM.
@@ -88,11 +90,11 @@ export abstract class Jadis extends HTMLElement {
    * @param children The children to append to the component
    * @returns The created component instance
    */
-  static toTemplate<T extends JadisConstructor>(
-    this: T,
-    options: OptionsWithProps<ElementValues<InstanceType<T>>> = {},
+  static toTemplate<T extends Jadis>(
+    this: JadisConstructor<T>,
+    options: OptionsWithProps<ElementValues<T>> = {},
     children: DocumentFragment = document.createDocumentFragment()
-  ): InstanceType<T> {
+  ): T {
     const element = createElement(this.selector, options);
     element.appendChild(children.cloneNode(true));
     return element;
@@ -125,6 +127,9 @@ export abstract class Jadis extends HTMLElement {
 
   connectedCallback(): void {
     this._isConnected = true;
+    this._onConnectActions.forEach((fn) => {
+      fn();
+    });
     setTimeout(() => this.onConnect?.());
   }
 
@@ -213,8 +218,8 @@ export abstract class Jadis extends HTMLElement {
     _schema?: {
       [EventKey in keyof EventType]: Constructor<EventType[EventKey]> | undefined;
     }
-  ): UseEventsHandler<EventType> {
-    return {
+  ): Readonly<UseEventsHandler<EventType>> {
+    return Object.freeze({
       emit: <EventKey extends keyof EventType>(
         event: EventKey,
         ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
@@ -230,7 +235,7 @@ export abstract class Jadis extends HTMLElement {
           signal: this.killSignal,
         });
       },
-    };
+    });
   }
 
   /**
@@ -272,7 +277,7 @@ export abstract class Jadis extends HTMLElement {
         query: Tag
       ) => SelectorToElementWithFallback<Tag, Element>
     ) => ElementMap
-  ): ElementMap {
+  ): Readonly<ElementMap> {
     // Call mapFn with a dummy ref that just returns the query string
     // This allows us to extract the structure of the queries
     const structure = mapFn(
@@ -280,14 +285,36 @@ export abstract class Jadis extends HTMLElement {
         query as unknown as Element
     );
 
-    return Object.entries(structure).reduce((acc, [key, query]) => {
-      Object.defineProperty(acc, key as keyof ElementMap, {
-        configurable: false,
-        enumerable: true,
-        get: () => this.getElement(query as unknown as string),
+    return Object.freeze(
+      Object.entries(structure).reduce((acc, [key, query]) => {
+        Object.defineProperty(acc, key as keyof ElementMap, {
+          configurable: false,
+          enumerable: true,
+          get: () => this.getElement(query as unknown as string),
+        });
+        return acc;
+      }, {} as ElementMap)
+    );
+  }
+
+  /**
+   * Creates a change handler variable.
+   * @param initialValue The initial value of the change handler variable
+   * @param onChange A callback function that is called when the change handler variable changes
+   * @param options Optional configuration for the change handler
+   * @returns An object with `get` and `set` methods for the change handler variable
+   */
+  protected useChange<T>(
+    initialValue: T,
+    onChange: (newValue: T, oldValue: T) => void,
+    { immediate = false }: ChangeOptions = {}
+  ): Readonly<ChangeHandler<T>> {
+    if (immediate) {
+      this._onConnectActions.push(() => {
+        onChange(initialValue, initialValue);
       });
-      return acc;
-    }, {} as ElementMap);
+    }
+    return new ChangeHandler<T>(initialValue, onChange);
   }
 
   private buildTemplate(): DocumentFragment {
@@ -307,9 +334,5 @@ export abstract class Jadis extends HTMLElement {
 
   private static get typeOfClass(): JadisConstructor {
     return this.prototype.constructor as JadisConstructor;
-  }
-
-  private get typeOfConstructor(): JadisConstructor {
-    return this.constructor as JadisConstructor;
   }
 }
