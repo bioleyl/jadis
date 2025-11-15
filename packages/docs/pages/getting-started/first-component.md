@@ -45,7 +45,7 @@
 
 Now, let’s build a real component using **@jadis/core**!
 
-## 🧩 Define a Button Component
+## 🧩 Define a CounterButton Component
 
 We’ll create a reusable button that shows a label and keeps track of how many times it's clicked.
 
@@ -54,108 +54,61 @@ We’ll create a reusable button that shows a label and keeps track of how many 
 ```javascript
 import { Jadis, html, createSelector } from '@jadis/core';
 
-class ClickButton extends Jadis {
-  static selector = createSelector('click-button');
+class CounterButton extends Jadis {
+  static selector = createSelector('counter-component');
+
+  count = this.useChange(0, (val) => {
+    this.refs.count.textContent = val.toString();
+  }, { immediate: true });
 
   refs = this.useRefs((ref) => ({
-    button: ref('button'),
-    count: ref('#count'),
+    count: ref('span'),
+    incrementButton: ref('button'),
   }));
-
-  #count = 0;
 
   templateHtml() {
     return html`
-      <button id="btn"></button>
-      <p>Clicked <span id="count">0</span> times</p>
+      <p>Count: <span></span></p>
+      <button>Increment</button>
     `;
   }
 
   onConnect() {
-    const { button } = this.refs;
-    button.textContent = this.getAttribute('label') || 'Click me';
-    this.on(button, 'click', () => this.increment());
-  }
-
-  increment() {
-    this.#count++;
-    this.refs.count.textContent = this.#count.toString();
+    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
   }
 }
 
-ClickButton.register();
+CounterButton.register();
 ```
 
 ```typescript
 import { Jadis, html } from '@jadis/core';
 
-class ClickButton extends Jadis {
-  static readonly selector = 'click-button';
-  
-  readonly refs = this.useRefs((ref) =>({
-    button: ref('button'),
-    count: ref<HTMLSpanElement>('#count'),
-  }));
+class CounterButton extends Jadis {
+  static readonly selector = 'counter-component';
 
-  private count = 0;
+  private readonly count = this.useChange(0, (val) => {
+    this.refs.count.textContent = val.toString()
+  }, { immediate: true });
+
+  private readonly refs = this.useRefs((ref) => ({
+    count: ref('span'),
+    incrementButton: ref('button'),
+  }));
 
   templateHtml(): DocumentFragment {
     return html`
-      <button id="btn"></button>
-      <p>Clicked <span id="count">0</span> times</p>
+      <p>Count: <span></span></p>
+      <button>Increment</button>
     `;
   }
 
   onConnect(): void {
-    const { button } = this.refs;
-    button.textContent = this.getAttribute('label') || 'Click me';
-    this.on(button, 'click', () => this.increment());
-  }
-
-  private increment(): void {
-    this.count++;
-    this.refs.count.textContent = this.count.toString();
+    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
   }
 }
 
-ClickButton.register();
-```
-
-```javascript [js-doc]
-// @ts-check
-import { Jadis, html, createSelector } from '@jadis/core';
-
-class ClickButton extends Jadis {
-  static selector = createSelector('click-button');
-
-  refs = this.useRefs((ref) => ({
-    button: ref('button'),
-    /** @type HTMLSpanElement */
-    count: ref('#count'),
-  }));
-  
-  #count = 0;
-
-  templateHtml() {
-    return html`
-      <button id="btn"></button>
-      <p>Clicked <span id="count">0</span> times</p>
-    `;
-  }
-
-  onConnect() {
-    const { button } = this.refs;
-    button.textContent = this.getAttribute('label') || 'Click me';
-    this.on(button, 'click', () => this.increment());
-  }
-
-  increment() {
-    this.#count++;
-    this.refs.count.textContent = this.#count.toString();
-  }
-}
-
-ClickButton.register();
+CounterButton.register();
 ```
 
 :::
@@ -163,7 +116,7 @@ ClickButton.register();
 Then in your HTML:
 
 ```html
-<click-button label="Click me"></click-button>
+<counter-button label="Click me"></counter-button>
 ```
 
 ## 🎨 Adding styles

@@ -87,6 +87,10 @@ export default defineConfig({
             link: '/pages/helpers/use-refs',
             text: 'useRefs',
           },
+          {
+            link: '/pages/helpers/use-change',
+            text: 'useChange',
+          },
         ],
         text: 'Helpers',
       },

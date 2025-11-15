@@ -24,9 +24,7 @@ export default class Counter extends Jadis {
   templateHtml(): DocumentFragment {
     return html`
       <p>Count: <span></span></p>
-      <slot></slot>
       <button>Increment</button>
-      <slot name="footer">
     `;
   }
 

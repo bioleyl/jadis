@@ -4,7 +4,7 @@ export default class Counter extends Jadis {
   static selector = createSelector('counter-component');
 
   /** @type {import('@jadis/core').UseEventsHandler<{change: number}>} */
-  events = this.useEvents({ change: Number });
+  events = this.useEvents();
 
   count = this.useChange(
     0,
