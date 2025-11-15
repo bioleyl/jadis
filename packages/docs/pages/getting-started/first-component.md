@@ -20,7 +20,7 @@
   
   ```javascript
     export class MyComponent extends Jadis {
-      selector = createSelector('my-component');
+      static selector = createSelector('my-component');
     }
     // use createSelector() to safely check the selector is of type 
     // ${string}-${string} 
@@ -88,7 +88,7 @@ class CounterButton extends Jadis {
   static readonly selector = 'counter-component';
 
   private readonly count = this.useChange(0, (val) => {
-    this.refs.count.textContent = val.toString()
+    this.refs.count.textContent = val.toString();
   }, { immediate: true });
 
   private readonly refs = this.useRefs((ref) => ({
@@ -116,7 +116,7 @@ CounterButton.register();
 Then in your HTML:
 
 ```html
-<counter-button label="Click me"></counter-button>
+<counter-button></counter-button>
 ```
 
 ## 🎨 Adding styles

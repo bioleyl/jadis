@@ -25,7 +25,7 @@ class ClickButton extends Jadis {
 Another option for styling is to isolate your CSS in a separate file and import it
 
 ```javascript
-import { Jadis, css, createSelector } from '@jadis/core';
+import { Jadis, createSelector, css, createSelector } from '@jadis/core';
 import style from './your-css-file.css?inline'; 
 
 class ClickButton extends Jadis {
@@ -51,7 +51,7 @@ class ClickButton extends Jadis {
 ::: tip
 CSS variables can traverse the shadow DOM
 You might want to use them for font-styles, sizes and such
-on the `::root` element.
+on the `:root` element.
 :::
 
 ::: tip
@@ -71,17 +71,15 @@ The `toggleClass()` method can add a class to the component or remove it based o
 :::code-group
 
 ```javascript
-import { css, html, Jadis } from "@jadis/core";
+import { css, createSelector, html, Jadis } from '@jadis/core';
 
 export default class MyButton extends Jadis {
-  static selector = createSelector("my-button");
+  static selector = createSelector('my-button');
   isError = false;
 
-  refs = this.useRefs((ref) => {
-    return {
+  refs = this.useRefs((ref) => ({
       button: ref('button')
-    }
-  })
+  }));
 
   templateHtml() {
     return html`
@@ -106,7 +104,7 @@ export default class MyButton extends Jadis {
     this.on(this.refs.button, 'click', () => {
       this.isError = !this.isError;
       this.toggleClass('error', this.isError)
-    })
+    });
   }
 }
 
@@ -114,17 +112,15 @@ MyButton.register();
 ```
 
 ```typescript
-import { css, html, Jadis } from "@jadis/core";
+import { css, html, Jadis } from '@jadis/core';
 
 export default class MyButton extends Jadis {
-  static readonly selector = "my-button";
+  static readonly selector = 'my-button';
   private isError = false;
 
-  private readonly refs = this.useRefs((ref) => {
-    return {
+  private readonly refs = this.useRefs((ref) => ({
       button: ref<HTMLButtonElement>('button')
-    }
-  })
+  }));
 
   templateHtml(): DocumentFragment {
     return html`
@@ -149,7 +145,7 @@ export default class MyButton extends Jadis {
     this.on(this.refs.button, 'click', () => {
       this.isError = !this.isError;
       this.toggleClass('error', this.isError)
-    })
+    });
   }
 }
 

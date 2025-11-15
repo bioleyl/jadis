@@ -183,7 +183,7 @@ export class Router {
 
     const [rootComponent, ...childComponents] = componentSelector.split(COMPONENT_SELECTOR_SEPARATOR);
     const rootElement = createElement(rootComponent, { attrs: params });
-    childComponents.reduce((parent, selector) => createElement(selector, params, parent), rootElement);
+    childComponents.reduce((parent, selector) => createElement(selector, { attrs: params }, parent), rootElement);
     return rootElement;
   }
 
