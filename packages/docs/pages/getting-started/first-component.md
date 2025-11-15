@@ -1,6 +1,49 @@
 # ⚙️ First Component
 
-Let’s build a real component using **@jadis/core**.
+## The Essentials of a Jadis Component
+
+- A component in **@jadis/core** is a class that extends from *Jadis*
+  
+  ```javascript
+    class MyComponent extends Jadis {}
+  ```
+
+- The component needs to be exported if used elsewhere
+
+  ```javascript
+    export class MyComponent extends Jadis {}
+  ```
+
+- The component needs a selector property in order to be used in the DOM
+  
+  :::code-group
+  
+  ```javascript
+    export class MyComponent extends Jadis {
+      selector = createSelector('my-component');
+    }
+    // use createSelector() to safely check the selector is of type 
+    // ${string}-${string} 
+  ```
+
+  ```typescript
+    export class MyComponent extends Jadis {
+      static readonly selector = createSelector('my-component');
+    }
+    // selector property needs to be readonly
+  ```
+
+- The component needs to be registered by calling the `register()` method
+
+  ```javascript
+    export class MyComponent extends Jadis {
+      ...
+    }
+
+    MyComponent.register();
+  ```
+
+Now, let’s build a real component using **@jadis/core**!
 
 ## 🧩 Define a Button Component
 
@@ -123,26 +166,6 @@ Then in your HTML:
 <click-button label="Click me"></click-button>
 ```
 
-## 🎨 Optional: Adding styles
+## 🎨 Adding styles
 
-You can style your component by adding a `static style` property:
-
-```javascript
-import { Jadis, css, createSelector } from '@jadis/core';
-
-...
-
-class ClickButton extends Jadis {
-  static selector = createSelector('click-button');
-
-  templateCss() {
-    return css`button { padding: 0.5rem; font-size: 1rem; }`;
-  }
-
-  templateHtml() {
-    ...
-  }
-
-  ...
-}
-```
+See [documentation about adding style](../styling/add-style.md).

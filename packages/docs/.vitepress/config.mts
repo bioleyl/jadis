@@ -90,6 +90,24 @@ export default defineConfig({
         ],
         text: 'Helpers',
       },
+      {
+        items: [
+          {
+            link: '/pages/styling/add-style',
+            text: 'Add style to components',
+          }
+        ],
+        text: 'Style',
+      },
+      {
+        items: [
+          {
+            link: '/pages/slots/use-slots',
+            text: 'Use slots in your components',
+          }, 
+        ],
+        text: 'Slots',
+      }
     ],
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/bioleyl/jadis' }],

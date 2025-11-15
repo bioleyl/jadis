@@ -24,4 +24,11 @@ features:
   - title: Helpers
     details: How to use the embedded helpers
     link: /pages/helpers/create-element
+  - title: Styling
+    details: Adding style to components
+    link: /pages/styling/add-style
+  - title: Slots
+    details: Using slots in your components
+    link: /pages/slots/use-slots
+  
 ---
