@@ -1,6 +1,12 @@
+import type { ChangeHandler } from './change.helper';
+
 export type Constructor<T> = new (...args: unknown[]) => T;
 
 export type Callable = (...args: any[]) => any;
+
+export type NonCallableValues<T> = {
+  [K in keyof T]: T[K] extends Callable ? never : T[K];
+}[keyof T];
 
 export type Primitive<T> = T extends NumberConstructor
   ? number
@@ -26,11 +32,11 @@ export type HtmlMarkupValue = string | number | boolean | Node | Node[] | null |
 
 export type AppendableElement = HTMLElement | ShadowRoot | DocumentFragment;
 
-export type ElementAttributes<T extends HTMLElement> =
-  | Partial<{
-      [K in keyof T as T[K] extends Callable ? never : K]: T[K];
-    }>
-  | Record<string, string>;
+export type ElementValues<T extends HTMLElement> = {
+  [K in keyof T as T[K] extends Callable ? never : K]?: T[K] extends Readonly<ChangeHandler<infer U>> ? U : T[K];
+};
+
+export type OptionsWithProps<T> = { props?: T; attrs?: Record<string, string> };
 
 export type SelectorToElementWithFallback<
   S extends keyof HTMLElementTagNameMap | string,

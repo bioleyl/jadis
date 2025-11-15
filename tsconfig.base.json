@@ -11,7 +11,7 @@
     ],
     "moduleResolution": "node",
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
   },
   "exclude": [
     "**/dist",

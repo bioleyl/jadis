@@ -8,7 +8,7 @@ describe('Element helper', () => {
     });
 
     it('should create an element with the given attributes', () => {
-      const div = createElement('div', { autofocus: true, class: 'my-class', id: 'my-div' });
+      const div = createElement('div', { attrs: { class: 'my-class' }, props: { id: 'my-div' } });
       expect(div).toBeInstanceOf(HTMLDivElement);
       expect(div.id).toBe('my-div');
       expect(div.className).toBe('my-class');
@@ -22,7 +22,7 @@ describe('Element helper', () => {
     });
 
     it('should create an element with the given text content', () => {
-      const div = createElement('div', { textContent: 'Hello, world!' });
+      const div = createElement('div', { props: { textContent: 'Hello, world!' } });
       expect(div).toBeInstanceOf(HTMLDivElement);
       expect(div.textContent).toBe('Hello, world!');
     });

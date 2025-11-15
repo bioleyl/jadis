@@ -2,7 +2,7 @@ import { createSelector, css, html, Jadis } from '@jadis/core';
 
 import { myRouter } from '../../router';
 
-class HelloPage extends Jadis {
+export default class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
 
   refs = this.useRefs((ref) => ({
@@ -31,14 +31,12 @@ class HelloPage extends Jadis {
     const { name, button } = this.refs;
 
     name.textContent = this.getAttribute('name');
-    this.on(button, 'click', () => this.#onButtonClick());
+    this.on(button, 'click', () => this.onButtonClick());
   }
 
-  #onButtonClick() {
+  onButtonClick() {
     myRouter.gotoName('main');
   }
 }
 
 HelloPage.register();
-
-export default HelloPage;

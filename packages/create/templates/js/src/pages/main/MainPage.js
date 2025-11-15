@@ -1,32 +1,28 @@
 import { createElement, createSelector, html, Jadis } from '@jadis/core';
 
 import logo from '../../assets/logo.svg';
-import Counter from '../../components/counter';
+import Counter from '../../components/Counter';
+import NameInput from '../../components/NameInput';
 import { myRouter } from '../../router';
 import style from './MainPage.css?inline';
 
-class MainPage extends Jadis {
+export default class MainPage extends Jadis {
   static selector = createSelector('main-page');
 
   refs = this.useRefs((ref) => ({
-    greetButton: ref('button'),
     /** @type {HTMLDivElement} */
     header: ref('.header'),
-    nameInput: ref('input'),
-    /** @type {HTMLDivElement} */
-    wrapper: ref('.wrapper'),
+    /** @type {NameInput} */
+    input: ref(NameInput.toString()),
   }));
 
   templateHtml() {
     return html`
       <div class="header"></div>
-
-      <div>
-        <input type="text" placeholder="Enter your name"/>
-        <button>Greet</button>
+      ${NameInput.toTemplate({ props: { label: 'Your name', placeholder: 'Enter your name' } })}
+      <div class="wrapper">
+        ${Array.from({ length: 3 }, (_, i) => this.createCounter(i))} 
       </div>
-
-      <div class="wrapper"></div>
     `;
   }
 
@@ -35,26 +31,24 @@ class MainPage extends Jadis {
   }
 
   onConnect() {
-    const { greetButton, header, wrapper } = this.refs;
+    const { header } = this.refs;
 
-    createElement('img', { src: logo }, header);
-    wrapper.replaceChildren(...Array.from({ length: 3 }).map((_, i) => this.#createCounter(i)));
-    this.on(greetButton, 'click', () => this.#onButtonClick());
-  }
+    createElement('img', { attrs: { src: logo } }, header);
 
-  #onButtonClick() {
-    myRouter.gotoName('hello', { name: this.refs.nameInput.value });
-  }
-
-  #createCounter(id) {
-    const counter = new Counter();
-    counter.events.register('change', (count) => {
-      return console.log(`Counter id ${id}:`, count);
+    this.refs.input.events.register('greet', (name) => {
+      myRouter.gotoName('hello', { name });
     });
+  }
+
+  /**
+   * @param {number} id
+   * @returns {Counter}
+   */
+  createCounter(id) {
+    const counter = createElement(Counter);
+    counter.events.register('change', (count) => console.log(`Counter id ${id}:`, count));
     return counter;
   }
 }
 
 MainPage.register();
-
-export default MainPage;

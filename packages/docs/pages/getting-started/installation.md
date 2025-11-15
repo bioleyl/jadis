@@ -58,7 +58,7 @@ Then in your HTML:
 
 ## 🌐 Using a CDN
 
-You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis/core/dist/umd/index.js) or [esm](https://esm.sh/@jadis/core@0.5.0):
+You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis/core/dist/umd/index.js) or [esm](https://esm.sh/@jadis/core@0.7.0):
 
 ```html
 <!DOCTYPE html>
@@ -73,7 +73,7 @@ You can also use Jadis directly from a CDN like [unpkg](https://unpkg.com/@jadis
     <script type="importmap">
       {
         "imports": {
-          "jadis": "https://esm.sh/@jadis/core@0.5.2"
+          "jadis": "https://esm.sh/@jadis/core@0.7.0"
         }
       }
     </script>

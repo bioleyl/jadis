@@ -87,9 +87,31 @@ export default defineConfig({
             link: '/pages/helpers/use-refs',
             text: 'useRefs',
           },
+          {
+            link: '/pages/helpers/use-change',
+            text: 'useChange',
+          },
         ],
         text: 'Helpers',
       },
+      {
+        items: [
+          {
+            link: '/pages/styling/add-style',
+            text: 'Add style to components',
+          }
+        ],
+        text: 'Style',
+      },
+      {
+        items: [
+          {
+            link: '/pages/slots/use-slots',
+            text: 'Use slots in your components',
+          }, 
+        ],
+        text: 'Slots',
+      }
     ],
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/bioleyl/jadis' }],

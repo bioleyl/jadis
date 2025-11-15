@@ -1,31 +1,26 @@
 import { createElement, html, Jadis } from '@jadis/core';
 
 import logo from '../../assets/logo.svg';
-import Counter from '../../components/counter';
+import Counter from '../../components/Counter';
+import NameInput from '../../components/NameInput';
 import { myRouter } from '../../router';
 import style from './MainPage.css?inline';
 
-class MainPage extends Jadis {
+export default class MainPage extends Jadis {
   static readonly selector = 'main-page';
 
-  readonly refs = this.useRefs((ref) => ({
-    greetButton: ref('button'),
+  private readonly _refs = this.useRefs((ref) => ({
     header: ref<HTMLDivElement>('.header'),
-    input: ref('input'),
-    wrapper: ref<HTMLDivElement>('.wrapper'),
+    input: ref<NameInput>(NameInput.toString()),
   }));
 
   templateHtml(): DocumentFragment {
     return html`
       <div class="header"></div>
-
-      <div>
-        <label for="nameInput">Your Name:</label>
-        <input type="text" placeholder="Enter your name"/>
-        <button>Greet</button>
+      ${NameInput.toTemplate({ props: { label: 'Your name', placeholder: 'Enter your name' } })}
+      <div class="wrapper">
+        ${Array.from({ length: 3 }, (_, i) => this.createCounter(i))} 
       </div>
-
-      <div class="wrapper"></div>
     `;
   }
 
@@ -34,26 +29,20 @@ class MainPage extends Jadis {
   }
 
   onConnect(): void {
-    const { greetButton, header, wrapper } = this.refs;
+    const { header } = this._refs;
 
-    createElement('img', { src: logo }, header);
-    wrapper.replaceChildren(...Array.from({ length: 3 }).map((_, i) => this.createCounter(i)));
-    this.on(greetButton, 'click', () => this.onButtonClick());
-  }
+    createElement('img', { attrs: { src: logo } }, header);
 
-  private onButtonClick(): void {
-    myRouter.gotoName('hello', { name: this.refs.input.value });
+    this._refs.input.events.register('greet', (name) => {
+      myRouter.gotoName('hello', { name });
+    });
   }
 
   private createCounter(id: number): Counter {
-    const counter = new Counter();
-    counter.events.register('change', (count) => {
-      return console.log(`Counter id ${id}:`, count);
-    });
+    const counter = createElement(Counter);
+    counter.events.register('change', (count) => console.log(`Counter id ${id}:`, count));
     return counter;
   }
 }
 
 MainPage.register();
-
-export default MainPage;
