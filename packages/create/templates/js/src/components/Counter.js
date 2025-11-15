@@ -1,14 +1,24 @@
 import { createSelector, html, Jadis } from '@jadis/core';
 
-class Counter extends Jadis {
+export default class Counter extends Jadis {
   static selector = createSelector('counter-component');
 
+  /** @type {import('@jadis/core').UseEventsHandler<{change: number}>} */
   events = this.useEvents({ change: Number });
+
+  count = this.useChange(
+    0,
+    (val) => {
+      this.refs.count.textContent = val.toString();
+      this.events.emit('change', val);
+    },
+    { immediate: true }
+  );
+
   refs = this.useRefs((ref) => ({
     count: ref('span'),
     incrementButton: ref('button'),
   }));
-  #count = 0;
 
   templateHtml() {
     return html`
@@ -18,21 +28,8 @@ class Counter extends Jadis {
   }
 
   onConnect() {
-    this.#updateCount();
-    this.on(this.refs.incrementButton, 'click', () => this.#increment());
-  }
-
-  #increment() {
-    this.#count++;
-    this.events.emit('change', this.#count);
-    this.#updateCount();
-  }
-
-  #updateCount() {
-    this.refs.count.textContent = this.#count.toString();
+    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
   }
 }
 
 Counter.register();
-
-export default Counter;

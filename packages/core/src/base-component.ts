@@ -310,9 +310,13 @@ export abstract class Jadis extends HTMLElement {
     { immediate = false }: ChangeOptions = {}
   ): Readonly<ChangeHandler<T>> {
     if (immediate) {
-      this._onConnectActions.push(() => {
+      if (this._isConnected) {
         onChange(initialValue, initialValue);
-      });
+      } else {
+        this._onConnectActions.push(() => {
+          onChange(initialValue, initialValue);
+        });
+      }
     }
     return new ChangeHandler<T>(initialValue, onChange);
   }

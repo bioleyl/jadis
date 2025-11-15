@@ -5,8 +5,6 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleDetection": "force",
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
@@ -14,8 +12,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-
-    /* Linting */
     "strict": true,
     "target": "ES2020",
     "useDefineForClassFields": true

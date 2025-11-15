@@ -2,10 +2,10 @@ import { css, html, Jadis } from '@jadis/core';
 
 import { myRouter } from '../../router';
 
-class HelloPage extends Jadis {
+export default class HelloPage extends Jadis {
   static readonly selector = 'hello-page';
 
-  readonly refs = this.useRefs((ref) => ({
+  private readonly _refs = this.useRefs((ref) => ({
     button: ref('button'),
     name: ref('span'),
   }));
@@ -28,17 +28,15 @@ class HelloPage extends Jadis {
   }
 
   onConnect(): void {
-    const { name, button } = this.refs;
+    const { name, button } = this._refs;
 
     name.textContent = this.getAttribute('name') ?? '';
-    this.on(button, 'click', () => this.#onButtonClick());
+    this.on(button, 'click', () => this.onButtonClick());
   }
 
-  #onButtonClick(): void {
+  private onButtonClick(): void {
     myRouter.gotoName('main');
   }
 }
 
 HelloPage.register();
-
-export default HelloPage;
