@@ -87,7 +87,7 @@ class MainPage extends Jadis {
   } // [!code focus]
 }
 
-MainPage.register();<>
+MainPage.register();
 ```
 
 :::

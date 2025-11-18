@@ -1,12 +1,15 @@
 # Add *Jadis* components to the template with `toTemplate()`
 
 *Jadis* provides the `toTemplate()` method on components which makes it really easy to
-use them in the template and populate slots with the `children` parameter. It provides an options object that allows passing props and attributes.
+use them in the template and populate slots with the `slotted` parameter. It provides an options object that allows passing props and attributes.
 
 ## Signature
 
-```javascript
-this.toTemplate(<options>, <slotted>)
+```typescript
+toTemplate(
+  options?: { props?: Record<string, any>; attrs?: Record<string, any> },
+  slotted?: DocumentFragment
+)
 ```
 
 ### Parameters

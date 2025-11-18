@@ -1,4 +1,4 @@
-# Event Handling in *Jadis" with `this.on`
+# Event Handling in *Jadis* with `this.on`
 
 For typical DOM event listeners, *Jadis* offers a built-in `on` method that simplifies events handling. It automatically registers the event and cleans it up when the component unmounts — so you don’t need to worry about the signal manually.
 

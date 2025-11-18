@@ -18,13 +18,12 @@ You can read more about [typing events](#typing-the-event-system)!
 
 ```javascript
 useEvents({eventName: PrimitiveConstructor});
-// PrimitiveConstructor can be any primitive constructor: String, Number, Boolean, etc.
+// PrimitiveConstructor can be any primitive constructor: 
+// String, Number, Boolean, etc.
 ```
 
 ```typescript
 useEvents<{eventName: Type}>();
-// 
-
 ```
 
 ```javascript[js-doc]
@@ -36,16 +35,17 @@ useEvents();
 
 ### Parameter
 
-- used only for typing in JavaScript and JSDoc, unused in TypeScript
+- An `object` used only for typing in JavaScript and JSDoc, unused in TypeScript, `{someEvent: PrimitiveConstructor}`
 
 :::code-group
 
 ```javascript
-
+const events = this.useEvents({someEvent: String});
 ```
 
 ```[js-doc]
-
+/** @type {import('@jadis/core').UseEventsHandler<{someEvent: string}>} */
+  events = this.useEvents();
 ```
 
 :::
