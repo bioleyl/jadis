@@ -2,7 +2,7 @@
 
 <!-- Slot à la main, ref vers toTemplate -->
 
-In *Jadis*, much similar to how it works in web components, cou can use slots in your templates, so as to create more flexible components.
+In *Jadis*, much similar to how it works in web components, you can use slots in your templates, so as to create more flexible components.
 
 ## Usage
 

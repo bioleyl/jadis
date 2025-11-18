@@ -57,7 +57,7 @@ templateHtml(): DocumentFragment {
 ${MyComponent.toTemplate(
   {attrs: {
     class: 'container'}, 
-    props: {titleValue='My First component'}
+    props: {titleValue: 'My First component'}
   }, html`
     <h1>My Title</h1>
     <p>My Paragraph</p>

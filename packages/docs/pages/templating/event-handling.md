@@ -5,7 +5,7 @@ For typical DOM event listeners, *Jadis* offers a built-in `on` method that simp
 ## Signature
 
 ```typescript
-this.on(element<HTMLElement>, event<Event>, callback<(event) => {}>)
+this.on(element: HTMLElement, event: string, callback: (event: Event) => void)
 ```
 
 ### Parameters
