@@ -1,12 +1,62 @@
-# 📡 From child to parent
+# From child to parent
 
 Communication between a child component and its parent is based on custom events.
 
-The **parent registers** an event listener on the child. The **child emits** the event, which triggers the callbacks defined in the parent.
+The **parent registers** an event listener on the child. The child **emits** the event, which triggers the callbacks defined in the parent.
 
-You can implement your own event system if you prefer, but **Jadis includes a built-in method** `useEvents` that ensures memory safety and supports **strong typing with both TypeScript and JSDoc** — making event handling clean, scalable, and type-safe.
+You can implement your own event system if you prefer, but *Jadis* **includes a built-in method** `useEvents` that ensures memory safety and supports **strong typing with both TypeScript and JSDoc**, making event handling clean, scalable, and type-safe.
 
-## 💻 UseEvents Usage
+## Signature
+
+The main idea is to pass an interface to the function's generic in TypeScript and in JSDoc. In JavaScript, we need to use an oject that represents the interface as close as possible.
+
+In JavaScript an object or an array can not be described more precisely than **Object** and **Array**.
+
+You can read more about [typing events](#typing-the-event-system)!
+
+:::code-group
+
+```javascript
+useEvents({eventName: PrimitiveConstructor});
+// PrimitiveConstructor can be any primitive constructor: String, Number, Boolean, etc.
+```
+
+```typescript
+useEvents<{eventName: Type}>();
+// 
+
+```
+
+```javascript[js-doc]
+/** @type {import('@jadis/core').UseEventsHandler<{eventName: Type}>} */
+useEvents();
+```
+
+:::
+
+### Parameter
+
+- used only for typing in JavaScript and JSDoc, unused in TypeScript
+
+:::code-group
+
+```javascript
+
+```
+
+```[js-doc]
+
+```
+
+:::
+
+### Return value
+
+- An object with 2 methods: **register** and **emit**.
+  - `register` is  used to subscribe to an event
+  - `emit` is used to emit an event.
+
+## UseEvents Usage
 
 ::: code-group
 
@@ -153,11 +203,11 @@ ParentComponent.register();
 
 :::
 
-## 🧠 Typing the Event System
+## Typing the Event System
 
 The best way to type the event system is with **TypeScript** or **JSDoc**. With either, you can pass an interface that clearly describes what each event’s payload should be.
 
-## 📎 Note
+## Note
 
 If you don’t want to send a payload, you can define the event as `undefined`, like so:
 

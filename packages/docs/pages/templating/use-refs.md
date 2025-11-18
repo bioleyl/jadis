@@ -1,22 +1,28 @@
-# 🧭 `useRefs` Helper
+# Point to an element in the DOM with `useRefs` Helper
 
 The `useRefs` helper creates **typed, lazy references** to elements within your component’s template using a **standard CSS selector**.  
 It’s a convenient alternative to manually calling [`getElement()`](./get-element.md) for each element.
 
-Instead of writing multiple getters, `useRefs` lets you define all your element references in one place — using a simple mapping function.
+Instead of writing multiple getters, `useRefs` lets you define all your element references in one place, using a simple mapping function.
 
-## 💡 Overview
+## Signature
 
-`useRefs` takes a callback that receives a special `ref()` function.  
+```typescript
+this.useRefs(mapFn: (refFn) => refMap): Readonly<ElementMap>  
+```
+
+### Parameters
+
+- callback function that receives a special `ref()` function.  
 You call `ref(selector)` for each element you want to reference, and `useRefs` returns an object with **lazy getters** for those elements.
 
 Each getter internally calls [`getElement()`](./get-element.md), ensuring the element exists and automatically traversing shadow DOM boundaries if needed.
 
-## 📦 Return Type
+### Return value
 
-The return value is an object (`ElementMap`) where each key corresponds to an element reference, and each property is a **getter** that returns the corresponding `HTMLElement` (or subtype).
+- An object `ElementMap` where each key corresponds to an element reference, and each property is a **getter** that returns the corresponding `HTMLElement` (or subtype).
 
-## 🧪 Example
+## Example
 
 ::: code-group
 
@@ -108,10 +114,9 @@ class FormComponent extends Jadis {
 
 :::
 
-## 🧩 Advanced Example: Nested Components
+## Advanced Example: Nested Components
 
-You can also traverse into a child component’s shadow DOM using the `>>>` operator (same as [`getElement()`](./get-element.md)):
-
+You can also traverse into a child component’s shadow DOM using the `>>>` operator (same as [`getElement()`](./get-element.md)).
 
 ```javascript
 this.useRefs((ref) => ({
@@ -121,6 +126,6 @@ this.useRefs((ref) => ({
 
 This retrieves the `<button>` inside the `child-component`’s shadow root.
 
-## 🧰 Related Helpers
-
-- [`getElement()`](./get-element.md) — Used internally by `useRefs` to perform element lookups.
+:::tip
+Check out the related helper [`getElement()`](./get-element.md) used internally by `useRefs` to perform element lookups.
+:::

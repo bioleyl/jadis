@@ -86,17 +86,17 @@ export abstract class Jadis extends HTMLElement {
 
   /**
    * Creates a new instance with the defined children
-   * @param options An optional set of properties and attributes to set on the component
-   * @param children The children to append to the component
+   * @param options An optional set of properties and attributes to set on the component {attrs: {}, props: {}}
+   * @param slotted The DOM to slot inside the component
    * @returns The created component instance
    */
   static toTemplate<T extends Jadis>(
     this: JadisConstructor<T>,
     options: OptionsWithProps<ElementValues<T>> = {},
-    children: DocumentFragment = document.createDocumentFragment()
+    slotted: DocumentFragment = document.createDocumentFragment()
   ): T {
     const element = createElement(this.selector, options);
-    element.appendChild(children.cloneNode(true));
+    element.appendChild(slotted.cloneNode(true));
     return element;
   }
 

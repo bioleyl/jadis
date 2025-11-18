@@ -1,48 +1,45 @@
-# 🛠️ `createElement` helper
+# `createElement` helper
 
 The `createElement` helper is designed to simplify DOM construction in JavaScript and TypeScript.
 It lets you create HTML elements, set properties and attributes, and optionally append the new element to a container — all with minimal boilerplate.
 
-## 📦 Signature
+## Signature
 
 ```typescript
 createElement(<tag>, <options>, <parent>): <HTMLElement>
 ```
 
-The return type matches the tag name. For example:
+### Parameters
 
-- `'div'` returns an `HTMLDivElement`
-- `'p'` returns an `HTMLParagraphElement`
-- `'button'` returns an `HTMLButtonElement`
-- `'input'` returns an `HTMLInputElement`
-- …and all other standard HTML elements.
+- `tag`: HTML element tag name of the element to create.
+- `options`: optional, OptionsWithProps object. It is a set of properties and attributes to set on the component `{attrs: {}, props: {}}`
 
-This ensures proper typing and autocomplete when using `TypeScript` or `@ts-check`.
-
-## 🧩 Options Structure
-
-The second argument is an OptionsWithProps object:
-
-```
+```javascript
 {
   props?: { ... }   // Assigns properties to the element
   attrs?: { ... }   // Assigns HTML attributes (auto-kebab-cased)
 }
 ```
 
-- **props** set JavaScript properties directly on the element
-- **attrs** set HTML attributes (converted to kebab-case automatically)
-- `ChangeHandler` instances in props are updated via `.set()` instead of reassigned
+`props`: set JavaScript properties directly on the element  
+`attrs`: set HTML attributes (converted to kebab-case automatically)  
 
-## 📥 Append Target
+:::info
+`ChangeHandler` instances in props are updated via `.set()` instead of reassigned
+:::  
 
-The third argument, appendTo, may be an:
+- `appendTo`: Append target, optional. Can be `HTMLElement`, `ShadowRoot`, `DocumentFragment`. If provided, the created element will be appended automatically.
 
-- `HTMLElement`
-- `ShadowRoot`
-- `DocumentFragment`
+### Return value
 
-If provided, the created element will be appended automatically.
+- The created HTML element: matches the tag name. For example:
+  - `'div'` returns an `HTMLDivElement`
+  - `'p'` returns an `HTMLParagraphElement`
+  - `'button'` returns an `HTMLButtonElement`
+  - `'input'` returns an `HTMLInputElement`
+  - …and all other standard HTML elements.
+
+This ensures proper typing and autocomplete when using `TypeScript` or `@ts-check`.
 
 ## 🧪 Example
 
@@ -83,14 +80,14 @@ This will render:
 
 The `createElement` helper automatically infers the element type from the tag name.
 
-```
+```javascript
 const el = createElement('input');
 // el is inferred as HTMLInputElement
 ```
 
 When dealing with **custom elements**, you can manually specify the return type to ensure full autocomplete support:
 
-```
+```typescript
 createElement<MyCustomComponent>('my-custom-component');
 ```
 

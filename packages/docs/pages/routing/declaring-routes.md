@@ -1,8 +1,9 @@
-# 🧭 Declaring Routes
+# Declaring Routes
 
-You can add routes individually or organize them into a route group when parts of your app share a common URL prefix.
+You can add routes individually or organize them into a route group when parts of your app share a common URL prefix.  
+[See the dedicated documentation](using-route-groups.md) about route groups.
 
-## ➕ Add Individual Routes
+## Add Individual Routes
 
 Routes support dynamic parameters (e.g. `:name`), which are passed as attributes to the corresponding component.
 
@@ -44,7 +45,8 @@ Navigating to `/hello/john`, the router will render:
   </div>
 </body>
 ```
-## 🏷 Use Named Routes
+
+## Use Named Routes
 
 You can assign a **name** to a route and navigate to it by name instead of hardcoding the URL. This is especially useful when working with dynamic parameters.
 
@@ -59,7 +61,7 @@ myRouter.gotoName('inv', { id: 'abcd' })
 
 This will navigate `/invoice/abcd`
 
-## 🏗 Use a Root Component
+## Use a Root Component
 
 You can specify a root component (for example, a layout or wrapper) into which the route component will be injected. This is useful for shared layouts, navigation bars, or page wrappers.
 

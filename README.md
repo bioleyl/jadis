@@ -1,10 +1,10 @@
-## Jadis
+# *Jadis*
 
-**Jadis** is a minimal JavaScript toolkit for building web interfaces using native Web Components — no virtual DOM, no reactivity system, no compile step. Just clean, readable, native code.
+**Jadis** is a minimal JavaScript toolkit for building web interfaces using native Web Components: no virtual DOM, no reactivity system, no compile step. Just clean, readable, native code.
 
 > The web, like it used to be.
 
-## 🤔 Why Jadis?
+## Why *Jadis*?
 
 Modern frontend frameworks are powerful, but they come at a cost:
 
@@ -13,27 +13,27 @@ Modern frontend frameworks are powerful, but they come at a cost:
 - Bloated bundles
 - Fragile abstractions
 
-**Jadis** is for developers who are tired of that. It brings things back to the basics:
+*Jadis* is dedicated to simplicity and bringing things back to the basics:
 
-- ✅ Native Web Components
-- ✅ No framework-specific syntax
-- ✅ Zero dependencies
-- ✅ Works with just a browser
+- Native Web Components
+- No framework-specific syntax
+- Zero dependencies
+- Works with just a browser
 
-## 🚀 What You Get
+## What You Get
 
 - A set of tiny libraries to make Web Components simpler and more enjoyable to use
 - Simple templating without JSX or complex DSLs
 - Lifecycle helpers without hooks or reactivity
-- A feeling of control and peace 😌
+- A feeling of control and peace
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install @jadis/core
 ```
 
-## 🧱 Example
+## Example
 
 ```javascript
 import { Jadis, html, createSelector } from '@jadis/core';
@@ -59,15 +59,15 @@ Then in your HTML:
 <hello-world></hello-world>
 ```
 
-## 🧠 Philosophy
+## Philosophy
 
-**Jadis** isn't trying to replace React or Vue. It's here for when you want to:
+*Jadis* isn't trying to replace React or Vue. It's here for when you want to:
 
 - Build small, fast, maintainable UI pieces
 - Avoid a bloated toolchain
 - Use the platform, not fight it
 
-## 🔍 When to Use Jadis
+## When to Use *Jadis*
 
 Use it when you:
 
@@ -80,26 +80,20 @@ Avoid it if you need:
 - Complex state management
 - SSR or hydration
 
-## 🚫 What Jadis doesn’t do (on purpose)
+## What *Jadis* doesn’t do (on purpose)
 
-Jadis is intentionally boring — in the best way.
+*Jadis* is intentionally boring, in the best way.
 
-- ❌ No virtual DOM  
-  ✅ Real DOM, updated by you
-- ❌ No JSX / TSX  
-  ✅ Plain HTML templates
-- ❌ No magic reactivity  
-  ✅ Direct control over state and updates
-- ❌ No decorators or class gymnastics  
-  ✅ Works with both TypeScript and vanilla JS
-- ❌ No complex build setup  
-  ✅ Just a browser and a script tag
-- ❌ No over-engineered reactive stores  
-  ✅ Just event buses when you need global state — and they still work beautifully
+- No virtual DOM, but real DOM, updated by you
+- No JSX / TSX, but Plain HTML templates
+- No magic reactivity, but direct control over state and updates
+- No decorators or class gymnastics: it works with both TypeScript and vanilla JS
+- No complex build setup: just a browser and a script tag
+- No over-engineered reactive stores: just event buses when you need global state, and they still work beautifully
 
-> You’d be surprised how much you can build without the “modern essentials.”
+> You’d be surprised how much you can build without the "modern essentials".
 
-## ❤️ Try It Out
+## Try It Out
 
 Give it a spin. Build something in 5 minutes. Rediscover the joy of shipping features without wrestling with your framework.
 
@@ -107,16 +101,16 @@ Give it a spin. Build something in 5 minutes. Rediscover the joy of shipping fea
 npm install @jadis/core
 ```
 
-> The web has always been powerful. Jadis reminds you how it used to feel.
+> The web has always been powerful. *Jadis* reminds you how it used to feel.
 
-## ✨ Documentation
+## Documentation
 
 You can find the full documentation on [github](https://bioleyl.github.io/jadis/).
 
-## 🛠 Contributing
+## Contributing
 
 Feel free to open issues or submit PRs. Simplicity is key!
 
-## 📜 License
+## License
 
 MIT — Made with ❤️, ☕, a bit of 🧠 and Neovim.
