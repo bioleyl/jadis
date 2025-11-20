@@ -113,4 +113,4 @@ Feel free to open issues or submit PRs. Simplicity is key!
 
 ## License
 
-MIT — Made with ❤️, ☕, a bit of 🧠 and Neovim.
+MIT - Made with ❤️, ☕, a bit of 🧠 and Neovim.

@@ -1,12 +1,12 @@
 # `createElement` helper
 
 The `createElement` helper is designed to simplify DOM construction in JavaScript and TypeScript.
-It lets you create HTML elements, set properties and attributes, and optionally append the new element to a container — all with minimal boilerplate.
+It lets you create HTML elements, set properties and attributes, and optionally append the new element to a container, all with minimal boilerplate.
 
 ## Signature
 
 ```typescript
-createElement(<tag>, <options>, <parent>): <HTMLElement>
+createElement(<tag>, <options>, <appendTo>): <HTMLElement>
 ```
 
 ### Parameters
@@ -41,7 +41,7 @@ createElement(<tag>, <options>, <parent>): <HTMLElement>
 
 This ensures proper typing and autocomplete when using `TypeScript` or `@ts-check`.
 
-## 🧪 Example
+## Example
 
 ```javascript
 import { createElement } from '@jadis/core';
@@ -76,7 +76,7 @@ This will render:
 </div>
 ```
 
-## 🧠 Note About Typing
+## Note About Typing
 
 The `createElement` helper automatically infers the element type from the tag name.
 
@@ -91,4 +91,4 @@ When dealing with **custom elements**, you can manually specify the return type 
 createElement<MyCustomComponent>('my-custom-component');
 ```
 
-This ensures the returned element is recognized as MyCustomComponent instead of a generic `HTMLElement`.
+This ensures the returned element is recognized as `MyCustomComponent` instead of a generic `HTMLElement`.

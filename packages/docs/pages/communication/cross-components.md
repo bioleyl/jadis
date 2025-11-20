@@ -2,7 +2,7 @@
 
 While not the trendiest tool in modern frontend circles, the **EventBus** remains one of the most underrated solutions for cross-component communication. *Jadis* embraces this pattern with intention, offering a built-in Bus system that’s not only easy to use, but also memory-safe and fully typed for **TypeScript** and **JSDoc** users.
 
-*Jadis* brings you a bus helper for handling events in a type-safe manner. Even in **plain JavaScript**, *Jadis* allows for **partial typing** by defining event payloads using primitive constructors like `String`, `Number` or other constructors. This gives you lightweight type hints without switching languages, making event wiring safer and more expressive — even in a pure JS project.
+*Jadis* brings you a bus helper for handling events in a type-safe manner. Even in **plain JavaScript**, *Jadis* allows for **partial typing** by defining event payloads using primitive constructors like `String`, `Number` or other constructors. This gives you lightweight type hints without switching languages, making event wiring safer and more expressive, even in a pure JS project.
 
 You don’t need to reinvent global coordination. With *Jadis*, you get all the power of a scalable event system, minus the complexity.
 

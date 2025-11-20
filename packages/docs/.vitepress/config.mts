@@ -66,7 +66,7 @@ export default defineConfig({
           },
           {
             link: '/pages/templating/use-change',
-            text: 'Handle changes easily'
+            text: 'React to a property change'
           },
           {
             link: '/pages/templating/event-handling',

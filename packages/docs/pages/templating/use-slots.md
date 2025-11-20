@@ -17,11 +17,11 @@ closing tags of your external component will be rendered inside the `<slot></slo
 export class MyComponent extends Jadis {
   static selector = createSelector('my-component');
 
-  templateHtml(){ // [!code focus]
+  templateHtml () { // [!code focus]
     return html`<div class="container"><slot></slot></div>`; // [!code focus]
   } // [!code focus]
 
-  templateCss(){
+  templateCss () {
     return css`
       .container {
         background-color: darkblue;
@@ -40,12 +40,12 @@ MyComponent.register();
 export class MyComponent extends Jadis {
   static readonly selector = 'my-component';
 
-  templateHtml(): DocumentFragment { // [!code focus]
+  templateHtml (): DocumentFragment { // [!code focus]
     // [!code focus]
     return html`<div class="container"><slot></slot></div>`; // [!code focus] 
   } // [!code focus]
 
-  templateCss(): string {
+  templateCss (): string {
     return css`
       .container {
         background-color: darkblue;
@@ -69,7 +69,7 @@ Populate the slot
 class MainPage extends Jadis {
   static selector = createSelector('main-page');
 
-  templateHtml() { // [!code focus]
+  templateHtml () { // [!code focus]
     return html` <my-component><h1>My Title</h1><p>Hello there</p></my-component>`; // [!code focus]
   } // [!code focus]
 }
@@ -82,7 +82,7 @@ MainPage.register();
 class MainPage extends Jadis {
   static readonly selector = 'main-page';
 
-  templateHtml(): DocumentFragment { // [!code focus]
+  templateHtml (): DocumentFragment { // [!code focus]
     return html`<my-component><h1>My Title</h1><p>Hello there</p></my-component>`; // [!code focus]
   } // [!code focus]
 }
@@ -102,7 +102,7 @@ If you need to use several slots in the same component, just name them!
 
 ```javascript
 // MyComponent.js with 2 slots
-templateHtml() {
+templateHtml () {
   return html`
     <div class='container'>
         <slot></slot>
@@ -112,7 +112,7 @@ templateHtml() {
 }
 
 // Using MyComponent in MainPage.js
-templateHtml() {
+templateHtml () {
   return html`
     <my-component>
       <h1>My Title</h1>
@@ -128,7 +128,7 @@ templateHtml() {
 ```typescript
 
 // MyComponent.ts with 2 slots
-templateHtml(): DocumentFragment {
+templateHtml (): DocumentFragment {
   return html`
     <div class='container'>
       <slot></slot>
@@ -138,7 +138,7 @@ templateHtml(): DocumentFragment {
 }
 
 // Using MyComponent in MainPage.ts
-templateHtml(): DocumentFragment {
+templateHtml (): DocumentFragment {
     return html`
       <my-component>
         <h1>My Title</h1>
@@ -169,12 +169,12 @@ and props.
 class MainPage extends Jadis {
   static selector = createSelector('main-page');
 
-  templateHtml() {
+  templateHtml () {
     return html`
       ${MyComponent.toTemplate(
         {},
         html`<h1>My Article Title</h1>
-          <p>My article content</p>`
+          <p name='article'>My article content</p>`
       )}
     `;
   }
@@ -186,7 +186,7 @@ MainPage.register();
 export class MyComponent extends Jadis {
   static selector = createSelector('my-component');
 
-  templateHtml() {
+  templateHtml () {
     return html`
       <div class='container'>
         <slot></slot>
@@ -204,12 +204,12 @@ MyComponent.register();
 class MainPage extends Jadis {
   static readonly selector = 'main-page';
 
-  templateHtml(): DocumentFragment {
+  templateHtml (): DocumentFragment {
     return html`
       ${MyComponent.toTemplate(
         {},
         html`<h1>My Article Title</h1>
-          <p>My article content</p>`
+          <p name='article'>My article content</p>`
       )}
     `;
   }
@@ -221,7 +221,7 @@ MainPage.register();
 export class MyComponent extends Jadis {
   static readonly selector = 'my-component';
 
-  templateHtml(): DocumentFragment {
+  templateHtml (): DocumentFragment {
     return html`
       <div class='container'>
         <slot></slot>

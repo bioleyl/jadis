@@ -28,8 +28,8 @@ This will start a local dev server with instant reload.
 
 ## Why This CLI?
 
-Because *Jadis* is about simplicity. This CLI gives you only what you need to start — no boilerplate bloat, no unnecessary complexity, no heavy dependencies.
+Because *Jadis* is about simplicity. This CLI gives you only what you need to start: no boilerplate bloat, no unnecessary complexity, no heavy dependencies.
 
 ## License
 
-MIT — Made with ❤️, ☕, a bit of 🧠 and Neovim.
+MIT - Made with ❤️, ☕, a bit of 🧠 and Neovim.

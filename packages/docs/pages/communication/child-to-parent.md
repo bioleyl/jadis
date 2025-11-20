@@ -35,7 +35,7 @@ useEvents();
 
 ### Parameter
 
-- An `object` used only for typing in JavaScript and JSDoc, unused in TypeScript, `{someEvent: PrimitiveConstructor}`
+- An `object` used only for typing in JavaScript, unused in TypeScript and JSDoc, `{someEvent: PrimitiveConstructor}`
 
 :::code-group
 
@@ -43,7 +43,7 @@ useEvents();
 const events = this.useEvents({someEvent: String});
 ```
 
-```[js-doc]
+```javascript[js-doc]
 /** @type {import('@jadis/core').UseEventsHandler<{someEvent: string}>} */
   events = this.useEvents();
 ```

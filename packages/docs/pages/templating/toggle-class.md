@@ -5,13 +5,13 @@ The `toggleClass()` method can add a class to the component or remove it based o
 ## Signature
 
 ```typescript
-this.toggleClass(className: string, condition: boolean): void
+this.toggleClass(<className>, <condition>): void
 ```
 
 ### Parameters
 
-- `className`: the name of the class to toggle
-- `condition`:  the binary condition used to toggle between classes. If `true`, class is added, if `false`, class is removed.
+- `className`: a `string` that representsthe name of the class to toggle
+- `condition`:  a `boolean` the binary condition used to toggle between classes. If `true`, class is added, if `false`, class is removed.
 
 ### Return value
 

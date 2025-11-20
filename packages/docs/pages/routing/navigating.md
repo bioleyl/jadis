@@ -9,9 +9,9 @@ When defining a route, the third parameter assigns a **name** to the route. This
 ```javascript
 const myRouter = new Router();
 
-myRouter.addRoute('/hello/:name', HelloPage.selector, { name: 'hello' });
+myRouter.addRoute('/invoice/:id', InvoicePage.selector, { name: 'inv' });
 
-myRouter.gotoName('hello', { name: 'World' });
+myRouter.gotoName('inv', { id: '12345' });
 ```
 
 This approach makes your code more resilient to future URL structure changes.
@@ -23,7 +23,7 @@ You can also navigate by passing the full path directly. However, this method pe
 ```javascript
 const myRouter = new Router();
 
-myRouter.addRoute('/hello/:name', HelloPage.selector);
+myRouter.addRoute('/invoice/:id', InvoicePage.selector);
 
-myRouter.gotoPath('/hello/World');
+myRouter.gotoPath('/invoice/12345');
 ```

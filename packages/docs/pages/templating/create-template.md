@@ -2,6 +2,13 @@
 
 The `templateHtml()` method defines the HTML structure of the component. It is intended to be overridden by subclasses or component implementations that need to supply their own visual layout. When implemented, this method should return a `DocumentFragment` containing the component’s rendered HTML.
 
+:::info Info: *Jadis* provides a template helper `html`
+that creates HTML templates using template literals,
+allowing for easy creation of HTML structures with
+interpolation. `html` returns a `<DocumentFragment>` containing
+the HTML structure. It is used in the shown examples.
+:::
+
 ## Signature
 
 ```typescript

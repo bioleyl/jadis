@@ -5,15 +5,17 @@ It’s a convenient alternative to manually calling [`getElement()`](./get-eleme
 
 Instead of writing multiple getters, `useRefs` lets you define all your element references in one place, using a simple mapping function.
 
+`useRefs()` uses [`getElement()`](get-element.md) behind the hood, [providing an `>>>` operator](#advanced-example-nested-components) that gets elements through a child's shadow DOM.
+
 ## Signature
 
 ```typescript
-this.useRefs(mapFn: (refFn) => refMap): Readonly<ElementMap>  
+this.useRefs(<mapFn>): Readonly<ElementMap>  
 ```
 
 ### Parameters
 
-- callback function that receives a special `ref()` function.  
+- `mapFn`: callback function that receives a special `ref()` function.  
 You call `ref(selector)` for each element you want to reference, and `useRefs` returns an object with **lazy getters** for those elements.
 
 Each getter internally calls [`getElement()`](./get-element.md), ensuring the element exists and automatically traversing shadow DOM boundaries if needed.

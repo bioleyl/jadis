@@ -1,6 +1,6 @@
 # Installation
 
-*Jadis* is flexible and easy to get started with — whether you prefer a boilerplate setup, manual installation via npm, or embedding via CDN. It provides **full type support for both TypeScript and JSDoc**, allowing you to describe component behavior with precision and confidence. Even in plain JavaScript, *Jadis* offers **partial typing** through primitive constructors, giving you a lightweight way to improve clarity and reduce bugs.
+*Jadis* is flexible and easy to get started with, whether you prefer a boilerplate setup, manual installation via npm, or embedding via CDN. It provides **full type support for both TypeScript and JSDoc**, allowing you to describe component behavior with precision and confidence. Even in plain JavaScript, *Jadis* offers **partial typing** through primitive constructors, giving you a lightweight way to improve clarity and reduce bugs.
 
 ## Using a boilerplate
 
