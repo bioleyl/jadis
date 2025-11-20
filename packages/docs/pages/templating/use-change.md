@@ -77,12 +77,14 @@ class ToggleSwitch extends Jadis {
 ## Example with a value
 
 ```typescript
-export class toggleSwitch extends Jadis {
+import { Jadis, html } from "@jadis/core";
+
+export class Dice extends Jadis {
   static readonly selector = 'toggle-value';
   private readonly toggleValue = this.useChange(
-    "Active",
+    0,
     (value) => {
-      this.refs.label.textContent = value;
+      this.refs.label.textContent = value.toString();
     },
     { immediate: true }
   );
@@ -95,27 +97,20 @@ export class toggleSwitch extends Jadis {
   templateHtml(): DocumentFragment {
     return html`
       <span></span>
-      <button>Disable me</button>
+      <button>Roll</button>
     `
   }
 
   onConnect(): void {
     this.on(this.refs.button, 'click', () => {
-      this.toggleValue.set('Disabled')
+      const roll = Math.floor(Math.random() * 6) + 1;
+      this.toggleValue.set(roll);
     })
   }
 }
 
-toggleSwitch.register();
-
+Dice.register();
 ```
-
-**What happens:**
-
-- `on` starts at `false`
-- `immediate: true` makes the label update on first connection (`OFF`)
-- Clicking the button toggles the value through `.set()`
-- Each toggle triggers the `onChange` callback, updating the label
 
 ## Typing Notes
 

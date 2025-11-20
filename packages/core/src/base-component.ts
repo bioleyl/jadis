@@ -183,21 +183,21 @@ export abstract class Jadis extends HTMLElement {
   /**
    * Registers a callback for a specific event on a bus.
    * @param bus The event bus to register the callback on
-   * @param event The event key to listen for
+   * @param eventName The event name to listen to
    * @param callback The callback to invoke when the event is emitted
    */
   protected onBus<BusType, BusEventKey extends keyof BusType>(
     bus: Bus<BusType>,
-    event: BusEventKey,
+    eventName: BusEventKey,
     callback: (detail: Primitive<BusType[BusEventKey]>) => void
   ): void {
-    bus.register(event, callback, this.killSignal);
+    bus.register(eventName, callback, this.killSignal);
   }
 
   /**
    * Creates a handler for events on the component.
    * This handler allows registering and emitting events in a type-safe manner.
-   * @template EventType The type of events to handle
+   * @template EventTypes The type of events to handle
    * @returns An object with methods to register and emit events
    * @example
    * // Typescript usage:
@@ -214,24 +214,24 @@ export abstract class Jadis extends HTMLElement {
    * });
    * events.emit('someEvent', 'Hello World');
    */
-  protected useEvents<EventType>(
+  protected useEvents<EventTypes>(
     _schema?: {
-      [EventKey in keyof EventType]: Constructor<EventType[EventKey]> | undefined;
+      [EventName in keyof EventTypes]: Constructor<EventTypes[EventName]> | undefined;
     }
-  ): Readonly<UseEventsHandler<EventType>> {
+  ): Readonly<UseEventsHandler<EventTypes>> {
     return Object.freeze({
-      emit: <EventKey extends keyof EventType>(
-        event: EventKey,
-        ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
+      emit: <EventName extends keyof EventTypes>(
+        eventName: EventName,
+        ...params: OptionalIfUndefined<Primitive<EventTypes[EventName]>>
       ): void => {
-        this.dispatchEvent(new CustomEvent(event as string, { detail: params[0] }));
+        this.dispatchEvent(new CustomEvent(eventName as string, { detail: params[0] }));
       },
-      register: <EventKey extends keyof EventType>(
-        event: EventKey,
-        callback: (detail: Primitive<EventType[EventKey]>) => void
+      register: <EventName extends keyof EventTypes>(
+        eventName: EventName,
+        callback: (detail: Primitive<EventTypes[EventName]>) => void
       ): void => {
-        const listener = ({ detail }: CustomEvent<Primitive<EventType[EventKey]>>) => callback(detail);
-        this.addEventListener(event as string, listener as EventListener, {
+        const listener = ({ detail }: CustomEvent<Primitive<EventTypes[EventName]>>) => callback(detail);
+        this.addEventListener(eventName as string, listener as EventListener, {
           signal: this.killSignal,
         });
       },
