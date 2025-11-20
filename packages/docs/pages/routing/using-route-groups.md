@@ -1,8 +1,8 @@
-# 🗂 Using Route Groups
+# Using Route Groups
 
 If many of your routes share a common prefix or a common layout and you don’t want to repeat yourself, you can group them together.
 
-## 📦 Add Routes by Group
+## Add Routes by Group
 
 Grouping routes under a shared prefix makes organization easier and keeps URLs clean. Use `RouteGroup` to create and register grouped routes:
 
@@ -42,7 +42,7 @@ Resulting names:
 - `/common-prefix/route-b` → `ModuleNameRouteB`
 - `/common-prefix/route-c` → `ModuleNameRouteC`
 
-## 📝 Note on Nested Route Groups
+## Note on Nested Route Groups
 
 You can also nest a RouteGroup inside another RouteGroup, which helps when organizing modules or features with deeply structured paths. This is ideal for applications with layered routing logic.
 
@@ -66,9 +66,11 @@ This would result in:
 - `/main-section/sub-section/item-b` → `ItemB`
 - `/main-section/overview` → `Overview`
 
-📌 Tip: When nesting groups, keep your route names consistent and concise to avoid confusion or use a name prefix on your groups.
+:::tip
+When nesting groups, keep your route names consistent and concise to avoid confusion or use a name prefix on your groups.
+:::
 
-## 🏗 Using a Root Component in a Group
+## Using a Root Component in a Group
 
 When you define a root component at the group level, all routes in that group will be wrapped with the specified component. This is useful for applying a shared layout across multiple pages.
 

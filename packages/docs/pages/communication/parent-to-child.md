@@ -1,8 +1,8 @@
-# 🧭 From parent to child
+# From parent to child
 
-Communication from a parent to its child component isn’t event-based. Instead, it follows a **direct control model** — the parent typically knows what the child needs in order to function properly and interacts with it accordingly.
+Communication from a parent to its child component isn’t event-based. Instead, it follows a **direct control model**: the parent typically knows what the child needs in order to function properly and interacts with it accordingly.
 
-## 📞 Method Calls
+## Method Calls
 
 The most straightforward way for a parent to interact with a child is by calling its **public methods** or **setters**.
 

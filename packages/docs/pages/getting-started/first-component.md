@@ -1,17 +1,11 @@
-# ⚙️ First Component
+# First Component
 
-## The Essentials of a Jadis Component
+## The Essentials of a *Jadis* Component
 
 - A component in **@jadis/core** is a class that extends from *Jadis*
   
   ```javascript
     class MyComponent extends Jadis {}
-  ```
-
-- The component needs to be exported if used elsewhere
-
-  ```javascript
-    export class MyComponent extends Jadis {}
   ```
 
 - The component needs a selector property in order to be used in the DOM
@@ -45,7 +39,7 @@
 
 Now, let’s build a real component using **@jadis/core**!
 
-## 🧩 Define a CounterButton Component
+## Define a CounterButton Component
 
 We’ll create a reusable button that shows a label and keeps track of how many times it's clicked.
 
@@ -113,12 +107,14 @@ CounterButton.register();
 
 :::
 
-Then in your HTML:
+Then in your HTML, you can use it simply by using its tag name:
 
 ```html
 <counter-button></counter-button>
 ```
 
-## 🎨 Adding styles
+Or you can use it with `toTemplate()`, see [dedicated page](../templating/to-template.md) on the documentation.
 
-See [documentation about adding style](../styling/add-style.md).
+## Adding style with CSS
+
+See [documentation about adding style](../templating/add-style.md).

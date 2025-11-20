@@ -1,14 +1,27 @@
-# 🔍 `getElement` Helper
+# Get Elements from template with `getElement` Helper
 
-The `getElement` helper parses the DOM inside a Jadis component using a **standard CSS selector**. It’s the recommended way to access elements within your component’s template.
+The `getElement` helper parses the DOM inside a *Jadis* component using a **standard CSS selector**. It’s the recommended way to access elements within your component’s template.
 
-If you need to access an element inside another component (which is typically discouraged), you can use the special `>>>` operator. This tells getElement to traverse into a **shadow DOM boundary** before applying the next selector segment.
+If you need to access an element inside another component (which is typically discouraged), you can use the special `>>>` operator. This tells `getElement` to traverse into a **shadow DOM boundary** before applying the next selector segment.
 
-## 📦 Return Type
+## Signature
 
-The return value is always an `HTMLElement`. You can cast it to a more specific element type as needed — for example, `HTMLButtonElement`, `HTMLInputElement`, or a custom class.
+```typescript
+this.getElement<T>(<query>): <HTMLElement>
+```
 
-## 🧪 Example
+### Parameters
+
+- `T`: A generic type to specify the element type if it can't be infered
+- `query`: The css query string to fetch the element in the component's dom. Automatically inferred if a tag name is provided (f.e. 'div' -> HTMLDivElement).
+  Supports chained selectors using the format `parent-selector >>> child-selector >>> nested-selector`
+  Each segment is resolved step-by-step, optionally entering shadow roots when present.
+
+### Return value
+
+- An `HTMLElement`. You can cast it to a more specific element type as needed, for example, `HTMLButtonElement`, `HTMLInputElement`, or a custom class.
+
+## Example
 
 ::: code-group
 
@@ -101,6 +114,6 @@ class ParentComponent extends Jadis {
 
 :::
 
-## 🧰 Related Helpers
-
-- [`useRefs()`](./use-refs.md) — Create multiple typed element references using a single mapping function.
+:::tip
+Check out the related helper [`useRefs()`](./use-refs.md): Create multiple typed element references using a single mapping function.
+:::

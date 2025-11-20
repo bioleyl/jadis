@@ -15,6 +15,9 @@ hero:
       link: /pages/examples/index
 
 features:
+  - title: Templating
+    details: All there is to know about templating 
+    link: /pages/templating/create-template
   - title: Communication
     details: How to communicate between components
     link: /pages/communication/parent-to-child
@@ -24,11 +27,5 @@ features:
   - title: Helpers
     details: How to use the embedded helpers
     link: /pages/helpers/create-element
-  - title: Styling
-    details: Adding style to components
-    link: /pages/styling/add-style
-  - title: Slots
-    details: Using slots in your components
-    link: /pages/slots/use-slots
-  
+
 ---

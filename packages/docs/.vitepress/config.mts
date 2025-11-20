@@ -6,6 +6,9 @@ export default defineConfig({
   description: 'Jadis official documentation',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    search: {
+      provider: 'local',
+    },
     nav: [
       {
         link: '/',
@@ -34,6 +37,47 @@ export default defineConfig({
       {
         items: [
           {
+            link: '/pages/templating/create-template',
+            text: 'Basics of templating',
+          },
+          {
+            link: '/pages/templating/add-style',
+            text: 'Add css style to components',
+          },
+          {
+            link: '/pages/templating/toggle-class',
+            text: 'Toggle classes in components'
+          },
+          {
+            link: '/pages/templating/get-element',
+            text: 'Get elements from template'
+          },
+          {
+            link: '/pages/templating/use-slots',
+            text: 'Use slots in your component'
+          },
+          {
+            link: '/pages/templating/to-template',
+            text: 'Add components to template'
+          }, 
+          {
+            link: '/pages/templating/use-refs',
+            text: 'Point to an element in the DOM'
+          },
+          {
+            link: '/pages/templating/use-change',
+            text: 'React to a property change'
+          },
+          {
+            link: '/pages/templating/event-handling',
+            text: 'Handle events with simplicity'
+          }
+        ],
+        text: 'Templating',
+      },
+      {
+        items: [
+          {
             link: '/pages/communication/parent-to-child',
             text: 'Parent to child',
           },
@@ -42,8 +86,8 @@ export default defineConfig({
             text: 'Child to parent',
           },
           {
-            link: '/pages/communication/between-anybody',
-            text: 'Between anybody',
+            link: '/pages/communication/cross-components',
+            text: 'Cross-Components ',
           },
         ],
         text: 'Communication',
@@ -79,41 +123,10 @@ export default defineConfig({
             link: '/pages/helpers/kill-signal',
             text: 'killSignal',
           },
-          {
-            link: '/pages/helpers/get-element',
-            text: 'getElement',
-          },
-          {
-            link: '/pages/helpers/use-refs',
-            text: 'useRefs',
-          },
-          {
-            link: '/pages/helpers/use-change',
-            text: 'useChange',
-          },
         ],
         text: 'Helpers',
       },
-      {
-        items: [
-          {
-            link: '/pages/styling/add-style',
-            text: 'Add style to components',
-          }
-        ],
-        text: 'Style',
-      },
-      {
-        items: [
-          {
-            link: '/pages/slots/use-slots',
-            text: 'Use slots in your components',
-          }, 
-        ],
-        text: 'Slots',
-      }
     ],
-
     socialLinks: [{ icon: 'github', link: 'https://github.com/bioleyl/jadis' }],
   },
   title: 'Jadis',

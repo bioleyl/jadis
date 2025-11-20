@@ -1,12 +1,12 @@
-# 🔗 From Any Component to Any Component
+# Cross-Component Communication
 
-While not the trendiest tool in modern frontend circles, the **EventBus** remains one of the most underrated solutions for cross-component communication. Jadis embraces this pattern with intention — offering a built-in Bus system that’s not only easy to use, but also memory-safe and fully typed for **TypeScript** and **JSDoc** users.
+While not the trendiest tool in modern frontend circles, the **EventBus** remains one of the most underrated solutions for cross-component communication. *Jadis* embraces this pattern with intention, offering a built-in Bus system that’s not only easy to use, but also memory-safe and fully typed for **TypeScript** and **JSDoc** users.
 
-Even in **plain JavaScript**, Jadis allows for **partial typing** by defining event payloads using primitive constructors like `String`, `Number` or other constructors. This gives you lightweight type hints without switching languages, making event wiring safer and more expressive — even in a pure JS project.
+*Jadis* brings you a bus helper for handling events in a type-safe manner. Even in **plain JavaScript**, *Jadis* allows for **partial typing** by defining event payloads using primitive constructors like `String`, `Number` or other constructors. This gives you lightweight type hints without switching languages, making event wiring safer and more expressive, even in a pure JS project.
 
-You don’t need to reinvent global coordination. With Jadis, you get all the power of a scalable event system, minus the complexity.
+You don’t need to reinvent global coordination. With *Jadis*, you get all the power of a scalable event system, minus the complexity.
 
-## 🏗️ Bus creation
+## Bus creation
 
 Here's how to create a new event bus:
 
@@ -37,7 +37,7 @@ const myBus = new Bus();
 
 When using plain JavaScript, event types are declared using primitive constructors like `Number`, `String`, `Boolean`, `BigInt`, `Symbol`, `Function`, `Array` or `Object`
 
-## 🚀 Bus Usage
+## Bus Usage
 
 Once the bus is defined, you can **register listeners** or **emit events** freely between components.
 
@@ -163,9 +163,9 @@ EmitterComponent.register();
 
 :::
 
-## 🧪 Usage Outside Jadis Components
+## Usage Outside of *Jadis* Components
 
-You can also use the bus outside of Jadis components — for example, in services or utilities. If you're registering listeners directly (without Jadis), it's important to provide an `AbortSignal` to ensure proper cleanup and avoid memory leaks.
+You can also use the bus outside of *Jadis* components. For example, in services or utilities. If you're registering listeners directly (without Jadis), it's important to provide an `AbortSignal` to ensure proper cleanup and avoid memory leaks.
 
 ```javascript
 // Create an AbortController to manage cleanup
