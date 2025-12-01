@@ -1,18 +1,45 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect } from 'vitest';
 
-import { RouteGroup } from './route-group';
+import { Jadis } from '../base-component';
+import { defineRouteGroup, defineRoutes } from '../helpers/router.helper';
 import { Router } from './router';
 
-import type { RouterOptions } from '../types/router.type';
+import type { RouteDef, RouterOptions } from '../types/router.type';
 
-const InitiateRouter = (options?: RouterOptions): { router: Router; container: HTMLDivElement } => {
+class BasePage extends Jadis {
+  static readonly selector = 'base-page';
+}
+
+class HomePage extends Jadis {
+  static readonly selector = 'home-page';
+}
+
+const InitiateRouter = <T extends Record<string, RouteDef>>(
+  routes: T = {} as T,
+  options?: RouterOptions
+): {
+  container: HTMLDivElement;
+  router: Router<
+    T & {
+      readonly base: {
+        readonly page: () => typeof BasePage;
+        readonly path: '/';
+      };
+    }
+  >;
+} => {
   const appContainer = document.createElement('div');
   appContainer.id = 'app';
   document.body.innerHTML = '';
   document.body.appendChild(appContainer);
 
-  const routerInstance = new Router(options);
-  routerInstance.addRoute('/', 'base-page', { name: 'base' });
+  const routerInstance = new Router(
+    {
+      ...routes,
+      base: { page: () => BasePage, path: '/' },
+    },
+    options
+  );
   routerInstance.mountOn(appContainer);
 
   return { container: appContainer, router: routerInstance };
@@ -24,91 +51,103 @@ describe('Route Group', () => {
     window.history.pushState({}, '', '/');
   });
 
-  it('should add a route group and navigate to it', () => {
-    const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('item', 'item-component', { name: 'item' }));
+  test.each([
+    [{ mode: 'hash' as const }, () => expect(window.location.hash).toBe('#/group/home')],
+    [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/group/home')],
+  ])('should add a route group and navigate to it', (options, assertUrl) => {
+    const routes = defineRoutes({
+      group: defineRouteGroup('/group', {
+        home: { page: () => HomePage, path: '/home' },
+      }),
+    });
+    const { router, container } = InitiateRouter(routes, options);
+    router.goto('groupHome');
 
-    router.gotoPath('/group/item');
-
-    expect(window.location.pathname).toBe('/group/item');
-    const component = container.querySelector('item-component');
+    assertUrl();
+    const component = container.querySelector(HomePage.selector);
     expect(component).toBeTruthy();
   });
 
-  it('should add a route group with params and navigate to it', () => {
-    const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('item/:id', 'item-component', { name: 'item' }));
+  test.each([
+    [{ mode: 'hash' as const }, () => expect(window.location.hash).toBe('#/group/home/456')],
+    [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/group/home/456')],
+  ])('should add a route group with params and navigate to it', (options, assertUrl) => {
+    const routes = defineRoutes({
+      group: defineRouteGroup('/group', {
+        home: { page: () => HomePage, path: '/home/:id' },
+      }),
+    });
+    const { router, container } = InitiateRouter(routes, options);
+    router.goto('groupHome', { id: '456' });
 
-    router.gotoPath('/group/item/456');
-
-    expect(window.location.pathname).toBe('/group/item/456');
-    const component = container.querySelector('item-component');
-    expect(component).toBeTruthy();
-    expect(component?.getAttribute('id')).toBe('456');
-  });
-
-  it('should add a route group and navigate to by name', () => {
-    const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('item', 'item-component', { name: 'item' }));
-
-    router.gotoName('item');
-
-    expect(window.location.pathname).toBe('/group/item');
-    const component = container.querySelector('item-component');
-    expect(component).toBeTruthy();
-  });
-
-  it('should add a route group with params and navigate to by name', () => {
-    const { router, container } = InitiateRouter();
-    router.addGroup(RouteGroup.create('group').addRoute('item/:id', 'item-component', { name: 'item' }));
-
-    router.gotoName('item', { id: '456' });
-
-    expect(window.location.pathname).toBe('/group/item/456');
-    const component = container.querySelector('item-component');
+    assertUrl();
+    const component = container.querySelector(HomePage.selector);
     expect(component).toBeTruthy();
     expect(component?.getAttribute('id')).toBe('456');
   });
 
-  it('should handle nested route groups with names', () => {
-    const { router, container } = InitiateRouter();
-    router.addGroup(
-      RouteGroup.create('group', { name: 'Main' })
-        .addRoute('item', 'item-component', { name: 'item' })
-        .addGroup(
-          RouteGroup.create('subgroup', { name: 'Sub' }).addRoute('details', 'details-component', {
-            name: 'Details',
-          })
-        )
-    );
+  test.each([
+    [{ mode: 'hash' as const }, () => expect(window.location.hash).toBe('#/group/456/home')],
+    [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/group/456/home')],
+  ])('should handle parameter in route prefix', (options, assertUrl) => {
+    const routes = defineRoutes({
+      group: defineRouteGroup('/group/:id', {
+        home: { page: () => HomePage, path: '/home' },
+      }),
+    });
+    const { router, container } = InitiateRouter(routes, options);
+    router.goto('groupHome', { id: '456' });
 
-    router.gotoName('MainSubDetails');
+    assertUrl();
+    const component = container.querySelector(HomePage.selector);
+    expect(component).toBeTruthy();
+    expect(component?.getAttribute('id')).toBe('456');
+  });
 
-    expect(window.location.pathname).toBe('/group/subgroup/details');
-    const component = container.querySelector('details-component');
+  test.each([
+    [{ mode: 'hash' as const }, () => expect(window.location.hash).toBe('#/group/subgroup/home')],
+    [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/group/subgroup/home')],
+  ])('should add a route group inside a route group and navigate to it', (options, assertUrl) => {
+    const routes = defineRoutes({
+      group: defineRouteGroup('/group', {
+        subgroup: defineRouteGroup('/subgroup', {
+          home: { page: () => HomePage, path: '/home' },
+        }),
+      }),
+    });
+    const { router, container } = InitiateRouter(routes, options);
+    router.goto('groupSubgroupHome');
+
+    assertUrl();
+    const component = container.querySelector(HomePage.selector);
     expect(component).toBeTruthy();
   });
 
-  it('should handle nested route groups with component selectors', () => {
-    const { router, container } = InitiateRouter();
-    router.addGroup(
-      RouteGroup.create('group', {
-        rootComponentSelector: 'main-component',
-      }).addGroup(
-        RouteGroup.create('subgroup', {
-          rootComponentSelector: 'sub-component',
-        }).addRoute('details', 'details-component')
-      )
-    );
+  test.each([
+    [{ mode: 'hash' as const }, () => expect(window.location.hash).toBe('#/group/subgroup/home')],
+    [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/group/subgroup/home')],
+  ])(
+    'should add a route group inside a route group and navigate to it with a root component',
+    (options, assertUrl) => {
+      const routes = defineRoutes({
+        group: defineRouteGroup(
+          '/group',
+          {
+            subgroup: defineRouteGroup('/subgroup', {
+              home: { page: () => HomePage, path: '/home' },
+            }),
+          },
+          { rootComponentSelector: 'group-root' }
+        ),
+      });
+      const { router, container } = InitiateRouter(routes, options);
+      router.goto('groupSubgroupHome');
 
-    router.gotoPath('/group/subgroup/details');
-
-    expect(window.location.pathname).toBe('/group/subgroup/details');
-    const mainComponent = container.querySelector('main-component');
-    expect(mainComponent).toBeTruthy();
-    const subComponent = mainComponent?.querySelector('sub-component');
-    expect(subComponent).toBeTruthy();
-    const detailsComponent = subComponent?.querySelector('details-component');
-    expect(detailsComponent).toBeTruthy();
-  });
+      assertUrl();
+      const groupRoot = container.querySelector('group-root');
+      expect(groupRoot).toBeTruthy();
+      const component = groupRoot?.querySelector(HomePage.selector);
+      expect(component).toBeTruthy();
+    }
+  );
 });
