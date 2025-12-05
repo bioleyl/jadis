@@ -48,7 +48,7 @@ export interface MatchedRoute extends InternalRoute {
   urlPath: string;
 }
 
-/** Extracts route parameters from a path litteral */
+/** Extracts route parameters from a path literal */
 export type ExtractParams<Path extends string> =
   Path extends `${string}${typeof ROUTER_PARAMETER_PREFIX}${infer Param}/${infer Rest}`
     ? { [K in Param | keyof ExtractParams<`/${Rest}`>]: string }
@@ -66,10 +66,10 @@ export type FlattenRoutes<Tree, Prefix extends string = ''> = Merge<
   {
     [K in keyof Tree]: Tree[K] extends RouteDefinition
       ? {
-          readonly [P in Prefix extends string ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`]: Tree[K];
+          readonly [P in Prefix extends '' ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`]: Tree[K];
         }
       : Tree[K] extends Record<string, unknown>
-        ? FlattenRoutes<Tree[K], Prefix extends string ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`>
+        ? FlattenRoutes<Tree[K], Prefix extends '' ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`>
         : never;
   }[keyof Tree]
 >;

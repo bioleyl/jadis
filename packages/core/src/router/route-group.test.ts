@@ -4,7 +4,7 @@ import { Jadis } from '../base-component';
 import { defineRouteGroup, defineRoutes } from '../helpers/router.helper';
 import { Router } from './router';
 
-import type { RouteDef, RouterOptions } from '../types/router.type';
+import type { RouteDefinition, RouterOptions } from '../types/router.type';
 
 class BasePage extends Jadis {
   static readonly selector = 'base-page';
@@ -14,7 +14,7 @@ class HomePage extends Jadis {
   static readonly selector = 'home-page';
 }
 
-const InitiateRouter = <T extends Record<string, RouteDef>>(
+const InitiateRouter = <T extends Record<string, RouteDefinition>>(
   routes: T = {} as T,
   options?: RouterOptions
 ): {

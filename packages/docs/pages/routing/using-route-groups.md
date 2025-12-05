@@ -38,10 +38,10 @@ import { defineRouteGroup, defineRoutes, Router } from "@jadis/core";
 const routes = defineRoutes({
   mainSection: defineRouteGroup('/main-section', {
     subSection: defineRouteGroup('/sub-section', {
-      itemA: { path: '/item-a', component: ItemAPage },
-      itemB: { path: '/item-b', component: ItemBPage },
+      itemA: { path: '/item-a', page: ItemAPage },
+      itemB: { path: '/item-b', page: ItemBPage },
     }),
-    overview: { path: '/overview', component: OverviewPage },
+    overview: { path: '/overview', page: OverviewPage },
   }),
 })
 
@@ -63,7 +63,7 @@ When you define a root component at the group level, all routes in that group wi
 ```javascript
 const routes = defineRoutes({
   mainSection: defineRouteGroup('/main-section', {
-    overview: { path: '/overview', component: OverviewPage },
+    overview: { path: '/overview', page: OverviewPage },
   }, { rootComponentSelector: 'main-component' }),
 });
 ```

@@ -23,7 +23,7 @@ features:
     link: /pages/communication/parent-to-child
   - title: Routing
     details: How to use the router
-    link: /pages/routing/declaring-routes
+    link: /pages/routing/configuration
   - title: Helpers
     details: How to use the embedded helpers
     link: /pages/helpers/create-element

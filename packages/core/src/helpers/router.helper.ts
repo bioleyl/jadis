@@ -27,7 +27,7 @@ function formatRouteKey<P extends string, K extends string>(prefix: P, key: K): 
 function flattenRoutes<const T extends Record<string, RouteDefinition | RouteTree>>(
   routes: T,
   prefix = ''
-): FlattenRoutes<T> {
+): Record<string, RouteDefinition> {
   const result: Record<string, RouteDefinition> = {};
 
   for (const [key, value] of Object.entries(routes)) {
@@ -43,7 +43,7 @@ function flattenRoutes<const T extends Record<string, RouteDefinition | RouteTre
     }
   }
 
-  return result as FlattenRoutes<T>;
+  return result;
 }
 
 /**
@@ -54,7 +54,7 @@ function flattenRoutes<const T extends Record<string, RouteDefinition | RouteTre
 export function defineRoutes<const Tree extends Record<string, RouteDefinition | RouteTree>>(
   routes: Tree
 ): FlattenRoutes<Tree> {
-  return flattenRoutes(routes);
+  return flattenRoutes(routes) as FlattenRoutes<Tree>;
 }
 
 /**
