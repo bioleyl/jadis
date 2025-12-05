@@ -4,6 +4,10 @@
 
 > The web, like it used to be.
 
+## Documentation
+
+You can find the full documentation on [github pages](https://bioleyl.github.io/jadis/).
+
 ## Why *Jadis*?
 
 Modern frontend frameworks are powerful, but they come at a cost:
@@ -22,9 +26,8 @@ Modern frontend frameworks are powerful, but they come at a cost:
 
 ## What You Get
 
-- A set of tiny libraries to make Web Components simpler and more enjoyable to use
+- A set of tiny helpers to make Web Components simpler and more enjoyable to use
 - Simple templating without JSX or complex DSLs
-- Lifecycle helpers without hooks or reactivity
 - A feeling of control and peace
 
 ## Installation
@@ -102,10 +105,6 @@ npm install @jadis/core
 ```
 
 > The web has always been powerful. *Jadis* reminds you how it used to feel.
-
-## Documentation
-
-You can find the full documentation on [github](https://bioleyl.github.io/jadis/).
 
 ## Contributing
 

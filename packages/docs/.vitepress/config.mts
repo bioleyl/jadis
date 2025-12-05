@@ -106,10 +106,6 @@ export default defineConfig({
             link: '/pages/routing/using-route-groups',
             text: 'Using route groups',
           },
-          {
-            link: '/pages/routing/navigating',
-            text: 'Navigating',
-          },
         ],
         text: 'Routing',
       },

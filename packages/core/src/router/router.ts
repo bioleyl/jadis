@@ -1,19 +1,17 @@
 import { assert } from '../helpers/assert.helper';
 import { createElement } from '../helpers/element.helper';
 import { normalizePath } from '../helpers/router.helper';
-import { COMPONENT_SELECTOR_SEPARATOR } from './router-constants';
+import { COMPONENT_SELECTOR_SEPARATOR, ROUTER_PARAMETER_PREFIX } from './router-constants';
 
 import type {
+  ExtractParams,
   InternalRoute,
   MatchedRoute,
   Route,
-  RouteOptions,
+  RouteDefinition,
   RouterMode,
   RouterOptions,
 } from '../types/router.type';
-import type { RouteGroup } from './route-group';
-
-const ROUTER_PARAMETER_PREFIX = ':';
 
 const defaultOptions: Required<RouterOptions> = {
   baseUrl: '/',
@@ -25,7 +23,7 @@ const defaultOptions: Required<RouterOptions> = {
  * It supports both hash and history modes for navigation.
  * It allows defining routes, navigating to them, and mounting components based on the current URL.
  */
-export class Router {
+export class Router<T extends Record<string, RouteDefinition>> {
   private readonly _routes: Array<InternalRoute> = [];
   private readonly _mode: RouterMode;
   private readonly _baseUrl: string;
@@ -33,9 +31,21 @@ export class Router {
   private _mount?: HTMLElement;
   private _currentRoute?: Route;
 
-  constructor(options?: RouterOptions) {
+  constructor(routes: T, options?: RouterOptions) {
     this._mode = options?.mode ?? defaultOptions.mode;
     this._baseUrl = options?.baseUrl ?? defaultOptions.baseUrl;
+    this._routes = Object.entries(routes).map(([name, def]) => {
+      const path = normalizePath(`/${def.path}`);
+      const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
+      return {
+        componentSelector: [def.options?.rootComponentSelector, def.page.selector]
+          .filter(Boolean)
+          .join(COMPONENT_SELECTOR_SEPARATOR),
+        name,
+        path,
+        regexp: new RegExp(`^${pathWithoutParameters}$`),
+      };
+    });
 
     window.addEventListener(this.eventName, (evt) => {
       evt.preventDefault();
@@ -65,47 +75,6 @@ export class Router {
   }
 
   /**
-   * Adds a new route to the router.
-   * @param {string} path The path of the route
-   * @param {string} componentSelector The selector of the component to mount for this route
-   * @param {RouteOptions} [options={}] - Optional route options including name and rootComponentSelector.
-   * @example
-   * router.addRoute('/home', 'home-component', { name: 'home' });
-   * @returns {Router} The current Router instance
-   */
-  addRoute(path: string, componentSelector: string, options: RouteOptions = {}): this {
-    const normalizedPath = normalizePath(`/${path}`);
-    const pathWithoutParameters = normalizedPath.replace(this._parametersRegexp, '(.+)');
-    this._routes.push({
-      componentSelector: [options.rootComponentSelector, componentSelector]
-        .filter(Boolean)
-        .join(COMPONENT_SELECTOR_SEPARATOR),
-      name: options.name,
-      path: normalizedPath,
-      regexp: new RegExp(`^${pathWithoutParameters}$`),
-    });
-    return this;
-  }
-
-  /**
-   *  Adds a group of routes defined in a RouteGroup.
-   * This allows for organizing routes under a common prefix.
-   * @param {RouteGroup} routeGroup The RouteGroup containing routes to add
-   * @example
-   * const group = RouteGroup.create('/api')
-   *   .addRoute('/users', 'user-list')
-   *   .addRoute('/users/:id', 'user-detail');
-   * router.addGroup(group);
-   * @returns {Router} The current Router instance
-   */
-  addGroup(routeGroup: RouteGroup): this {
-    routeGroup.getRoutes().forEach(({ path, componentSelector, name }) => {
-      this.addRoute(path, componentSelector, { name });
-    });
-    return this;
-  }
-
-  /**
    * Mounts the router on a specific HTML element.
    * @param {HTMLElement} el The element to mount the router on
    */
@@ -119,22 +88,16 @@ export class Router {
    * @param {string} name The name of the route to navigate to
    * @param {Record<string, string>} [params] The parameters to include with the route
    */
-  gotoName(name: string, params?: Record<string, string>) {
-    const route = this.getRouteByName(name);
-    assert(route, `No route found for name: ${name}`);
+  goto<K extends keyof T>(name: K & (keyof ExtractParams<T[K]['path']> extends never ? K : never)): void;
+  goto<K extends keyof T>(
+    name: K & (keyof ExtractParams<T[K]['path']> extends never ? never : K),
+    params: ExtractParams<T[K]['path']>
+  ): void;
+  goto(name: keyof T, params?: Record<string, string>) {
+    const route = this.getRouteByName(String(name));
+    assert(route, `No route found for name: ${String(name)}`);
 
     this.gotoPath(this.buildPath(route.path, params));
-  }
-
-  /**
-   * Navigates to a route by its path.
-   * @warning This method is not recommended. Please prefer using `gotoName` for better maintainability.
-   * @param {string} path The path of the route to navigate to
-   */
-  gotoPath(path: string) {
-    const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState({}, '', normalizePath(`${this.baseUrl}/${urlPath}`));
-    this.onUrlChange();
   }
 
   private get baseUrl(): string {
@@ -156,6 +119,12 @@ export class Router {
       : window.location.pathname;
     const path = this._mode === 'hash' ? window.location.hash.slice(1) : formattedPath;
     return normalizePath(path);
+  }
+
+  private gotoPath(path: string) {
+    const urlPath = this._mode === 'hash' ? `#${path}` : path;
+    window.history.pushState({}, '', normalizePath(`${this.baseUrl}/${urlPath}`));
+    this.onUrlChange();
   }
 
   private onUrlChange() {

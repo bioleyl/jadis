@@ -35,7 +35,7 @@ export default class HelloPage extends Jadis {
   }
 
   onButtonClick() {
-    myRouter.gotoName('main');
+    myRouter.goto('main');
   }
 }
 

@@ -34,7 +34,7 @@ export default class MainPage extends Jadis {
     createElement('img', { attrs: { src: logo } }, header);
 
     this._refs.input.events.register('greet', (name) => {
-      myRouter.gotoName('hello', { name });
+      myRouter.goto('hello', { name });
     });
   }
 
