@@ -6,8 +6,8 @@ Routing in *Jadis* is **component-based**: each route corresponds to a registere
 
 To use the router, 3 simple steps:
 
-1. Instantiate the router
-2. Define your routes
+1. Define your routes
+2. Instantiate the router
 3. Mount it to a DOM element
 
 When creating a router instance, you can configure several options to control its behavior and navigation mode.
@@ -22,13 +22,15 @@ The router supports two navigation modes:
 ## Example
 
 ```typescript
-import { Router, RouterOptions } from '@jadis/core';
+import { Router, RouterOptions, defineRoutes } from '@jadis/core';
+
+const routes = defineRoutes(...)
 
 const routerOptions: RouterOptions = {
   mode: 'hash', // Use 'history' for clean URLs
 };
 
-export const myRouter = new Router(routerOptions);
+export const myRouter = new Router(routes, routerOptions);
 ```
 
 Choose the mode that best fits your application's requirements and hosting setup.
@@ -38,13 +40,15 @@ Choose the mode that best fits your application's requirements and hosting setup
 If your application is hosted in a subdirectory of your domain (e.g. `https://my-website.com/my-app`), you should set the `baseUrl` option to ensure routes resolve correctly. Otherwise, routing will assume your app is at the domain root.
 
 ```typescript
-import { Router, RouterOptions } from '@jadis/core';
+import { Router, RouterOptions, defineRoutes } from '@jadis/core';
+
+const routes = defineRoutes(...)
 
 const routerOptions: RouterOptions = {
   baseUrl: 'my-app',
 };
 
-export const myRouter = new Router(routerOptions);
+export const myRouter = new Router(routes, routerOptions);
 ```
 
 This prevents incorrect route resolution and enables consistent behavior regardless of deployment location.

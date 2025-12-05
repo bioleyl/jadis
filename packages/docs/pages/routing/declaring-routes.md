@@ -8,7 +8,7 @@ You can add routes individually or organize them into a route group when parts o
 Routes support dynamic parameters (e.g. `:name`), which are passed as attributes to the corresponding component.
 
 ```javascript
-import { Jadis, html, createSelector, Router } from '@jadis/core';
+import { Jadis, html, createSelector, Router, defineRoutes } from '@jadis/core';
 
 class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
@@ -29,9 +29,11 @@ class HelloPage extends Jadis {
 
 HelloPage.register();
 
-const myRouter = new Router();
+const routes = defineRoutes({
+  hello: { path: '/hello/:name', page: HelloPage },
+});
 
-myRouter.addRoute('/hello/:name', HelloPage.selector);
+const myRouter = new Router(routes);
 
 myRouter.mountOn(document.getElementById('app'));
 ```
@@ -46,17 +48,20 @@ Navigating to `/hello/john`, the router will render:
 </body>
 ```
 
-## Use Named Routes
+## Navigation
 
-You can assign a **name** to a route and navigate to it by name instead of hardcoding the URL. This is especially useful when working with dynamic parameters.
+You can navigate to any defined route by using the name used as the key. If the route has parameters, you can pass them as the second argument of the `goto` method.
 
 ```javascript
-const myRouter = new Router();
+const routes = defineRoutes({
+  inv: { path: '/invoice/:id', page: InvoicePage },
+});
 
-myRouter.addRoute('/invoice/:id', InvoicePage.selector, { name: 'inv' });
+const myRouter = new Router(routes);
+
 myRouter.mountOn(document.getElementById('app'));
 
-myRouter.gotoName('inv', { id: 'abcd' })
+myRouter.goto('inv', { id: 'abcd' })
 ```
 
 This will navigate `/invoice/abcd`
@@ -66,11 +71,15 @@ This will navigate `/invoice/abcd`
 You can specify a root component (for example, a layout or wrapper) into which the route component will be injected. This is useful for shared layouts, navigation bars, or page wrappers.
 
 ```javascript
-const myRouter = new Router();
+const routes = defineRoutes({
+  hello: {
+    path: '/hello/:name',
+    page: HelloPage,
+    options: { rootComponentSelector: LayoutComponent.selector }
+  },
+})
 
-myRouter.addRoute('/hello/:name', HelloPage.selector, {
-  rootComponentSelector: 'layout-component'
-});
+const myRouter = new Router(routes);
 
 myRouter.mountOn(document.getElementById('app'));
 ```
