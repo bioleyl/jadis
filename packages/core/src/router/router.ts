@@ -8,7 +8,7 @@ import type {
   InternalRoute,
   MatchedRoute,
   Route,
-  RouteDef,
+  RouteDefinition,
   RouterMode,
   RouterOptions,
 } from '../types/router.type';
@@ -23,7 +23,7 @@ const defaultOptions: Required<RouterOptions> = {
  * It supports both hash and history modes for navigation.
  * It allows defining routes, navigating to them, and mounting components based on the current URL.
  */
-export class Router<T extends Record<string, RouteDef>> {
+export class Router<T extends Record<string, RouteDefinition>> {
   private readonly _routes: Array<InternalRoute> = [];
   private readonly _mode: RouterMode;
   private readonly _baseUrl: string;
@@ -38,7 +38,7 @@ export class Router<T extends Record<string, RouteDef>> {
       const path = normalizePath(`/${def.path}`);
       const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
       return {
-        componentSelector: [def.options?.rootComponentSelector, def.page().selector]
+        componentSelector: [def.options?.rootComponentSelector, def.page.selector]
           .filter(Boolean)
           .join(COMPONENT_SELECTOR_SEPARATOR),
         name,
@@ -100,12 +100,6 @@ export class Router<T extends Record<string, RouteDef>> {
     this.gotoPath(this.buildPath(route.path, params));
   }
 
-  private gotoPath(path: string) {
-    const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState({}, '', normalizePath(`${this.baseUrl}/${urlPath}`));
-    this.onUrlChange();
-  }
-
   private get baseUrl(): string {
     return normalizePath(this._baseUrl);
   }
@@ -125,6 +119,12 @@ export class Router<T extends Record<string, RouteDef>> {
       : window.location.pathname;
     const path = this._mode === 'hash' ? window.location.hash.slice(1) : formattedPath;
     return normalizePath(path);
+  }
+
+  private gotoPath(path: string) {
+    const urlPath = this._mode === 'hash' ? `#${path}` : path;
+    window.history.pushState({}, '', normalizePath(`${this.baseUrl}/${urlPath}`));
+    this.onUrlChange();
   }
 
   private onUrlChange() {

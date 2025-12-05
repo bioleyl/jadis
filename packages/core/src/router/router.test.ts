@@ -22,7 +22,7 @@ const InitiateRouter = <T extends Record<string, RouteDef>>(
   router: Router<
     T & {
       readonly base: {
-        readonly page: () => typeof BasePage;
+        readonly page: typeof BasePage;
         readonly path: '/';
       };
     }
@@ -36,7 +36,7 @@ const InitiateRouter = <T extends Record<string, RouteDef>>(
   const routerInstance = new Router(
     {
       ...routes,
-      base: { page: () => BasePage, path: '/' },
+      base: { page: BasePage, path: '/' },
     },
     options
   );
@@ -63,7 +63,7 @@ describe('Router', () => {
     [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/home')],
   ])('should add a route and navigate to it', (options, assertUrl) => {
     const routes = defineRoutes({
-      home: { page: () => HomePage, path: '/home' },
+      home: { page: HomePage, path: '/home' },
     });
     const { router, container } = InitiateRouter(routes, options);
     router.goto('home');
@@ -78,7 +78,7 @@ describe('Router', () => {
     [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/home/123')],
   ])('should add a route and navigate to it with params', (options, assertUrl) => {
     const routes = defineRoutes({
-      home: { page: () => HomePage, path: '/home/:id' },
+      home: { page: HomePage, path: '/home/:id' },
     });
     const { router, container } = InitiateRouter(routes, options);
     router.goto('home', { id: '123' });
@@ -99,7 +99,7 @@ describe('Router', () => {
     [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/home/123')],
   ])('should create a root component', (options, assertUrl) => {
     const routes = defineRoutes({
-      home: { options: { rootComponentSelector: 'root-component' }, page: () => HomePage, path: '/home/:id' },
+      home: { options: { rootComponentSelector: 'root-component' }, page: HomePage, path: '/home/:id' },
     });
     const { router, container } = InitiateRouter(routes, options);
     router.goto('home', { id: '123' });
@@ -128,7 +128,7 @@ describe('Router', () => {
     [{ mode: 'history' as const }, () => expect(window.location.pathname).toBe('/app/home')],
   ])('should navigate to a route with base URL', (options, assertUrl) => {
     const routes = defineRoutes({
-      home: { page: () => HomePage, path: '/home' },
+      home: { page: HomePage, path: '/home' },
     });
     const { router, container } = InitiateRouter(routes, { ...options, baseUrl: '/app' });
     router.goto('home');

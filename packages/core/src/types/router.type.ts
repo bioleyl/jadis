@@ -1,18 +1,21 @@
 import type { JadisConstructor } from '../base-component';
 import type { ROUTER_PARAMETER_PREFIX } from '../router/router-constants';
 
+/** Remove trailing slash from a string literal */
+type TrimTrailingSlash<S extends string> = S extends `${infer Rest}/` ? Rest : S;
+
 export type Path = `/${string}`;
 export type RouterMode = 'hash' | 'history';
 
 export type RouteTree = {
-  readonly [key: string]: RouteDef | RouteTree;
+  readonly [key: string]: RouteDefinition | RouteTree;
 };
 
-export type RouteDef = {
+export type RouteDefinition = {
   /** The path for the route. */
   readonly path: Path;
   /** The page component constructor for the route. */
-  readonly page: () => JadisConstructor<any>;
+  readonly page: JadisConstructor<any>;
   /** Optional route options. */
   readonly options?: RouteOptions;
 };
@@ -45,11 +48,11 @@ export interface MatchedRoute extends InternalRoute {
   urlPath: string;
 }
 
-/** Extracts route parameters from a path string */
-export type ExtractParams<S extends string> =
-  S extends `${string}${typeof ROUTER_PARAMETER_PREFIX}${infer Param}/${infer Rest}`
+/** Extracts route parameters from a path litteral */
+export type ExtractParams<Path extends string> =
+  Path extends `${string}${typeof ROUTER_PARAMETER_PREFIX}${infer Param}/${infer Rest}`
     ? { [K in Param | keyof ExtractParams<`/${Rest}`>]: string }
-    : S extends `${string}:${infer Param}`
+    : Path extends `${string}${typeof ROUTER_PARAMETER_PREFIX}${infer Param}`
       ? { [K in Param]: string }
       : Record<never, never>;
 
@@ -59,30 +62,27 @@ type Merge<U> = (U extends unknown ? (k: U) => void : never) extends (k: infer I
   : never;
 
 /** Flatten a nested route tree into a single-level route map */
-export type Flatten<T, Prefix extends string = ''> = Merge<
+export type FlattenRoutes<Tree, Prefix extends string = ''> = Merge<
   {
-    [K in keyof T]: T[K] extends RouteDef
+    [K in keyof Tree]: Tree[K] extends RouteDefinition
       ? {
-          readonly [P in Prefix extends '' ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`]: T[K];
+          readonly [P in Prefix extends string ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`]: Tree[K];
         }
-      : T[K] extends Record<string, unknown>
-        ? Flatten<T[K], Prefix extends '' ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`>
+      : Tree[K] extends Record<string, unknown>
+        ? FlattenRoutes<Tree[K], Prefix extends string ? `${string & K}` : `${Prefix}${Capitalize<string & K>}`>
         : never;
-  }[keyof T]
+  }[keyof Tree]
 >;
 
-/** Remove trailing slash from a string literal */
-type TrimTrailingSlash<S extends string> = S extends `${infer Rest}/` ? Rest : S;
-
-/** Adds a prefix to all paths in a route tree */
-export type WithPrefix<Prefix extends string, T extends RouteTree> = {
-  readonly [K in keyof T]: T[K] extends RouteDef
+/** Adds a prefix to all paths in a route group tree */
+export type FlattenRouteGroup<Prefix extends string, Tree extends RouteTree> = {
+  readonly [K in keyof Tree]: Tree[K] extends RouteDefinition
     ? {
-        readonly path: `${TrimTrailingSlash<Prefix>}${T[K]['path']}`;
-        readonly page: T[K]['page'];
+        readonly path: `${TrimTrailingSlash<Prefix>}${Tree[K]['path']}`;
+        readonly page: Tree[K]['page'];
         options?: RouteOptions;
       }
-    : T[K] extends RouteTree
-      ? WithPrefix<Prefix, T[K]>
+    : Tree[K] extends RouteTree
+      ? FlattenRouteGroup<Prefix, Tree[K]>
       : never;
 };

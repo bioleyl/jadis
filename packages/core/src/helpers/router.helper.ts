@@ -1,6 +1,13 @@
-import type { Flatten, Path, RouteDef, RouteOptions, RouteTree, WithPrefix } from '../types/router.type';
+import type {
+  FlattenRouteGroup,
+  FlattenRoutes,
+  Path,
+  RouteDefinition,
+  RouteOptions,
+  RouteTree,
+} from '../types/router.type';
 
-export function isRouteDef(obj: any): obj is RouteDef {
+export function isRouteDef(obj: any): obj is RouteDefinition {
   return obj && typeof obj.path === 'string' && typeof obj.page === 'function';
 }
 
@@ -9,19 +16,19 @@ export function isRouteDef(obj: any): obj is RouteDef {
  * @param path The URL path to format.
  * @returns The formatted URL path.
  */
-export const normalizePath = (path: string): Path => {
+export function normalizePath(path: string): Path {
   return `/${path}`.replace(/\/{2,}/g, '/').replace(/(?<=.)\/$/, '') as Path;
-};
+}
 
 function formatRouteKey<P extends string, K extends string>(prefix: P, key: K): string {
   return !prefix ? key : `${prefix}${key.charAt(0).toUpperCase()}${key.slice(1)}`;
 }
 
-function flattenTree<const T extends Record<string, RouteDef | RouteTree>>(
+function flattenRoutes<const T extends Record<string, RouteDefinition | RouteTree>>(
   routes: T,
   prefix = ''
-): Record<string, RouteDef> {
-  const result: Record<string, RouteDef> = {};
+): FlattenRoutes<T> {
+  const result: Record<string, RouteDefinition> = {};
 
   for (const [key, value] of Object.entries(routes)) {
     const nextKey = formatRouteKey(prefix, key);
@@ -32,11 +39,11 @@ function flattenTree<const T extends Record<string, RouteDef | RouteTree>>(
         path: normalizePath(value.path),
       };
     } else {
-      Object.assign(result, flattenTree(value, nextKey));
+      Object.assign(result, flattenRoutes(value, nextKey));
     }
   }
 
-  return result;
+  return result as FlattenRoutes<T>;
 }
 
 /**
@@ -44,8 +51,10 @@ function flattenTree<const T extends Record<string, RouteDef | RouteTree>>(
  * @param routes A record of route definitions or nested route trees.
  * @returns A flattened and normalized route map.
  */
-export function defineRoutes<const T extends Record<string, RouteDef | RouteTree>>(routes: T): Flatten<T> {
-  return flattenTree(routes) as Flatten<T>;
+export function defineRoutes<const Tree extends Record<string, RouteDefinition | RouteTree>>(
+  routes: Tree
+): FlattenRoutes<Tree> {
+  return flattenRoutes(routes);
 }
 
 /**
@@ -55,11 +64,11 @@ export function defineRoutes<const T extends Record<string, RouteDef | RouteTree
  * @param options Optional route options to apply to all routes in the group.
  * @returns A new route tree with the prefix applied to all paths.
  */
-export function defineRouteGroup<const Prefix extends Path, const T extends RouteTree>(
+export function defineRouteGroup<const Prefix extends Path, const Tree extends RouteTree>(
   prefix: Prefix,
-  routes: T,
+  routes: Tree,
   options?: RouteOptions
-): WithPrefix<Prefix, T> {
+): FlattenRouteGroup<Prefix, Tree> {
   const normalizedPrefix = normalizePath(prefix);
 
   return Object.fromEntries(

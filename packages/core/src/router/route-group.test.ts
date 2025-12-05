@@ -22,7 +22,7 @@ const InitiateRouter = <T extends Record<string, RouteDef>>(
   router: Router<
     T & {
       readonly base: {
-        readonly page: () => typeof BasePage;
+        readonly page: typeof BasePage;
         readonly path: '/';
       };
     }
@@ -36,7 +36,7 @@ const InitiateRouter = <T extends Record<string, RouteDef>>(
   const routerInstance = new Router(
     {
       ...routes,
-      base: { page: () => BasePage, path: '/' },
+      base: { page: BasePage, path: '/' },
     },
     options
   );
@@ -57,7 +57,7 @@ describe('Route Group', () => {
   ])('should add a route group and navigate to it', (options, assertUrl) => {
     const routes = defineRoutes({
       group: defineRouteGroup('/group', {
-        home: { page: () => HomePage, path: '/home' },
+        home: { page: HomePage, path: '/home' },
       }),
     });
     const { router, container } = InitiateRouter(routes, options);
@@ -74,7 +74,7 @@ describe('Route Group', () => {
   ])('should add a route group with params and navigate to it', (options, assertUrl) => {
     const routes = defineRoutes({
       group: defineRouteGroup('/group', {
-        home: { page: () => HomePage, path: '/home/:id' },
+        home: { page: HomePage, path: '/home/:id' },
       }),
     });
     const { router, container } = InitiateRouter(routes, options);
@@ -92,7 +92,7 @@ describe('Route Group', () => {
   ])('should handle parameter in route prefix', (options, assertUrl) => {
     const routes = defineRoutes({
       group: defineRouteGroup('/group/:id', {
-        home: { page: () => HomePage, path: '/home' },
+        home: { page: HomePage, path: '/home' },
       }),
     });
     const { router, container } = InitiateRouter(routes, options);
@@ -111,7 +111,7 @@ describe('Route Group', () => {
     const routes = defineRoutes({
       group: defineRouteGroup('/group', {
         subgroup: defineRouteGroup('/subgroup', {
-          home: { page: () => HomePage, path: '/home' },
+          home: { page: HomePage, path: '/home' },
         }),
       }),
     });
@@ -134,7 +134,7 @@ describe('Route Group', () => {
           '/group',
           {
             subgroup: defineRouteGroup('/subgroup', {
-              home: { page: () => HomePage, path: '/home' },
+              home: { page: HomePage, path: '/home' },
             }),
           },
           { rootComponentSelector: 'group-root' }
