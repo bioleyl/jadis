@@ -27,5 +27,8 @@ features:
   - title: Helpers
     details: How to use the embedded helpers
     link: /pages/helpers/create-element
+  - title: Customization
+    details: How to customize Jadis for your needs
+    link: /pages/customization/extending-jadis
 
 ---

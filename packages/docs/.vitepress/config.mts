@@ -122,6 +122,15 @@ export default defineConfig({
         ],
         text: 'Helpers',
       },
+      {
+        items: [
+          {
+            link: '/pages/customization/extending-jadis',
+            text: 'Extending Jadis',
+          }
+        ],
+        text: 'Customization',
+      }
     ],
     socialLinks: [{ icon: 'github', link: 'https://github.com/bioleyl/jadis' }],
   },
