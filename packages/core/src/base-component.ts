@@ -34,9 +34,11 @@ export abstract class Jadis extends HTMLElement {
 
   protected readonly attributesCallback: Partial<Record<string, (value: string, oldValue: string) => void>> = {};
 
+  /** Actions to perform when the component is connected to the DOM. */
+  protected onConnectActions: Array<() => void> = [];
+
   private readonly _abortController = new AbortController();
   private _isConnected = false;
-  private _onConnectActions: Array<() => void> = [];
 
   /**
    * Callback invoked when the component is connected to the DOM.
@@ -127,7 +129,7 @@ export abstract class Jadis extends HTMLElement {
 
   connectedCallback(): void {
     this._isConnected = true;
-    this._onConnectActions.forEach((fn) => {
+    this.onConnectActions.forEach((fn) => {
       fn();
     });
     setTimeout(() => this.onConnect?.());
@@ -313,7 +315,7 @@ export abstract class Jadis extends HTMLElement {
       if (this._isConnected) {
         onChange(initialValue, initialValue);
       } else {
-        this._onConnectActions.push(() => {
+        this.onConnectActions.push(() => {
           onChange(initialValue, initialValue);
         });
       }
