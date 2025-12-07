@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: It cannot infer that a div exist based on the previous assertion */
-import { css, html } from './template.helper.js';
+import { css, html } from '../../helpers/template.helper.js';
 
 describe('Template helper', () => {
   describe('html', () => {

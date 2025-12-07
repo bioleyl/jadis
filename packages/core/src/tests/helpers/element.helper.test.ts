@@ -1,4 +1,4 @@
-import { createElement } from './element.helper';
+import { createElement } from '../../helpers/element.helper';
 
 describe('Element helper', () => {
   describe('createElement', () => {

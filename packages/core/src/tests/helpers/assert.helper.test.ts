@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/suspicious/noSelfCompare: We need pointless comparison for thoses tests */
 import { describe } from 'vitest';
 
-import { assert } from './assert.helper';
+import { assert } from '../../helpers/assert.helper';
 
 describe('Assert helper', () => {
   it('should assert equality', () => {
