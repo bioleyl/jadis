@@ -197,6 +197,26 @@ export abstract class Jadis extends HTMLElement {
   }
 
   /**
+   * Creates getters for the specified attributes on the component.
+   * This method allows you to define a list of attribute names and automatically
+   * creates corresponding getters that retrieve the attribute values.
+   * @param attributes The list of attribute names to create getters for
+   * @returns An object with getters for the specified attributes
+   */
+  protected useAttributes<Attr extends string>(...attributes: Attr[]): Record<Attr, string | null> {
+    return attributes.reduce(
+      (acc, name) => {
+        Object.defineProperty(acc, name, {
+          enumerable: true,
+          get: () => this.getAttribute(name),
+        });
+        return acc;
+      },
+      {} as Record<Attr, string | null>
+    );
+  }
+
+  /**
    * Creates a handler for events on the component.
    * This handler allows registering and emitting events in a type-safe manner.
    * @template EventTypes The type of events to handle
