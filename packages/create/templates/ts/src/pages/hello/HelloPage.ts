@@ -10,6 +10,8 @@ export default class HelloPage extends Jadis {
     name: ref('span'),
   }));
 
+  private readonly _attrs = this.useAttributes('name');
+
   templateHtml(): DocumentFragment {
     return html`
       <h1>Hello, <span></span>!</h1>
@@ -30,7 +32,7 @@ export default class HelloPage extends Jadis {
   onConnect(): void {
     const { name, button } = this._refs;
 
-    name.textContent = this.getAttribute('name') ?? '';
+    name.textContent = this._attrs.name ?? '';
     this.on(button, 'click', () => this.onButtonClick());
   }
 

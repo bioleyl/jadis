@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-import { Bus } from './bus.helper';
+import { Bus } from '../../helpers/bus.helper';
 
 describe('Bus helper', () => {
   it('should publish and subscribe to events correctly', () => {

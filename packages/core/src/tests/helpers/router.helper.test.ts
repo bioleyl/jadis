@@ -1,4 +1,4 @@
-import { normalizePath } from './router.helper';
+import { normalizePath } from '../../helpers/router.helper';
 
 describe('Router helper', () => {
   describe('normalizePath', () => {

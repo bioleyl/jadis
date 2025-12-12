@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Jadis } from '../base-component';
-import { defineRoutes } from '../helpers/router.helper';
-import { Router } from './router';
+import { Jadis } from '../../base-component';
+import { defineRoutes } from '../../helpers/router.helper';
+import { Router } from '../../router/router';
 
-import type { RouteDefinition, RouterOptions } from '../types/router.type';
+import type { RouteDefinition, RouterOptions } from '../../types/router.type';
 
 class BasePage extends Jadis {
   static readonly selector = 'base-page';

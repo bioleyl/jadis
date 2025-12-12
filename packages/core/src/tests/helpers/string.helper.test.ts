@@ -1,4 +1,4 @@
-import { toKebabCase } from './string.helper';
+import { toKebabCase } from '../../helpers/string.helper';
 
 describe('String helper', () => {
   describe('toKebabCase', () => {

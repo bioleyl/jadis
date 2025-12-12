@@ -49,6 +49,10 @@ export default defineConfig({
             text: 'Toggle classes in components'
           },
           {
+            link: '/pages/templating/use-attributes',
+            text: 'Use attributes in your component'
+          },
+          {
             link: '/pages/templating/get-element',
             text: 'Get elements from template'
           },

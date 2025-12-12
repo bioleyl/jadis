@@ -1,4 +1,4 @@
-import { createSelector, isComponentSelector } from './component.helper';
+import { createSelector, isComponentSelector } from '../../helpers/component.helper';
 
 describe('Component helper', () => {
   describe('isComponentSelector', () => {
