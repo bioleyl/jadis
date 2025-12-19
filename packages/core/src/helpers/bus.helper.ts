@@ -5,7 +5,7 @@ import type { Constructor, OptionalIfUndefined, Primitive } from './type.helper'
  * It allows registering and emitting events with specific types.
  */
 export class Bus<T extends Record<string, unknown>> {
-  private readonly _domElement = document.createElement('div');
+  private readonly _domElement = new EventTarget();
 
   // biome-ignore lint/complexity/noUselessConstructor: Needed in JS for typing if no JSDoc is present
   constructor(_schema?: { [K in keyof T]: Constructor<T[K]> | undefined }) {} // NOSONAR
