@@ -188,10 +188,10 @@ export abstract class Jadis extends HTMLElement {
    * @param eventName The event name to listen to
    * @param callback The callback to invoke when the event is emitted
    */
-  protected onBus<BusType, BusEventKey extends keyof BusType>(
+  protected onBus<BusType extends Record<string, unknown>, BusEventKey extends Extract<keyof BusType, string>>(
     bus: Bus<BusType>,
     eventName: BusEventKey,
-    callback: (detail: Primitive<BusType[BusEventKey]>) => void
+    callback: (detail?: Primitive<BusType[BusEventKey]>) => void
   ): void {
     bus.register(eventName, callback, this.killSignal);
   }
@@ -237,23 +237,24 @@ export abstract class Jadis extends HTMLElement {
    * events.emit('someEvent', 'Hello World');
    */
   protected useEvents<EventTypes>(
+    // Needed in JS for typing if no JSDoc is present
     _schema?: {
       [EventName in keyof EventTypes]: Constructor<EventTypes[EventName]> | undefined;
     }
   ): Readonly<UseEventsHandler<EventTypes>> {
     return Object.freeze({
-      emit: <EventName extends keyof EventTypes>(
+      emit: <EventName extends keyof EventTypes & string>(
         eventName: EventName,
         ...params: OptionalIfUndefined<Primitive<EventTypes[EventName]>>
       ): void => {
-        this.dispatchEvent(new CustomEvent(eventName as string, { detail: params[0] }));
+        this.dispatchEvent(new CustomEvent(eventName, { detail: params[0] }));
       },
-      register: <EventName extends keyof EventTypes>(
+      register: <EventName extends keyof EventTypes & string>(
         eventName: EventName,
-        callback: (detail: Primitive<EventTypes[EventName]>) => void
+        callback: (detail?: Primitive<EventTypes[EventName]>) => void
       ): void => {
-        const listener = ({ detail }: CustomEvent<Primitive<EventTypes[EventName]>>) => callback(detail);
-        this.addEventListener(eventName as string, listener as EventListener, {
+        const listener = ({ detail }: CustomEventInit<Primitive<EventTypes[EventName]>>) => callback(detail);
+        this.addEventListener(eventName, listener, {
           signal: this.killSignal,
         });
       },
@@ -271,7 +272,7 @@ export abstract class Jadis extends HTMLElement {
     eventName: EventName,
     callback: (event: HTMLElementEventMap[EventName]) => void
   ): void {
-    element.addEventListener(eventName as string, callback as EventListener, {
+    element.addEventListener(eventName, callback, {
       signal: this.killSignal,
     });
   }

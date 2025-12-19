@@ -31,8 +31,8 @@ export function createElement<Component extends JadisConstructor>(
   options?: OptionsWithProps<ElementValues<InstanceType<Component>>>,
   appendTo?: AppendableElement
 ): InstanceType<Component>;
-export function createElement(
-  tag: string,
+export function createElement<Tag extends keyof HTMLElementTagNameMap | HTMLElement | JadisConstructor>(
+  tag: Tag,
   options: OptionsWithProps<Record<string, unknown>> = {},
   appendTo?: AppendableElement
 ): HTMLElement {

@@ -6,9 +6,9 @@ export type UseEventsHandler<EventType> = {
    * @param event The event key to listen for
    * @param callback The callback to invoke when the event is emitted
    */
-  register: <EventKey extends keyof EventType>(
+  register: <EventKey extends keyof EventType & string>(
     event: EventKey,
-    callback: (detail: Primitive<EventType[EventKey]>) => void
+    callback: (detail?: Primitive<EventType[EventKey]>) => void
   ) => void;
 
   /**
@@ -16,7 +16,7 @@ export type UseEventsHandler<EventType> = {
    * @param event The event key to emit
    * @param params The parameters to include with the event
    */
-  emit: <EventKey extends keyof EventType>(
+  emit: <EventKey extends keyof EventType & string>(
     event: EventKey,
     ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
   ) => void;

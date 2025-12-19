@@ -8,6 +8,9 @@ describe('Component helper', () => {
 
     it('should return false for non-component selectors', () => {
       expect(isComponentSelector('div')).toBe(false);
+      expect(isComponentSelector('div-')).toBe(false);
+      expect(isComponentSelector('-div')).toBe(false);
+      expect(isComponentSelector('-')).toBe(false);
     });
   });
 

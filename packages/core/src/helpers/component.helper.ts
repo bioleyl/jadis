@@ -8,7 +8,7 @@ import type { ComponentSelector } from './type.helper';
  * @returns True if the string is a valid component selector, false otherwise
  */
 export function isComponentSelector(key: string): key is ComponentSelector {
-  return key.includes('-');
+  return /^[^-]+-[^-]+$/.test(key);
 }
 
 /**
