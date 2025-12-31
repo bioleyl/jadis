@@ -18,7 +18,9 @@ import type { ChangeOptions, UseEventsHandler } from './types/jadis.type';
 export interface JadisConstructor<T extends Jadis = Jadis> {
   new (): T;
   readonly selector: ComponentSelector;
+  readonly template: string;
   readonly observedAttributes: Array<string>;
+  readonly useShadowDom: boolean;
 }
 
 /**
@@ -30,8 +32,10 @@ export abstract class Jadis extends HTMLElement {
   static readonly selector: ComponentSelector;
   static readonly template: string = '';
   static readonly observedAttributes: Array<string> = [];
-  readonly shadowRoot: ShadowRoot;
+  /** Whether to use Shadow DOM for this component */
+  static readonly useShadowDom: boolean = true;
 
+  readonly shadowRoot: ShadowRoot | null = null;
   protected readonly attributesCallback: Partial<Record<string, (value: string, oldValue: string) => void>> = {};
 
   /** Actions to perform when the component is connected to the DOM. */
@@ -82,8 +86,12 @@ export abstract class Jadis extends HTMLElement {
 
   constructor() {
     super();
-    this.shadowRoot = this.attachShadow({ mode: 'open' });
-    this.shadowRoot.appendChild(this.buildTemplate());
+    if ((this.constructor as JadisConstructor).useShadowDom) {
+      this.shadowRoot = this.attachShadow({ mode: 'open' });
+      this.shadowRoot.appendChild(this.buildTemplate());
+    } else {
+      this.appendChild(this.buildTemplate());
+    }
   }
 
   /**
@@ -345,11 +353,14 @@ export abstract class Jadis extends HTMLElement {
   }
 
   private buildTemplate(): DocumentFragment {
-    const style = document.createElement('style');
-    style.textContent = this.templateCss?.() ?? '';
-
     const fragment = document.createDocumentFragment();
-    fragment.appendChild(style);
+
+    const templateCss = this.templateCss?.();
+    if (templateCss) {
+      const style = document.createElement('style');
+      style.textContent = templateCss;
+      fragment.appendChild(style);
+    }
 
     const htmlContent = this.templateHtml?.();
     if (htmlContent) {
