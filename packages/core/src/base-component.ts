@@ -118,8 +118,8 @@ export abstract class Jadis extends HTMLElement {
    */
   static register(): void {
     assert(this.selector, `selector is not defined for ${this.name}`);
-    if (!customElements.get(this.typeOfClass.selector)) {
-      customElements.define(this.typeOfClass.selector, this.typeOfClass);
+    if (!customElements.get(this.selector)) {
+      customElements.define(this.selector, this.typeOfClass);
     }
   }
 
