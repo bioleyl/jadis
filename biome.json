@@ -42,7 +42,14 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["packages/**/*.{ts,js,css,json}", "!**/node_modules", "!**/dist", "!**/build", "!**/coverage"]
+    "includes": [
+      "packages/**/*.{ts,js,css,json}",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/core/package.json"
+    ]
   },
   "formatter": {
     "attributePosition": "auto",
