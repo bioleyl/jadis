@@ -46,6 +46,7 @@ export abstract class Jadis extends HTMLElement {
   private readonly _abortController = new AbortController();
   private _isConnected = false;
   private _pendingProperties = false;
+  private _rendered = false;
 
   /**
    * Callback invoked when the component is connected to the DOM.
@@ -114,6 +115,7 @@ export abstract class Jadis extends HTMLElement {
    * the property change is complete and the component can now render.
    */
   [INTERNAL_END_PROPERTY](): void {
+    this._pendingProperties = false;
     this.renderTemplate();
   }
 
@@ -378,12 +380,12 @@ export abstract class Jadis extends HTMLElement {
   }
 
   private renderTemplate(): void {
-    const template = this.buildTemplate();
-    if (this.shadowRoot) {
-      this.shadowRoot.appendChild(template);
-    } else {
-      this.appendChild(template);
+    if (this._rendered) {
+      return;
     }
+    this._rendered = true;
+    const template = this.buildTemplate();
+    (this.shadowRoot ?? this).appendChild(template);
   }
 
   private buildTemplate(): DocumentFragment {

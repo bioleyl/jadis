@@ -13,6 +13,7 @@ describe('Jadis — useRefs', () => {
       inside: ref('#inside'),
     }));
 
+    expect(el.shadowRoot).toBeDefined();
     expect(refs.inside).toBe(el.shadowRoot?.querySelector('#inside'));
   });
 });
