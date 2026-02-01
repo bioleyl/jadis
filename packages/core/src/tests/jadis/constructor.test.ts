@@ -1,13 +1,14 @@
-import { TestComponent, TestComponentNoShadow } from './TestComponent';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent, TestComponentNoShadow } from '../fixtures/TestComponent';
 
 describe('Jadis - constructor', () => {
   it('should attach a shadow root', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     expect(el.shadowRoot).toBeDefined();
   });
 
   it('should inject template HTML + CSS', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     expect(el.shadowRoot).toBeDefined();
     const style = el.shadowRoot?.querySelector('style');
     const inside = el.shadowRoot?.querySelector('#inside');
@@ -16,14 +17,14 @@ describe('Jadis - constructor', () => {
   });
 
   it('should not attach a shadow root when useShadowDom is false', () => {
-    const el = new TestComponentNoShadow();
+    const el = createElement(TestComponentNoShadow);
     expect(el.shadowRoot).toBeNull();
     const insideNoShadow = el.querySelector('#inside-no-shadow');
     expect(insideNoShadow).not.toBeNull();
   });
 
   it('should inject template when useShadowDom is false', () => {
-    const el = new TestComponentNoShadow();
+    const el = createElement(TestComponentNoShadow);
     const style = el.querySelector('style');
     const insideNoShadow = el.querySelector('#inside-no-shadow');
     expect(style).toBeNull();

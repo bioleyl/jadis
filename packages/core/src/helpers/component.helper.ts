@@ -1,5 +1,7 @@
+import { INTERNAL_START_PROPERTY } from '../constants';
 import { assert } from './assert.helper';
 
+import type { Jadis } from '../base-component';
 import type { ComponentSelector } from './type.helper';
 
 /**
@@ -20,4 +22,13 @@ export function isComponentSelector(key: string): key is ComponentSelector {
 export const createSelector = (name: string): ComponentSelector => {
   assert(isComponentSelector(name), `Custom element name must contain a hyphen: ${name}`);
   return name;
+};
+
+/**
+ * Checks if an object is an instance of Jadis.
+ * @param obj The object to check
+ * @returns True if the object is an instance of Jadis, false otherwise
+ */
+export const isJadisInstance = (obj: unknown): obj is Jadis => {
+  return INTERNAL_START_PROPERTY in (obj as Jadis) && INTERNAL_START_PROPERTY in (obj as Jadis);
 };

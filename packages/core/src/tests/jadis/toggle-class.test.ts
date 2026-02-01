@@ -2,17 +2,18 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { TestComponent } from './TestComponent';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — toggleClass', () => {
   it('should add class when condition = true', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     el['toggleClass']('active', true);
     expect(el.classList.contains('active')).toBe(true);
   });
 
   it('should remove class when condition = false', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     el.classList.add('active');
     el['toggleClass']('active', false);
     expect(el.classList.contains('active')).toBe(false);

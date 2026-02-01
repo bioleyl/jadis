@@ -2,11 +2,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { TestComponent } from './TestComponent';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — useAttributes', () => {
   it('should create getters for attributes', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     el.setAttribute('foo', 'bar');
 
     const attrs = el['useAttributes']('foo');

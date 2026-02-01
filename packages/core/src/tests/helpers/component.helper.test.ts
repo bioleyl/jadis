@@ -1,4 +1,5 @@
-import { createSelector, isComponentSelector } from '../../helpers/component.helper';
+import { createSelector, isComponentSelector, isJadisInstance } from '../../helpers/component.helper';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Component helper', () => {
   describe('isComponentSelector', () => {
@@ -22,6 +23,17 @@ describe('Component helper', () => {
 
     it('should throw if the component name is invalid', () => {
       expect(() => createSelector('invalidComponent')).toThrow();
+    });
+  });
+
+  describe('isJadisInstance', () => {
+    const el = document.createElement('div');
+    it('should return false for non-Jadis instances', () => {
+      expect(isJadisInstance(el)).toBe(false);
+    });
+    it('should return true for Jadis instances', () => {
+      const el = new TestComponent();
+      expect(isJadisInstance(el)).toBe(true);
     });
   });
 });
