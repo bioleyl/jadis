@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TestComponent } from './TestComponent';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — toTemplate', () => {
   it('should create an instance of the component', () => {

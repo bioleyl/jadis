@@ -2,11 +2,12 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { TestComponent } from './TestComponent';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — useChange', () => {
   it('should call onChange when value changes', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     const spy = vi.fn();
     const handler = el['useChange']<number>(1, spy);
 
@@ -15,7 +16,7 @@ describe('Jadis — useChange', () => {
   });
 
   it('should call onChange immediately if { immediate: true } and connected', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     document.body.appendChild(el);
 
     const spy = vi.fn();

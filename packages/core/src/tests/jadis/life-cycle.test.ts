@@ -2,11 +2,12 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { TestComponent } from './TestComponent';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — lifecycle', () => {
   it('connectedCallback should call onConnect', async () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     const spy = vi.fn();
     el.onConnect = spy;
     document.body.appendChild(el);
@@ -17,7 +18,7 @@ describe('Jadis — lifecycle', () => {
   });
 
   it('disconnectedCallback should abort killSignal and call onDisconnect', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     const spy = vi.fn();
     el.onDisconnect = spy;
 

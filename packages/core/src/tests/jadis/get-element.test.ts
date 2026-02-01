@@ -2,12 +2,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { TestComponent, TestComponentNoShadow } from './TestComponent';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent, TestComponentNoShadow } from '../fixtures/TestComponent';
 
 describe('Jadis — getElement', () => {
   it('should return an element in shadow DOM', () => {
-    const el = new TestComponent();
-    document.body.appendChild(el);
+    const el = createElement(TestComponent, {}, document.body);
     expect(el.shadowRoot).toBeDefined();
 
     const found = el['getElement']('#inside');
@@ -15,26 +15,24 @@ describe('Jadis — getElement', () => {
   });
 
   it('should throw if element not found', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
 
     expect(() => el['getElement']('#missing')).toThrow();
   });
 
   it('should return an element in light DOM when useShadowDom is false', () => {
-    const el = new TestComponentNoShadow();
-    document.body.appendChild(el);
+    const el = createElement(TestComponentNoShadow, {}, document.body);
+    expect(el.shadowRoot).toBeNull();
 
     const found = el['getElement']('#inside-no-shadow');
     expect(found).toBe(el.querySelector('#inside-no-shadow'));
   });
 
   it('should find elements inside nested components with >>> selector', () => {
-    const parent = new TestComponent();
-    document.body.appendChild(parent);
+    const parent = createElement(TestComponent, {}, document.body);
     const parentDiv = parent['getElement']('#inside');
 
-    const child = new TestComponent();
-    parentDiv.appendChild(child);
+    const child = createElement(TestComponent, {}, parentDiv);
 
     expect(parent.shadowRoot?.querySelector('x-test')).toBe(child);
     expect(child.shadowRoot).toBeDefined();
@@ -47,12 +45,10 @@ describe('Jadis — getElement', () => {
   });
 
   it('should find elements inside nested components without shadow DOM with >>> selector', () => {
-    const parent = new TestComponent();
-    document.body.appendChild(parent);
+    const parent = createElement(TestComponent, {}, document.body);
     const parentDiv = parent['getElement']('#inside');
 
-    const child = new TestComponentNoShadow();
-    parentDiv.appendChild(child);
+    const child = createElement(TestComponentNoShadow, {}, parentDiv);
 
     expect(parent.shadowRoot?.querySelector('x-test-no-shadow')).toBe(child);
     expect(child.shadowRoot).toBeNull();

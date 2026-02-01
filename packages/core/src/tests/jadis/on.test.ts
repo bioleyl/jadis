@@ -2,14 +2,16 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { TestComponent } from './TestComponent';
+import { assert } from '../../helpers/assert.helper';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — on', () => {
   it('should register an event listener on an element', () => {
-    const el = new TestComponent();
-    document.body.appendChild(el);
+    const el = createElement(TestComponent, {}, document.body);
 
     const button = document.createElement('button');
+    assert(el.shadowRoot, 'Shadow root should be present');
     el.shadowRoot.appendChild(button);
 
     const callback = vi.fn();
@@ -26,10 +28,10 @@ describe('Jadis — on', () => {
   });
 
   it('should automatically remove the listener when killSignal is aborted', () => {
-    const el = new TestComponent();
-    document.body.appendChild(el);
+    const el = createElement(TestComponent, {}, document.body);
 
     const button = document.createElement('button');
+    assert(el.shadowRoot, 'Shadow root should be present');
     el.shadowRoot.appendChild(button);
 
     const callback = vi.fn();

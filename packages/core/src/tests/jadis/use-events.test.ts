@@ -2,11 +2,12 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { TestComponent } from './TestComponent';
+import { createElement } from '../../helpers/element.helper';
+import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — useEvents', () => {
   it('should register and emit events', () => {
-    const el = new TestComponent();
+    const el = createElement(TestComponent);
     document.body.appendChild(el);
 
     const events = el['useEvents']<{ ping: string }>();
