@@ -52,3 +52,34 @@ templateHtml(): DocumentFragment{
 ```
 
 :::
+
+## Notes on shadow DOM
+
+By default, all *Jadis* components are rendered using a shadow DOM. This provides style and markup encapsulation, preventing unintended side effects from global CSS and ensuring predictable component behavior.
+
+In some cases, it may be desirable to render a component without a Shadow DOM. This can be achieved by setting the static readonly property `useShadowDom` to `false`.
+
+## When to disable the Shadow DOM
+
+Disabling the Shadow DOM is recommended in the following scenarios:
+
+- **Global styling requirements**: when a component must inherit styles from a global stylesheet or a CSS framework that relies on global selectors.
+- **Integration with third party libraries**: when using libraries or scripts that expect direct access to the DOM tree and do not support Shadow DOM boundaries.
+- **Progressive enhancement or legacy environments**: when building components intended to enhance existing markup or integrate into legacy codebases where Shadow DOM usage is not feasible.
+- **SEO or tooling constraints**: when spedific tools, crawlers, or testing utilities do not fully support Shadow DOM and require access to the light DOM.
+
+### Example without a shadow Dom
+
+```typescript
+  export class TestComponentNoShadow extends Jadis {
+  static readonly selector = 'test-no-shadow';
+  static readonly useShadowDom = false;
+
+  templateHtml() {
+    // this template won't be inside
+    // a shadow DOM
+  }
+}
+
+TestComponentNoShadow.register();
+```

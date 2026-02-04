@@ -36,10 +36,8 @@ class FormComponent extends Jadis {
 
   templateHtml() {
     return html`
-      <form>
-        <input class="my-input" />
-        <button>Submit</button>
-      </form>
+      <input class="my-input" />
+      <button>Submit</button>
     `;
   }
 
@@ -48,10 +46,10 @@ class FormComponent extends Jadis {
     button: ref('button'),
   }));
 
-  connectedCallback() {
+  onConnect() {
     this.refs.button.addEventListener('click', () => {
       console.log('Input value:', this.refs.input.value);
-    });
+    }, { signal: this.killSignal });
   }
 }
 ```
@@ -64,10 +62,8 @@ class FormComponent extends Jadis {
 
   templateHtml() {
     return html`
-      <form>
-        <input class="my-input" />
-        <button>Submit</button>
-      </form>
+      <input class="my-input" />
+      <button>Submit</button>
     `;
   }
 
@@ -76,10 +72,10 @@ class FormComponent extends Jadis {
     button: ref('button'),
   }));
 
-  connectedCallback() {
+  onConnect() {
     this.refs.button.addEventListener('click', () => {
       console.log('Input value:', this.refs.input.value);
-    });
+    }, { signal: this.killSignal });
   }
 }
 ```
@@ -91,12 +87,10 @@ import { html, Jadis, createSelector } from '@jadis/core';
 class FormComponent extends Jadis {
   static selector = createSelector('form-component');
 
-  templateHtml() {
+ templateHtml() {
     return html`
-      <form>
-        <input class="my-input" />
-        <button>Submit</button>
-      </form>
+      <input class="my-input" />
+      <button>Submit</button>
     `;
   }
 
@@ -106,10 +100,10 @@ class FormComponent extends Jadis {
     button: ref('button'),
   }));
 
-  connectedCallback() {
+  onConnect() {
     this.refs.button.addEventListener('click', () => {
       console.log('Input value:', this.refs.input.value);
-    });
+    }, { signal: this.killSignal });
   }
 }
 ```
