@@ -66,9 +66,9 @@ Disabling the Shadow DOM is recommended in the following scenarios:
 - **Global styling requirements**: when a component must inherit styles from a global stylesheet or a CSS framework that relies on global selectors.
 - **Integration with third party libraries**: when using libraries or scripts that expect direct access to the DOM tree and do not support Shadow DOM boundaries.
 - **Progressive enhancement or legacy environments**: when building components intended to enhance existing markup or integrate into legacy codebases where Shadow DOM usage is not feasible.
-- **SEO or tooling constraints**: when spedific tools, crawlers, or testing utilities do not fully support Shadow DOM and require access to the light DOM.
+- **SEO or tooling constraints**: when specific tools, crawlers, or testing utilities do not fully support Shadow DOM and require access to the light DOM.
 
-### Example without a shadow Dom
+### Example without a Shadow DOM
 
 ```typescript
   export class TestComponentNoShadow extends Jadis {
