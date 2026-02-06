@@ -5,7 +5,7 @@ Every *Jadis* component provides an internal `AbortSignal` called `killSignal`. 
 ## Signature
 
 ```typescript
-this.killSignal(): AbortSignal;
+this.killSignal: AbortSignal;
 ```
 
 ### Parameters
