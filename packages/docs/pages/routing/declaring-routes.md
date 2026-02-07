@@ -61,7 +61,7 @@ const myRouter = new Router(routes);
 
 myRouter.mountOn(document.getElementById('app'));
 
-myRouter.goto('inv', { id: 'abcd' })
+myRouter.goto('inv', { id: 'abcd' });
 ```
 
 This will navigate `/invoice/abcd`

@@ -60,7 +60,7 @@ import { html, Jadis } from '@jadis/core';
 class FormComponent extends Jadis {
   static readonly selector = 'form-component';
 
-  templateHtml() {
+  templateHtml(): DocumentFragment {
     return html`
       <input class="my-input" />
       <button>Submit</button>

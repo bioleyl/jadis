@@ -59,7 +59,7 @@ class ToggleSwitch extends Jadis {
     button: ref<HTMLButtonElement>('button'),
   }));
 
-  templateHtml() {
+  templateHtml(): DocumentFragment {
     return html`
       <span></span>
       <button>Toggle</button>
@@ -98,7 +98,7 @@ export class Dice extends Jadis {
     return html`
       <span></span>
       <button>Roll</button>
-    `
+    `;
   }
 
   onConnect(): void {

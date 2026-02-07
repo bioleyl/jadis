@@ -24,23 +24,23 @@ toTemplate(<options?>, <slotted?>): <DocumentFragment>
 
 ```javascript
 templateHtml() {
-    return html`
-      ${MyComponent.toTemplate({}, html`
-          <h1 class="title">My Title</h1>
-          <p class="content">My content</p>
-      `)}
-    `
+  return html`
+    ${MyComponent.toTemplate({}, html`
+      <h1 class="title">My Title</h1>
+      <p class="content">My content</p>
+    `)}
+  `;
 }
 ```
 
 ```typescript
 templateHtml(): DocumentFragment {
-    return html`
-      ${MyComponent.toTemplate({}, html`
-          <h1 class="title">My Title</h1>
-          <p class="content">My content</p>
-      `)}
-    `
+  return html`
+    ${MyComponent.toTemplate({}, html`
+      <h1 class="title">My Title</h1>
+      <p class="content">My content</p>
+    `)}
+  `;
 }
 
 ```
