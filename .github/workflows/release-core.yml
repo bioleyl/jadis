@@ -1,0 +1,99 @@
+name: Release Core Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: 'Release notes/changelog'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Get package version
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./packages/core/package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Current @jadis/core version: $VERSION"
+          
+          # Determine npm dist-tag
+          if [[ "${{ inputs.prerelease }}" == "true" ]]; then
+            if [[ "$VERSION" == *"-alpha"* ]]; then
+              echo "NPM_TAG=alpha" >> $GITHUB_ENV
+            elif [[ "$VERSION" == *"-beta"* ]]; then
+              echo "NPM_TAG=beta" >> $GITHUB_ENV
+            elif [[ "$VERSION" == *"-rc"* ]]; then
+              echo "NPM_TAG=rc" >> $GITHUB_ENV
+            else
+              echo "NPM_TAG=next" >> $GITHUB_ENV
+            fi
+          else
+            echo "NPM_TAG=latest" >> $GITHUB_ENV
+          fi
+          echo "Will publish to npm with tag: $NPM_TAG"
+      
+      - name: Build package
+        run: |
+          cd packages/core
+          npm run build
+      
+      - name: Publish to npm with provenance
+        run: npm publish --workspace=packages/core --access public --provenance --tag ${{ env.NPM_TAG }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Create Git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "core-v${{ env.VERSION }}" -m "@jadis/core v${{ env.VERSION }}"
+          git push origin "core-v${{ env.VERSION }}"
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: core-v${{ env.VERSION }}
+          release_name: '@jadis/core v${{ env.VERSION }}'
+          body: |
+            ## @jadis/core v${{ env.VERSION }}
+            
+            ${{ inputs.release_notes }}
+            
+            ### Installation
+            ```bash
+            npm install @jadis/core@${{ env.VERSION }}
+            ```
+          draft: false
+          prerelease: ${{ inputs.prerelease }}
