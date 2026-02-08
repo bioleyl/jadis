@@ -60,7 +60,7 @@
   "name": "@jadis/core",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bioleyl/jadis.git"
+    "url": "git+https://github.com/bioleyl/jadis.git"
   },
   "scripts": {
     "build": "npm run build:types && npm run build:bundle",

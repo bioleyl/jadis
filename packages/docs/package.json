@@ -10,7 +10,8 @@
   "scripts": {
     "build": "vitepress build",
     "dev": "vitepress dev",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "test": "echo \"No tests for create package\" && exit 0"
   },
   "version": "1.0.0"
 }

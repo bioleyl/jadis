@@ -69,8 +69,6 @@ jobs:
       
       - name: Publish to npm with provenance
         run: npm publish --workspace=packages/core --access public --provenance --tag ${{ env.NPM_TAG }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Create Git tag
         run: |

@@ -28,7 +28,7 @@
   "name": "@jadis/create",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bioleyl/jadis.git"
+    "url": "git+https://github.com/bioleyl/jadis.git"
   },
   "scripts": {
     "test": "echo \"No tests for create package\" && exit 0"
