@@ -29,7 +29,7 @@ export default class MyButton extends Jadis {
   isError = false;
 
   refs = this.useRefs((ref) => ({
-      button: ref('button')
+    button: ref('button')
   }));
 
   templateHtml() {
@@ -70,7 +70,7 @@ export default class MyButton extends Jadis {
   private isError = false;
 
   private readonly refs = this.useRefs((ref) => ({
-      button: ref<HTMLButtonElement>('button')
+    button: ref<HTMLButtonElement>('button')
   }));
 
   templateHtml(): DocumentFragment {

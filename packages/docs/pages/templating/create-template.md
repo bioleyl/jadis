@@ -18,7 +18,7 @@ templateHtml?(): DocumentFragment;
 ### Parameters
 
 - none
-  
+
 ### Return value
 
 - `DocumentFragment` A fragment representing the component’s HTML template.
@@ -31,23 +31,23 @@ Override this method in your component to provide a custom HTML template. Typica
 :::code-group
 
 ```javascript
-templateHtml(){
-    return html`
-      <div class="container">
-        <p>Hello There</p>
-      </div>
-    `;
-  }
+templateHtml() {
+  return html`
+    <div class="container">
+      <p>Hello There</p>
+    </div>
+  `;
+}
 ```
 
 ```typescript
-templateHtml(): DocumentFragment{
-    return html`
-      <div class="container">
-        <p>Hello There</p>
-      </div>
-    `;
-  }
+templateHtml(): DocumentFragment {
+  return html`
+    <div class="container">
+      <p>Hello There</p>
+    </div>
+  `;
+}
 
 ```
 
@@ -71,7 +71,7 @@ Disabling the Shadow DOM is recommended in the following scenarios:
 ### Example without a Shadow DOM
 
 ```typescript
-  export class TestComponentNoShadow extends Jadis {
+export class TestComponentNoShadow extends Jadis {
   static readonly selector = 'test-no-shadow';
   static readonly useShadowDom = false;
 

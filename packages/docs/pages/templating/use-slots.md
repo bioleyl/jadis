@@ -107,7 +107,7 @@ templateHtml() {
         <slot></slot>
         <slot name='article'></slot>
     </div>
-  `
+  `;
 }
 
 // Using MyComponent in MainPage.js
@@ -120,7 +120,7 @@ templateHtml() {
         My article content is good.
       </div>
     </my-component>
-  `
+  `;
 }
 ```
 
@@ -133,21 +133,21 @@ templateHtml(): DocumentFragment {
       <slot></slot>
       <slot name='article'></slot>
     </div>
-  `
+  `;
 }
 
 // Using MyComponent in MainPage.ts
 templateHtml(): DocumentFragment {
-    return html`
-      <my-component>
-        <h1>My Title</h1>
-        <p>Hello there</p>
-        <div slot='article'>
-          My article content is good.
-        </div>
-      </my-component>
-    `;
-  }
+  return html`
+    <my-component>
+      <h1>My Title</h1>
+      <p>Hello there</p>
+      <div slot='article'>
+        My article content is good.
+      </div>
+    </my-component>
+  `;
+}
 
 ```
 
@@ -173,7 +173,8 @@ class MainPage extends Jadis {
       ${MyComponent.toTemplate(
         {},
         html`<h1>My Article Title</h1>
-          <p slot='article'>My article content</p>`
+          <p slot='article'>My article content</p>
+        `;
       )}
     `;
   }
@@ -208,7 +209,8 @@ class MainPage extends Jadis {
       ${MyComponent.toTemplate(
         {},
         html`<h1>My Article Title</h1>
-          <p slot='article'>My article content</p>`
+          <p slot='article'>My article content</p>
+        `;
       )}
     `;
   }
