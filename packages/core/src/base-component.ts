@@ -42,8 +42,9 @@ export abstract class Jadis extends HTMLElement {
   /** Actions to perform when the component is connected to the DOM. */
   protected onConnectActions: Array<() => void> = [];
 
-  private readonly _abortController = new AbortController();
+  private _abortController = new AbortController();
   private _isConnected = false;
+  private _hasRendered = false;
 
   /**
    * Callback invoked when the component is connected to the DOM.
@@ -141,11 +142,13 @@ export abstract class Jadis extends HTMLElement {
       this.onConnectActions.forEach((fn) => {
         fn();
       });
+      this.onConnectActions = [];
       this.onConnect?.();
     });
   }
 
   disconnectedCallback(): void {
+    this._isConnected = false;
     this._abortController.abort();
     this.onDisconnect?.();
   }
@@ -356,8 +359,12 @@ export abstract class Jadis extends HTMLElement {
   }
 
   private renderTemplate(): void {
+    if (this._hasRendered) {
+      return;
+    }
     const template = this.buildTemplate();
     (this.shadowRoot ?? this).appendChild(template);
+    this._hasRendered = true;
   }
 
   private buildTemplate(): DocumentFragment {

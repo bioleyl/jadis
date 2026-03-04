@@ -6,12 +6,14 @@ import { createElement } from '../../helpers/element.helper';
 import { TestComponent } from '../fixtures/TestComponent';
 
 describe('Jadis — useChange', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
   it('should call onChange when value changes', () => {
-    const el = createElement(TestComponent);
+    const el = createElement(TestComponent, {}, document.body);
     const spy = vi.fn();
     const handler = el['useChange']<number>(1, spy);
-
-    el.connectedCallback();
 
     handler.set(2);
     expect(spy).toHaveBeenCalledWith(2, 1);
@@ -33,7 +35,7 @@ describe('Jadis — useChange', () => {
 
     handler.set(2);
 
-    el.connectedCallback();
+    document.body.appendChild(el);
 
     await vi.waitFor(() => {
       expect(spy).toHaveBeenCalledWith(2, 1);
@@ -41,9 +43,7 @@ describe('Jadis — useChange', () => {
   });
 
   it('should call onChange immediately if { immediate: true } and connected', () => {
-    const el = createElement(TestComponent);
-
-    el.connectedCallback();
+    const el = createElement(TestComponent, {}, document.body);
 
     const spy = vi.fn();
     el['useChange'](5, spy, { immediate: true });
