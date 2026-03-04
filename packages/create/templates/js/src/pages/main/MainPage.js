@@ -1,4 +1,4 @@
-import { createElement, createSelector, html, Jadis } from '@jadis/core';
+import { assert, createElement, createSelector, html, Jadis } from '@jadis/core';
 
 import logo from '../../assets/logo.svg';
 import Counter from '../../components/Counter';
@@ -36,6 +36,7 @@ export default class MainPage extends Jadis {
     createElement('img', { attrs: { src: logo } }, header);
 
     this.refs.input.events.register('greet', (name) => {
+      assert(name, 'Name is required');
       myRouter.goto('hello', { name });
     });
   }

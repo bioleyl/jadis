@@ -1,8 +1,7 @@
-import { INTERNAL_END_PROPERTY, INTERNAL_START_PROPERTY } from '../constants';
 import { ChangeHandler } from './change.helper';
 import { toKebabCase } from './string.helper';
 
-import type { Jadis, JadisConstructor } from '../base-component';
+import type { JadisConstructor } from '../base-component';
 import type { AppendableElement, ElementValues, OptionsWithProps } from './type.helper';
 
 /**
@@ -38,7 +37,6 @@ export function createElement<Tag extends keyof HTMLElementTagNameMap | HTMLElem
   appendTo?: AppendableElement
 ): HTMLElement {
   const el = document.createElement(tag.toString());
-  (el as Jadis)[INTERNAL_START_PROPERTY]?.();
 
   Object.entries(options.props ?? {}).forEach(([key, value]) => {
     const prop = el as HTMLElement & Record<string, unknown>;
@@ -53,7 +51,6 @@ export function createElement<Tag extends keyof HTMLElementTagNameMap | HTMLElem
     el.setAttribute(toKebabCase(key), String(value));
   });
 
-  (el as Jadis)[INTERNAL_END_PROPERTY]?.();
   appendTo?.appendChild(el);
   return el;
 }

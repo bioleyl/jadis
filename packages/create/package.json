@@ -33,5 +33,5 @@
   "scripts": {
     "test": "echo \"No tests for create package\" && exit 0"
   },
-  "version": "1.6.0"
+  "version": "1.7.0"
 }
