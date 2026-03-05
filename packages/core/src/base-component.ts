@@ -1,6 +1,5 @@
 /** biome-ignore-all lint/complexity/noThisInStatic: I explicitly need to refer to "this" and not Jadis for code hint when creating components */
 
-import { INTERNAL_END_PROPERTY, INTERNAL_START_PROPERTY } from './constants';
 import { assert } from './helpers/assert.helper';
 import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
@@ -43,10 +42,9 @@ export abstract class Jadis extends HTMLElement {
   /** Actions to perform when the component is connected to the DOM. */
   protected onConnectActions: Array<() => void> = [];
 
-  private readonly _abortController = new AbortController();
+  private _abortController = new AbortController();
   private _isConnected = false;
-  private _pendingProperties = false;
-  private _rendered = false;
+  private _hasRendered = false;
 
   /**
    * Callback invoked when the component is connected to the DOM.
@@ -93,30 +91,6 @@ export abstract class Jadis extends HTMLElement {
     if ((this.constructor as JadisConstructor).useShadowDom) {
       this.shadowRoot = this.attachShadow({ mode: 'open' });
     }
-    queueMicrotask(() => {
-      if (!this._pendingProperties) {
-        this.renderTemplate();
-      }
-    });
-  }
-
-  /**
-   * Marks the start of a property update.
-   * This method is called before updating properties to indicate that
-   * a property change is in progress and the component should not render yet.
-   */
-  [INTERNAL_START_PROPERTY](): void {
-    this._pendingProperties = true;
-  }
-
-  /**
-   * Marks the end of a property update.
-   * This method is called after updating properties to indicate that
-   * the property change is complete and the component can now render.
-   */
-  [INTERNAL_END_PROPERTY](): void {
-    this._pendingProperties = false;
-    this.renderTemplate();
   }
 
   /**
@@ -161,16 +135,20 @@ export abstract class Jadis extends HTMLElement {
   }
 
   connectedCallback(): void {
+    this.renderTemplate();
     this._isConnected = true;
+
     setTimeout(() => {
       this.onConnectActions.forEach((fn) => {
         fn();
       });
+      this.onConnectActions = [];
       this.onConnect?.();
     });
   }
 
   disconnectedCallback(): void {
+    this._isConnected = false;
     this._abortController.abort();
     this.onDisconnect?.();
   }
@@ -367,25 +345,26 @@ export abstract class Jadis extends HTMLElement {
     onChange: (newValue: T, oldValue: T) => void,
     { immediate = false }: ChangeOptions = {}
   ): Readonly<ChangeHandler<T>> {
+    const updateFunc = (newValue: T, oldValue: T) => {
+      this._isConnected
+        ? onChange(newValue, oldValue)
+        : this.onConnectActions.push(() => onChange(newValue, oldValue));
+    };
+
     if (immediate) {
-      if (this._isConnected) {
-        onChange(initialValue, initialValue);
-      } else {
-        this.onConnectActions.push(() => {
-          onChange(initialValue, initialValue);
-        });
-      }
+      updateFunc(initialValue, initialValue);
     }
-    return new ChangeHandler<T>(initialValue, onChange);
+
+    return new ChangeHandler<T>(initialValue, updateFunc);
   }
 
   private renderTemplate(): void {
-    if (this._rendered) {
+    if (this._hasRendered) {
       return;
     }
-    this._rendered = true;
     const template = this.buildTemplate();
     (this.shadowRoot ?? this).appendChild(template);
+    this._hasRendered = true;
   }
 
   private buildTemplate(): DocumentFragment {
