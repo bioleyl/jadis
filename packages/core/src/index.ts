@@ -8,5 +8,5 @@ export { toKebabCase } from './helpers/string.helper';
 export { css, html } from './helpers/template.helper';
 export { Router } from './router/router';
 
-export type { UseEventsHandler } from './types/jadis.type';
+export type { ChangeOptions, UseChangeHandler as ChangeStateHandler, UseEventsHandler } from './types/jadis.type';
 export type { Route, RouterMode, RouterOptions } from './types/router.type';

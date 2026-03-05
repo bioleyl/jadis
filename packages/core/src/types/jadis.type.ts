@@ -22,6 +22,11 @@ export type UseEventsHandler<EventType> = {
   ) => void;
 };
 
+export type UseChangeHandler<StateType> = Readonly<{
+  get(): StateType;
+  set(setter: StateType | ((prevState: StateType) => StateType)): void;
+}>;
+
 export interface ChangeOptions {
   immediate?: boolean;
 }
