@@ -58,7 +58,7 @@ Then in your HTML:
 
 ## Using a CDN
 
-You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@0.12.0):
+You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@0.12.1):
 
 ```html
 <!DOCTYPE html>
@@ -73,7 +73,7 @@ You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/co
     <script type="importmap">
       {
         "imports": {
-          "jadis": "https://esm.sh/@jadis/core@0.12.0"
+          "jadis": "https://esm.sh/@jadis/core@0.12.1"
         }
       }
     </script>

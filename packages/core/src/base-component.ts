@@ -14,7 +14,7 @@ import type {
   Primitive,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
-import type { ChangeOptions, UseEventsHandler } from './types/jadis.type';
+import type { ChangeOptions, UseChangeHandler, UseEventsHandler } from './types/jadis.type';
 
 export interface JadisConstructor<T extends Jadis = Jadis> {
   new (): T;
@@ -344,7 +344,7 @@ export abstract class Jadis extends HTMLElement {
     initialValue: T,
     onChange: (newValue: T, oldValue: T) => void,
     { immediate = false }: ChangeOptions = {}
-  ): Readonly<ChangeHandler<T>> {
+  ): Readonly<UseChangeHandler<T>> {
     const updateFunc = (newValue: T, oldValue: T) => {
       this._isConnected
         ? onChange(newValue, oldValue)
