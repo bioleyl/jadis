@@ -42,3 +42,13 @@ export type SelectorToElementWithFallback<
   S extends keyof HTMLElementTagNameMap | string,
   Fallback extends HTMLElement = HTMLElement,
 > = S extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[S] : Fallback;
+
+export type KeysWithUndefined<T> = {
+  [K in keyof T]-?: undefined extends Primitive<T[K]> ? K : never;
+}[keyof T] &
+  string;
+
+export type KeysWithoutUndefined<T> = {
+  [K in keyof T]-?: undefined extends Primitive<T[K]> ? never : K;
+}[keyof T] &
+  string;

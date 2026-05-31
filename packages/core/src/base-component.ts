@@ -9,7 +9,6 @@ import type {
   ComponentSelector,
   Constructor,
   ElementValues,
-  OptionalIfUndefined,
   OptionsWithProps,
   Primitive,
   SelectorToElementWithFallback,
@@ -250,28 +249,25 @@ export abstract class Jadis extends HTMLElement {
    * events.emit('someEvent', 'Hello World');
    */
   protected useEvents<EventTypes>(
-    // Needed in JS for typing if no JSDoc is present
     _schema?: {
       [EventName in keyof EventTypes]: Constructor<EventTypes[EventName]> | undefined;
     }
   ): Readonly<UseEventsHandler<EventTypes>> {
     return Object.freeze({
-      emit: <EventName extends keyof EventTypes & string>(
-        eventName: EventName,
-        ...params: OptionalIfUndefined<Primitive<EventTypes[EventName]>>
-      ): void => {
-        this.dispatchEvent(new CustomEvent(eventName, { detail: params[0] }));
+      emit: (eventName: string, detail?: unknown): void => {
+        this.dispatchEvent(new CustomEvent(eventName, { detail }));
       },
-      register: <EventName extends keyof EventTypes & string>(
-        eventName: EventName,
-        callback: (detail?: Primitive<EventTypes[EventName]>) => void
-      ): void => {
-        const listener = ({ detail }: CustomEventInit<Primitive<EventTypes[EventName]>>) => callback(detail);
+
+      register: (eventName: string, callback: (detail?: unknown) => void): void => {
+        const listener = (event: Event) => {
+          callback((event as CustomEvent<unknown>).detail);
+        };
+
         this.addEventListener(eventName, listener, {
           signal: this.killSignal,
         });
       },
-    });
+    }) as Readonly<UseEventsHandler<EventTypes>>;
   }
 
   /**
