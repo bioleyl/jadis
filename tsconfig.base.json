@@ -9,7 +9,6 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "moduleResolution": "node",
     "skipLibCheck": true,
     "strict": true,
   },
