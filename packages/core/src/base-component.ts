@@ -279,14 +279,9 @@ export abstract class Jadis extends HTMLElement {
 
       // biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
       register: (eventName: string, callback: (...args: any[]) => void): void => {
-        const listener = (eventObj: Event) => {
-          const detail = (eventObj as CustomEvent<unknown>).detail;
-          callback(detail);
-        };
+        const listener = ({ detail }: CustomEventInit<Event>) => callback(detail);
 
-        this.addEventListener(eventName, listener as EventListener, {
-          signal: this.killSignal,
-        });
+        this.addEventListener(eventName, listener, { signal: this.killSignal });
       },
     };
 

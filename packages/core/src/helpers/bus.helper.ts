@@ -8,7 +8,7 @@ export class Bus<T extends Record<string, unknown>> {
   private readonly _domElement = new EventTarget();
 
   // biome-ignore lint/complexity/noUselessConstructor: Needed in JS for typing if no JSDoc is present
-  constructor(_schema?: EventSchema) {} // NOSONARr(_schema?: { [K in keyof T]: Constructor<T[K]> | undefined }) {} // NOSONAR
+  constructor(_schema?: EventSchema) {} // NOSONAR
 
   /**
    * Registers a callback for a specific event.
