@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { createElement } from '../../helpers/element.helper';
 import { TestComponent, TestComponentNoShadow } from '../fixtures/TestComponent';
 

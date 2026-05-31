@@ -10,12 +10,16 @@ describe('Jadis — useEvents', () => {
     const el = createElement(TestComponent);
     document.body.appendChild(el);
 
-    const events = el['useEvents']<{ ping: string }>();
-    const spy = vi.fn();
+    const events = el['useEvents']<{ ping: string; pong: undefined }>();
+    const spyPing = vi.fn();
+    const spyPong = vi.fn();
 
-    events.register('ping', spy);
+    events.register('ping', spyPing);
+    events.register('pong', spyPong);
     events.emit('ping', 'hello');
+    events.emit('pong');
 
-    expect(spy).toHaveBeenCalledWith('hello');
+    expect(spyPing).toHaveBeenCalledWith('hello');
+    expect(spyPong).toHaveBeenCalledWith(null);
   });
 });

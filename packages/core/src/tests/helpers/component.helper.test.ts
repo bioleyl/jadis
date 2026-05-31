@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { createSelector, isComponentSelector } from '../../helpers/component.helper';
 
 describe('Component helper', () => {
