@@ -1,35 +1,46 @@
 import type { ChangeHandler } from './change.helper';
 
 export type Constructor<T> = new (...args: unknown[]) => T;
-
+// biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
 export type Callable = (...args: any[]) => any;
 
 export type NonCallableValues<T> = {
   [K in keyof T]: T[K] extends Callable ? never : T[K];
 }[keyof T];
 
-export type Primitive<T> = T extends NumberConstructor
-  ? number
-  : T extends StringConstructor
-    ? string
-    : T extends BooleanConstructor
-      ? boolean
-      : T extends BigIntConstructor
-        ? bigint
-        : T extends SymbolConstructor
-          ? symbol
-          : T extends FunctionConstructor
-            ? Callable
-            : T extends ArrayConstructor
-              ? Array<unknown>
-              : T;
+export type EventSchemaValue =
+  | StringConstructor
+  | NumberConstructor
+  | BooleanConstructor
+  | BigIntConstructor
+  | SymbolConstructor
+  | FunctionConstructor
+  | ArrayConstructor
+  | Constructor<unknown>
+  | undefined;
 
-export type OptionalIfUndefined<T> = undefined extends T ? [param?: T] : [param: T];
+export type EventValue<T> = [T] extends [StringConstructor]
+  ? string
+  : [T] extends [NumberConstructor]
+    ? number
+    : [T] extends [BooleanConstructor]
+      ? boolean
+      : [T] extends [BigIntConstructor]
+        ? bigint
+        : [T] extends [SymbolConstructor]
+          ? symbol
+          : [T] extends [FunctionConstructor]
+            ? Callable
+            : [T] extends [ArrayConstructor]
+              ? Array<unknown>
+              : [T] extends [Constructor<infer U>]
+                ? U
+                : [T] extends [undefined]
+                  ? undefined
+                  : T;
 
 export type ComponentSelector = `${string}-${string}`;
-
 export type HtmlMarkupValue = string | number | boolean | Node | Node[] | null | undefined;
-
 export type AppendableElement = HTMLElement | ShadowRoot | DocumentFragment;
 
 export type ElementValues<T extends HTMLElement> = {
@@ -43,12 +54,19 @@ export type SelectorToElementWithFallback<
   Fallback extends HTMLElement = HTMLElement,
 > = S extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[S] : Fallback;
 
-export type KeysWithUndefined<T> = {
-  [K in keyof T]-?: undefined extends Primitive<T[K]> ? K : never;
-}[keyof T] &
-  string;
+export type EventSchema = Record<string, EventSchemaValue>;
 
-export type KeysWithoutUndefined<T> = {
-  [K in keyof T]-?: undefined extends Primitive<T[K]> ? never : K;
-}[keyof T] &
-  string;
+export type SchemaToEvents<S extends EventSchema> = {
+  [K in keyof S]: EventValue<S[K]>;
+};
+
+export type EventKey<T extends Record<string, unknown>> = Extract<keyof T, string>;
+export type HasUndefined<T> = [Extract<T, undefined>] extends [never] ? false : true;
+
+export type KeysWithUndefined<T extends Record<string, unknown>> = {
+  [K in EventKey<T>]-?: HasUndefined<T[K]> extends true ? K : never;
+}[EventKey<T>];
+
+export type KeysWithoutUndefined<T extends Record<string, unknown>> = {
+  [K in EventKey<T>]-?: HasUndefined<T[K]> extends true ? never : K;
+}[EventKey<T>];

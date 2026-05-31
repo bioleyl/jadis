@@ -1,6 +1,6 @@
-import type { KeysWithoutUndefined, KeysWithUndefined, Primitive } from '../helpers/type.helper';
+import type { KeysWithoutUndefined, KeysWithUndefined } from '../helpers/type.helper';
 
-export type UseEventsHandler<EventTypes> = {
+export type UseEventsHandler<EventTypes extends Record<string, unknown>> = {
   /**
    * Registers a callback for a specific event.
    * @param event The event key to listen for
@@ -8,11 +8,11 @@ export type UseEventsHandler<EventTypes> = {
    */
   register<EventName extends KeysWithoutUndefined<EventTypes>>(
     eventName: EventName,
-    callback: (detail: Primitive<EventTypes[EventName]>) => void
+    callback: (detail: EventTypes[EventName]) => void
   ): void;
   register<EventName extends KeysWithUndefined<EventTypes>>(
     eventName: EventName,
-    callback: (detail?: Primitive<EventTypes[EventName]>) => void
+    callback: (detail?: EventTypes[EventName]) => void
   ): void;
 
   /**
@@ -22,11 +22,11 @@ export type UseEventsHandler<EventTypes> = {
    */
   emit<EventName extends KeysWithoutUndefined<EventTypes>>(
     eventName: EventName,
-    detail: Primitive<EventTypes[EventName]>
+    detail: EventTypes[EventName]
   ): void;
   emit<EventName extends KeysWithUndefined<EventTypes>>(
     eventName: EventName,
-    detail?: Primitive<EventTypes[EventName]>
+    detail?: EventTypes[EventName]
   ): void;
 };
 

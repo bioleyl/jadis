@@ -7,10 +7,13 @@ import { createElement } from './helpers/element.helper';
 import type { Bus } from './helpers/bus.helper';
 import type {
   ComponentSelector,
-  Constructor,
   ElementValues,
+  EventKey,
+  EventSchema,
+  KeysWithoutUndefined,
+  KeysWithUndefined,
   OptionsWithProps,
-  Primitive,
+  SchemaToEvents,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
 import type { ChangeOptions, UseChangeHandler, UseEventsHandler } from './types/jadis.type';
@@ -200,12 +203,28 @@ export abstract class Jadis extends HTMLElement {
    * @param eventName The event name to listen to
    * @param callback The callback to invoke when the event is emitted
    */
-  protected onBus<BusType extends Record<string, unknown>, BusEventKey extends Extract<keyof BusType, string>>(
+  protected onBus<BusType extends Record<string, unknown>, K extends KeysWithoutUndefined<BusType>>(
     bus: Bus<BusType>,
-    eventName: BusEventKey,
-    callback: (detail?: Primitive<BusType[BusEventKey]>) => void
+    eventName: K,
+    callback: (detail: BusType[K]) => void
+  ): void;
+  protected onBus<BusType extends Record<string, unknown>, K extends KeysWithUndefined<BusType>>(
+    bus: Bus<BusType>,
+    eventName: K,
+    callback: (detail?: BusType[K]) => void
+  ): void;
+  protected onBus<BusType extends Record<string, unknown>>(
+    bus: Bus<BusType>,
+    eventName: EventKey<BusType>,
+    // biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
+    callback: (...args: any[]) => void
   ): void {
-    bus.register(eventName, callback, this.killSignal);
+    // biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
+    (bus.register as (event: EventKey<BusType>, cb: (...args: any[]) => void, signal: AbortSignal) => void)(
+      eventName,
+      callback,
+      this.killSignal
+    );
   }
 
   /**
@@ -248,26 +267,30 @@ export abstract class Jadis extends HTMLElement {
    * });
    * events.emit('someEvent', 'Hello World');
    */
-  protected useEvents<EventTypes>(
-    _schema?: {
-      [EventName in keyof EventTypes]: Constructor<EventTypes[EventName]> | undefined;
-    }
-  ): Readonly<UseEventsHandler<EventTypes>> {
-    return Object.freeze({
+  protected useEvents<TEvents extends Record<string, unknown>>(): Readonly<UseEventsHandler<TEvents>>;
+  protected useEvents<TSchema extends EventSchema>(
+    schema: TSchema
+  ): Readonly<UseEventsHandler<SchemaToEvents<TSchema>>>;
+  protected useEvents(_schema?: EventSchema): Readonly<UseEventsHandler<Record<string, unknown>>> {
+    const events = {
       emit: (eventName: string, detail?: unknown): void => {
         this.dispatchEvent(new CustomEvent(eventName, { detail }));
       },
 
-      register: (eventName: string, callback: (detail?: unknown) => void): void => {
-        const listener = (event: Event) => {
-          callback((event as CustomEvent<unknown>).detail);
+      // biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
+      register: (eventName: string, callback: (...args: any[]) => void): void => {
+        const listener = (eventObj: Event) => {
+          const detail = (eventObj as CustomEvent<unknown>).detail;
+          callback(detail);
         };
 
-        this.addEventListener(eventName, listener, {
+        this.addEventListener(eventName, listener as EventListener, {
           signal: this.killSignal,
         });
       },
-    }) as Readonly<UseEventsHandler<EventTypes>>;
+    };
+
+    return Object.freeze(events) as Readonly<UseEventsHandler<Record<string, unknown>>>;
   }
 
   /**
