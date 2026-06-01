@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noSelfCompare: We need pointless comparison for thoses tests */
-import { describe } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { assert } from '../../helpers/assert.helper';
 

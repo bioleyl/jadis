@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { toKebabCase } from '../../helpers/string.helper';
 
 describe('String helper', () => {

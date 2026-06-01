@@ -1,25 +1,33 @@
-import type { OptionalIfUndefined, Primitive } from '../helpers/type.helper';
+import type { KeysWithoutUndefined, KeysWithUndefined } from '../helpers/type.helper';
 
-export type UseEventsHandler<EventType> = {
+export type UseEventsHandler<EventTypes extends Record<string, unknown>> = {
   /**
    * Registers a callback for a specific event.
    * @param event The event key to listen for
    * @param callback The callback to invoke when the event is emitted
    */
-  register: <EventKey extends keyof EventType & string>(
-    event: EventKey,
-    callback: (detail?: Primitive<EventType[EventKey]>) => void
-  ) => void;
+  register<EventName extends KeysWithoutUndefined<EventTypes>>(
+    eventName: EventName,
+    callback: (detail: EventTypes[EventName]) => void
+  ): void;
+  register<EventName extends KeysWithUndefined<EventTypes>>(
+    eventName: EventName,
+    callback: (detail?: EventTypes[EventName]) => void
+  ): void;
 
   /**
    * Emits an event on the component.
    * @param event The event key to emit
    * @param params The parameters to include with the event
    */
-  emit: <EventKey extends keyof EventType & string>(
-    event: EventKey,
-    ...params: OptionalIfUndefined<Primitive<EventType[EventKey]>>
-  ) => void;
+  emit<EventName extends KeysWithoutUndefined<EventTypes>>(
+    eventName: EventName,
+    detail: EventTypes[EventName]
+  ): void;
+  emit<EventName extends KeysWithUndefined<EventTypes>>(
+    eventName: EventName,
+    detail?: EventTypes[EventName]
+  ): void;
 };
 
 export type UseChangeHandler<StateType> = Readonly<{

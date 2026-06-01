@@ -1,4 +1,4 @@
-import type { Constructor, OptionalIfUndefined, Primitive } from './type.helper';
+import type { EventKey, EventSchema, KeysWithoutUndefined, KeysWithUndefined } from './type.helper';
 
 /**
  * A bus for handling events in a type-safe manner.
@@ -8,7 +8,7 @@ export class Bus<T extends Record<string, unknown>> {
   private readonly _domElement = new EventTarget();
 
   // biome-ignore lint/complexity/noUselessConstructor: Needed in JS for typing if no JSDoc is present
-  constructor(_schema?: { [K in keyof T]: Constructor<T[K]> | undefined }) {} // NOSONAR
+  constructor(_schema?: EventSchema) {} // NOSONAR
 
   /**
    * Registers a callback for a specific event.
@@ -16,12 +16,16 @@ export class Bus<T extends Record<string, unknown>> {
    * @param callback The callback to invoke when the event is emitted
    * @param signal The AbortSignal to cancel the listener
    */
-  register<K extends Extract<keyof T, string>>(
+  register<K extends KeysWithoutUndefined<T>>(
     event: K,
-    callback: (detail?: Primitive<T[K]>) => void,
+    callback: (detail: T[K]) => void,
     signal: AbortSignal
-  ): void {
-    const listener = ({ detail }: CustomEventInit<Primitive<T[K]>>) => callback(detail);
+  ): void;
+  register<K extends KeysWithUndefined<T>>(event: K, callback: (detail?: T[K]) => void, signal: AbortSignal): void;
+  // biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
+  register(event: EventKey<T>, callback: (...args: any[]) => void, signal: AbortSignal): void {
+    const listener = ({ detail }: CustomEventInit<T[EventKey<T>]>) => callback(detail);
+
     this._domElement.addEventListener(event, listener, { signal });
   }
 
@@ -30,7 +34,9 @@ export class Bus<T extends Record<string, unknown>> {
    * @param event The event key to emit
    * @param params The parameters to include with the event
    */
-  emit<K extends Extract<keyof T, string>>(event: K, ...params: OptionalIfUndefined<Primitive<T[K]>>): void {
-    this._domElement.dispatchEvent(new CustomEvent(event, { detail: params[0] }));
+  emit<K extends KeysWithoutUndefined<T>>(event: K, detail: T[K]): void;
+  emit<K extends KeysWithUndefined<T>>(event: K, detail?: T[K]): void;
+  emit(event: EventKey<T>, detail?: unknown): void {
+    this._domElement.dispatchEvent(new CustomEvent(event, { detail }));
   }
 }

@@ -1,8 +1,8 @@
 {
   "devDependencies": {
-    "@jadis/core": "^0.12.1",
-    "typescript": "~5.9.3",
-    "vite": "^7.3.1"
+    "@jadis/core": "^0.12.2",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.14"
   },
   "name": "jadis-ts",
   "private": true,

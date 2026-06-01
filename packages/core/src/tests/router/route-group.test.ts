@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 
 import { Jadis } from '../../base-component';
 import { defineRouteGroup, defineRoutes } from '../../helpers/router.helper';

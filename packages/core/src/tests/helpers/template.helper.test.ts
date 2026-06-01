@@ -1,4 +1,6 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: It cannot infer that a div exist based on the previous assertion */
+import { describe, expect, it } from 'vitest';
+
 import { css, html } from '../../helpers/template.helper.js';
 
 describe('Template helper', () => {

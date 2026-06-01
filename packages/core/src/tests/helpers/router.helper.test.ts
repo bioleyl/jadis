@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { normalizePath } from '../../helpers/router.helper';
 
 describe('Router helper', () => {
