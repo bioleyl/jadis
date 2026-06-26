@@ -4,6 +4,9 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   base: '/jadis/',
   description: 'Jadis — A minimal JavaScript toolkit for building web interfaces with native Web Components.',
+  head: [
+    ['link', { rel: 'icon', href: '/jadis/favicon.png' }],
+  ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: '/logo.svg',
