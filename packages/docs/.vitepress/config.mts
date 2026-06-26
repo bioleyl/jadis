@@ -6,6 +6,7 @@ export default defineConfig({
   description: 'Jadis — A minimal JavaScript toolkit for building web interfaces with native Web Components.',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: '/logo.svg',
     search: {
       provider: 'local',
     },
@@ -17,10 +18,6 @@ export default defineConfig({
       {
         link: '/guides/examples',
         text: 'Examples',
-      },
-      {
-        link: 'https://github.com/bioleyl/jadis',
-        text: 'GitHub',
       },
     ],
 

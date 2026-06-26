@@ -17,7 +17,8 @@
     "publish:create": "npm publish --workspace=packages/create --access public",
     "test": "npm run test --workspaces",
     "check": "biome check",
-    "set-version": "node scripts/set-version.mjs"
+    "set-version": "node scripts/set-version.mjs",
+    "deps": "node scripts/update-deps.mjs"
   },
   "version": "1.0.0",
   "workspaces": [
