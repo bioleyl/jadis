@@ -16,7 +16,8 @@
     "publish:core": "npm publish --workspace=packages/core --access public",
     "publish:create": "npm publish --workspace=packages/create --access public",
     "test": "npm run test --workspaces",
-    "check": "biome check"
+    "check": "biome check",
+    "set-version": "node scripts/set-version.mjs"
   },
   "version": "1.0.0",
   "workspaces": [
