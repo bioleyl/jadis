@@ -49,7 +49,7 @@
       "!**/build",
       "!**/coverage",
       "!**/core/package.json",
-      "!**/templates/**/*"
+      "!**/*.tsx"
     ]
   },
   "formatter": {

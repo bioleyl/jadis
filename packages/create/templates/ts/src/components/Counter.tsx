@@ -1,6 +1,3 @@
-
-
-
 export default class Counter extends Jadis {
   static readonly selector = 'counter-component';
 
@@ -25,7 +22,7 @@ export default class Counter extends Jadis {
   templateHtml(): Node {
     return (
       <p>
-        Count:' '
+        Count:{' '}
         <span />
       </p>
     );

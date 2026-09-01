@@ -1,11 +1,10 @@
-import { createElement, } from '@jadis/core';
+import { createElement } from '@jadis/core';
 
 import logo from '../../assets/logo.svg';
 import Counter from '../../components/Counter';
 import NameInput from '../../components/NameInput';
 import { myRouter } from '../../router';
 import style from './MainPage.css?inline';
-
 
 export default class MainPage extends Jadis {
   static readonly selector = 'main-page';
