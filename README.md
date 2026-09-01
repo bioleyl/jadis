@@ -27,7 +27,7 @@ Modern frontend frameworks are powerful, but they come at a cost:
 ## What You Get
 
 - A set of tiny helpers to make Web Components simpler and more enjoyable to use
-- Simple templating without JSX or complex DSLs
+- Simple templating with JSX
 - A feeling of control and peace
 
 ## Installation
@@ -38,14 +38,14 @@ npm install @jadis/core
 
 ## Example
 
-```javascript
-import { Jadis, html, createSelector } from '@jadis/core';
+```typescript
+import { jsx } from '@jadis/core';
 
 class HelloWorld extends Jadis {
-  static selector = createSelector('hello-world');
-  
-  templateHtml() {
-    return html`<p>Hello, <span id="name"></span></p>`;
+  static readonly selector = 'hello-world';
+
+  templateHtml(): Node {
+    return <p>Hello, <span id="name"></span></p>;
   }
 
   onConnect() {
@@ -60,6 +60,19 @@ Then in your HTML:
 
 ```html
 <hello-world></hello-world>
+```
+
+### TypeScript Setup
+
+To enable JSX in TypeScript, add these settings to your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jadis/core"
+  }
+}
 ```
 
 ## Philosophy
@@ -83,18 +96,17 @@ Avoid it if you need:
 - Complex state management
 - SSR or hydration
 
-## What *Jadis* doesn’t do (on purpose)
+## What *Jadis* doesn't do (on purpose)
 
 *Jadis* is intentionally boring, in the best way.
 
 - No virtual DOM, but real DOM, updated by you
-- No JSX / TSX, but Plain HTML templates
 - No magic reactivity, but direct control over state and updates
 - No decorators or class gymnastics: it works with both TypeScript and vanilla JS
 - No complex build setup: just a browser and a script tag
 - No over-engineered reactive stores: just event buses when you need global state, and they still work beautifully
 
-> You’d be surprised how much you can build without the "modern essentials".
+> You'd be surprised how much you can build without the "modern essentials".
 
 ## Try It Out
 
