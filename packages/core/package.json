@@ -25,9 +25,19 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
+      "types": "./dist/dts/index.d.ts",
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/dts/helpers/jsx-runtime.d.ts",
+      "import": "./dist/esm/jsx-runtime.mjs",
+      "require": "./dist/cjs/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/dts/helpers/jsx-dev-runtime.d.ts",
+      "import": "./dist/esm/jsx-dev-runtime.mjs",
+      "require": "./dist/cjs/jsx-dev-runtime.js"
     }
   },
   "files": ["dist"],
@@ -72,6 +82,6 @@
     "test:coverage": "vitest run --coverage --reporter=html"
   },
   "type": "module",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/dts/index.d.ts",
   "version": "0.12.2"
 }
