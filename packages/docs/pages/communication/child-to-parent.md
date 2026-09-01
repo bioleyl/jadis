@@ -61,7 +61,11 @@ const events = this.useEvents({someEvent: String});
 ::: code-group
 
 ```javascript
-import { Jadis, html, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
@@ -69,7 +73,7 @@ class ChildComponent extends Jadis {
   events = this.useEvents({ someEvent: String });
 
   templateHtml() {
-    return html`<button id="btn">Click me</button>`;
+    return <button id="btn">Click me</button>;
   }
 
   onConnect() {
@@ -88,10 +92,12 @@ class ParentComponent extends Jadis {
   }));
 
   templateHtml() {
-    return html`
-      <child-component></child-component>
-      <p id="message"></p>
-    `;
+    return (
+      <>
+        <child-component></child-component>
+        <p id="message"></p>
+      </>
+    );
   }
 
   onConnect() {
@@ -106,7 +112,7 @@ ParentComponent.register();
 ```
 
 ```typescript
-import { Jadis, html } from '@jadis/core';
+import { Jadis } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static readonly selector = 'child-component';
@@ -115,8 +121,8 @@ class ChildComponent extends Jadis {
     someEvent: string;
   }>();
 
-  templateHtml(): DocumentFragment {
-    return html`<button id="btn">Click me</button>`;
+  templateHtml(): Node {
+    return <button id="btn">Click me</button>;
   }
 
   onConnect(): void {
@@ -134,11 +140,13 @@ class ParentComponent extends Jadis {
     childComponent: ref<ChildComponent>('child-component'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <child-component></child-component>
-      <p id="message"></p>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <child-component></child-component>
+        <p id="message"></p>
+      </>
+    );
   }
 
   onConnect(): void {
@@ -154,7 +162,11 @@ ParentComponent.register();
 
 ```javascript [js-doc]
 // @ts-check
-import { Jadis, html, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
@@ -163,7 +175,7 @@ class ChildComponent extends Jadis {
   events = this.useEvents();
 
   templateHtml() {
-    return html`<button id="btn">Click me</button>`;
+    return <button id="btn">Click me</button>;
   }
 
   onConnect() {
@@ -184,10 +196,12 @@ class ParentComponent extends Jadis {
   }));
 
   templateHtml() {
-    return html`
-      <child-component></child-component>
-      <p id="message"></p>
-    `;
+    return (
+      <>
+        <child-component></child-component>
+        <p id="message"></p>
+      </>
+    );
   }
 
   onConnect() {

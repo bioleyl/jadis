@@ -1,7 +1,5 @@
 # Use slots in a *Jadis* component
 
-<!-- Slot à la main, ref vers toTemplate -->
-
 In *Jadis*, much similar to how it works in web components, you can use slots in your templates, so as to create more flexible components.
 
 ## Usage
@@ -14,11 +12,15 @@ closing tags of your external component will be rendered inside the `<slot></slo
 
 ```javascript
 // MyComponent.js with a slot
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
 export class MyComponent extends Jadis {
   static selector = createSelector('my-component');
 
   templateHtml() { // [!code focus]
-    return html`<div class="container"><slot></slot></div>`; // [!code focus]
+    return <div class="container"><slot></slot></div>; // [!code focus]
   } // [!code focus]
 
   templateCss() {
@@ -40,8 +42,8 @@ MyComponent.register();
 export class MyComponent extends Jadis {
   static readonly selector = 'my-component';
 
-  templateHtml(): DocumentFragment { // [!code focus]
-    return html`<div class="container"><slot></slot></div>`; // [!code focus] 
+  templateHtml(): Node { // [!code focus]
+    return <div class="container"><slot></slot></div>; // [!code focus] 
   } // [!code focus]
 
   templateCss(): string {
@@ -65,11 +67,20 @@ Populate the slot
 
 ```javascript
 // MainPage.js using MyComponent
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
 class MainPage extends Jadis {
   static selector = createSelector('main-page');
 
   templateHtml() { // [!code focus]
-    return html` <my-component><h1>My Title</h1><p>Hello there</p></my-component>`; // [!code focus]
+    return ( // [!code focus]
+      <my-component> // [!code focus]
+        <h1>My Title</h1> // [!code focus]
+        <p>Hello there</p> // [!code focus]
+      </my-component> // [!code focus]
+    ); // [!code focus]
   } // [!code focus]
 }
 
@@ -81,8 +92,13 @@ MainPage.register();
 class MainPage extends Jadis {
   static readonly selector = 'main-page';
 
-  templateHtml(): DocumentFragment { // [!code focus]
-    return html`<my-component><h1>My Title</h1><p>Hello there</p></my-component>`; // [!code focus]
+  templateHtml(): Node { // [!code focus]
+    return ( // [!code focus]
+      <my-component> // [!code focus]
+        <h1>My Title</h1> // [!code focus]
+        <p>Hello there</p> // [!code focus]
+      </my-component> // [!code focus]
+    ); // [!code focus]
   } // [!code focus]
 }
 
@@ -102,17 +118,17 @@ If you need to use several slots in the same component, just name them!
 ```javascript
 // MyComponent.js with 2 slots
 templateHtml() {
-  return html`
+  return (
     <div class='container'>
         <slot></slot>
         <slot name='article'></slot>
     </div>
-  `;
+  );
 }
 
 // Using MyComponent in MainPage.js
 templateHtml() {
-  return html`
+  return (
     <my-component>
       <h1>My Title</h1>
       <p>Hello there</p>
@@ -120,25 +136,25 @@ templateHtml() {
         My article content is good.
       </div>
     </my-component>
-  `;
+  );
 }
 ```
 
 ```typescript
 
 // MyComponent.ts with 2 slots
-templateHtml(): DocumentFragment {
-  return html`
+templateHtml(): Node {
+  return (
     <div class='container'>
       <slot></slot>
       <slot name='article'></slot>
     </div>
-  `;
+  );
 }
 
 // Using MyComponent in MainPage.ts
-templateHtml(): DocumentFragment {
-  return html`
+templateHtml(): Node {
+  return (
     <my-component>
       <h1>My Title</h1>
       <p>Hello there</p>
@@ -146,20 +162,44 @@ templateHtml(): DocumentFragment {
         My article content is good.
       </div>
     </my-component>
-  `;
+  );
 }
 
 ```
 
 :::
 
-## Even easier With `toTemplate()`
+## Even easier With JSX children
 
-See the [dedicated documentation](to-template.md) about the *Jadis* method `toTemplate()` which allows you to easily populate slots
-in the template by passing directly your document fragment as a child of the component, along with attributes
-and props.
+JSX makes slotting natural — children are passed directly:
+
+```typescript
+templateHtml(): Node {
+  return (
+    <my-component>
+      <h1>My Title</h1>
+      <p>Hello there</p>
+    </my-component>
+  );
+}
+```
+
+Named slots work via the `slot` attribute:
+
+```typescript
+templateHtml(): Node {
+  return (
+    <my-component>
+      <h1>My Title</h1>
+      <p slot="article">My article content</p>
+    </my-component>
+  );
+}
+```
 
 ## Example with `toTemplate()`
+
+See the [dedicated documentation](to-template.md) about the *Jadis* method `toTemplate()`.
 
 :::code-group
 
@@ -169,14 +209,14 @@ class MainPage extends Jadis {
   static selector = createSelector('main-page');
 
   templateHtml() {
-    return html`
-      ${MyComponent.toTemplate(
-        {},
-        html`<h1>My Article Title</h1>
-          <p slot='article'>My article content</p>
-        `;
-      )}
-    `;
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(document.createElement('h1')).textContent = 'My Article Title';
+    const p = document.createElement('p');
+    p.slot = 'article';
+    p.textContent = 'My article content';
+    fragment.appendChild(p);
+
+    return <my-component>{MyComponent.toTemplate({}, fragment)}</my-component>;
   }
 }
 
@@ -187,12 +227,7 @@ export class MyComponent extends Jadis {
   static selector = createSelector('my-component');
 
   templateHtml() {
-    return html`
-      <div class='container'>
-        <slot></slot>
-        <slot name='article'></slot>
-      </div>
-    `;
+    return <div class='container'><slot></slot><slot name='article'></slot></div>;
   }
 }
 
@@ -204,15 +239,15 @@ MyComponent.register();
 class MainPage extends Jadis {
   static readonly selector = 'main-page';
 
-  templateHtml(): DocumentFragment {
-    return html`
-      ${MyComponent.toTemplate(
-        {},
-        html`<h1>My Article Title</h1>
-          <p slot='article'>My article content</p>
-        `;
-      )}
-    `;
+  templateHtml(): Node {
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(document.createElement('h1')).textContent = 'My Article Title';
+    const p = document.createElement('p');
+    p.slot = 'article';
+    p.textContent = 'My article content';
+    fragment.appendChild(p);
+
+    return <my-component>{MyComponent.toTemplate({}, fragment)}</my-component>;
   }
 }
 
@@ -222,13 +257,8 @@ MainPage.register();
 export class MyComponent extends Jadis {
   static readonly selector = 'my-component';
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <div class='container'>
-        <slot></slot>
-        <slot name='article'></slot>
-      </div>
-    `;
+  templateHtml(): Node {
+    return <div class='container'><slot></slot><slot name='article'></slot></div>;
   }
 }
 

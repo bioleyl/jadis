@@ -9,13 +9,17 @@ The most straightforward way for a parent to interact with a child is by calling
 ::: code-group
 
 ```javascript
-import { Jadis, html, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
 
   templateHtml() {
-    return html`<p></p>`;
+    return <p></p>;
   }
 
   set textValue(value) {
@@ -31,7 +35,7 @@ class ParentComponent extends Jadis {
   }));
 
   templateHtml() {
-    return html`<child-component></child-component>`;
+    return <child-component></child-component>;
   }
 
   onConnect() {
@@ -44,13 +48,13 @@ ParentComponent.register();
 ```
 
 ```typescript
-import { Jadis, html } from '@jadis/core';
+import { Jadis } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static readonly selector = 'child-component';
 
-  templateHtml(): DocumentFragment {
-    return html`<p></p>`;
+  templateHtml(): Node {
+    return <p></p>;
   }
 
   set textValue(value: string): void {
@@ -65,8 +69,8 @@ class ParentComponent extends Jadis {
     childComponent: ref<ChildComponent>('child-component'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`<child-component></child-component>`;
+  templateHtml(): Node {
+    return <child-component></child-component>;
   }
 
   onConnect(): void {
@@ -80,13 +84,17 @@ ParentComponent.register();
 
 ```javascript [js-doc]
 // @ts-check
-import { Jadis, html, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static selector = createSelector('child-component');
 
   templateHtml() {
-    return html`<p></p>`;
+    return <p></p>;
   }
 
   /** @param {string} value */
@@ -104,7 +112,7 @@ class ParentComponent extends Jadis {
   }));
 
   templateHtml() {
-    return html`<child-component></child-component>`;
+    return <child-component></child-component>;
   }
 
   onConnect() {

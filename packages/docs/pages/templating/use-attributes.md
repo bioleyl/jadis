@@ -25,7 +25,11 @@ useAttributes(<attribute>, <attribute>, ...): <attributesObject>
 ::: code-group
 
 ```javascript
-import { createSelector, html, Jadis } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
+import { createSelector, Jadis } from '@jadis/core';
 
 export default class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
@@ -37,9 +41,7 @@ export default class HelloPage extends Jadis {
   attrs = this.useAttributes('name');
 
   templateHtml() {
-    return html`
-      <h1>Hello, <span></span>!</h1>
-    `;
+    return <h1>Hello, <span></span>!</h1>;
   }
 
   onConnect() {
@@ -53,7 +55,7 @@ HelloPage.register();
 ```
 
 ```typescript
-import { html, Jadis } from '@jadis/core';
+import { Jadis } from '@jadis/core';
 
 export default class HelloPage extends Jadis {
   static readonly selector = 'hello-page';
@@ -64,10 +66,8 @@ export default class HelloPage extends Jadis {
 
   readonly attrs = this.useAttributes('name');
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <h1>Hello, <span></span>!</h1>
-    `;
+  templateHtml(): Node {
+    return <h1>Hello, <span></span>!</h1>;
   }
 
   onConnect(): void {

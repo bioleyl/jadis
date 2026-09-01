@@ -18,12 +18,12 @@ this.killSignal: AbortSignal;
 
 ## Example
 
-Here’s how you might use it to bind a DOM event:
+Here's how you might use it to bind a DOM event:
 
-```javascript
+```typescript
 class ButtonComponent extends Jadis {
-  templateHtml() {
-    return html`<button>Click me</button>`;
+  templateHtml(): Node {
+    return <button>Click me</button>;
   }
 
   onConnect() {

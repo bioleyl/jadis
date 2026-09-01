@@ -33,14 +33,14 @@ npm install @jadis/core
 
 Then create a file named `index.js` with the following content:
 
-```javascript
-import { Jadis, createSelector, html } from '@jadis/core';
+```typescript
+import { jsx } from '@jadis/core';
 
 class HelloWorld extends Jadis {
-  static selector = createSelector('hello-world');
+  static readonly selector = 'hello-world';
 
-  templateHtml() {
-    return html`<p>Hello, <span id="name"></span></p>`;
+  templateHtml(): Node {
+    return <p>Hello, <span id="name"></span></p>;
   }
 
   onConnect() {
@@ -78,13 +78,17 @@ You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/co
       }
     </script>
     <script type="module">
-      import { Jadis, createSelector, html } from 'jadis';
+      /// <reference types="@jadis/core/jsx-runtime" />
+      /** @jsx jsx */
+      /** @jsxImportSource @jadis/core */
+
+      import { Jadis } from 'jadis';
 
       class HelloWorld extends Jadis {
-        static selector = createSelector('hello-world');
+        static selector = 'hello-world';
 
         templateHtml() {
-          return html`<p>Hello, <span id="name"></span></p>`;
+          return <p>Hello, <span id="name"></span></p>;
         }
 
         onConnect() {

@@ -22,7 +22,11 @@ this.toggleClass(<className>, <condition>): void
 :::code-group
 
 ```javascript
-import { css, createSelector, html, Jadis } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsx jsx */
+/** @jsxImportSource @jadis/core */
+
+import { css, createSelector, Jadis } from '@jadis/core';
 
 export default class MyButton extends Jadis {
   static selector = createSelector('my-button');
@@ -33,10 +37,12 @@ export default class MyButton extends Jadis {
   }));
 
   templateHtml() {
-    return html`
-      <button>Toggle The Class</button>
-      <p>My Paragraph</p>  
-    `
+    return (
+      <>
+        <button>Toggle The Class</button>
+        <p>My Paragraph</p>
+      </>
+    )
   }
 
   templateCss() {
@@ -63,7 +69,7 @@ MyButton.register();
 ```
 
 ```typescript
-import { css, html, Jadis } from '@jadis/core';
+import { css, Jadis } from '@jadis/core';
 
 export default class MyButton extends Jadis {
   static readonly selector = 'my-button';
@@ -73,11 +79,13 @@ export default class MyButton extends Jadis {
     button: ref<HTMLButtonElement>('button')
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <button>Toggle The Class</button>
-      <p>My Paragraph</p>  
-    `
+  templateHtml(): Node {
+    return (
+      <>
+        <button>Toggle The Class</button>
+        <p>My Paragraph</p>
+      </>
+    )
   }
 
   templateCss(): string {
