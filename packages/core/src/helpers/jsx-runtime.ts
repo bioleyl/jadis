@@ -374,7 +374,7 @@ function resolveVNodeChildren(children: unknown[]): Array<Node | VNode | string 
   return result;
 }
 
-function mountVNodes(parent: AppendableElement, children: Array<Node | VNode | string | number>): void {
+export function mountVNodes(parent: AppendableElement, children: Array<Node | VNode | string | number>): void {
   for (const child of children) {
     if (child instanceof Node) {
       parent.appendChild(child);

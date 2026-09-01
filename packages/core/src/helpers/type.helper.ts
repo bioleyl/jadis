@@ -40,7 +40,6 @@ export type EventValue<T> = [T] extends [StringConstructor]
                   : T;
 
 export type ComponentSelector = `${string}-${string}`;
-export type HtmlMarkupValue = string | number | boolean | Node | Node[] | null | undefined;
 export type AppendableElement = HTMLElement | ShadowRoot | DocumentFragment;
 
 export type ElementValues<T extends HTMLElement> = {
