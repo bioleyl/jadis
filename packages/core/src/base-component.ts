@@ -13,6 +13,7 @@ import type {
   KeysWithoutUndefined,
   KeysWithUndefined,
   OptionsWithProps,
+  SafeElementValues,
   SchemaToEvents,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
@@ -24,6 +25,7 @@ export interface JadisConstructor<T extends Jadis = Jadis> {
   readonly template: string;
   readonly observedAttributes: Array<string>;
   readonly useShadowDom: boolean;
+  readonly __jadisProps: SafeElementValues<T>;
 }
 
 /**
