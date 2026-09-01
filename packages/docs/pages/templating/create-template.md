@@ -1,18 +1,23 @@
-# Write the DOM with `templateHTML()`
+# Write the DOM with `templateHtml()`
 
-The `templateHtml()` method defines the HTML structure of the component. It is intended to be overridden by subclasses or component implementations that need to supply their own visual layout. When implemented, this method should return a `DocumentFragment` containing the component’s rendered HTML.
+The `templateHtml()` method defines the HTML structure of the component. It is intended to be overridden by subclasses or component implementations that need to supply their own visual layout. When implemented, this method should return a `Node` containing the component's rendered HTML.
 
-:::info Info: *Jadis* provides a template helper `html`
-that creates HTML templates using template literals,
-allowing for easy creation of HTML structures with
-interpolation. `html` returns a `<DocumentFragment>` containing
-the HTML structure. It is used in the shown examples.
+:::info Info: *Jadis* uses **JSX** for templating
+Configure your project with the following tsconfig to enable JSX:
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jadis/core"
+  }
+}
+```
 :::
 
 ## Signature
 
 ```typescript
-templateHtml?(): DocumentFragment;
+templateHtml?(): Node;
 ```
 
 ### Parameters
@@ -21,37 +26,87 @@ templateHtml?(): DocumentFragment;
 
 ### Return value
 
-- `DocumentFragment` A fragment representing the component’s HTML template.
-This enables efficient DOM manipulation, as `DocumentFragment` can be constructed and modified without triggering layout or rendering until it is inserted into the document.
+- `Node` Any DOM node (element, fragment, document fragment, etc.) representing the component's template.
 
 ## Example
 
-Override this method in your component to provide a custom HTML template. Typically, you will create a `DocumentFragment` manually or by inserting other *Jadis* components.
+Override this method in your component to provide a custom HTML template using JSX syntax.
 
 :::code-group
 
 ```javascript
+// Add these JSDoc pragmas at the top of your file:
+// /// <reference types="@jadis/core/jsx-runtime" />
+// /** @jsx jsx */
+// /** @jsxImportSource @jadis/core */
+
 templateHtml() {
-  return html`
+  return (
     <div class="container">
       <p>Hello There</p>
     </div>
-  `;
+  );
 }
 ```
 
 ```typescript
-templateHtml(): DocumentFragment {
-  return html`
+templateHtml(): Node {
+  return (
     <div class="container">
       <p>Hello There</p>
     </div>
-  `;
+  );
 }
 
 ```
 
 :::
+
+### Using Fragments
+
+When your template has multiple root elements, wrap them in a fragment:
+
+```typescript
+templateHtml(): Node {
+  return (
+    <>
+      <header>Header content</header>
+      <main>Main content</main>
+      <footer>Footer content</footer>
+    </>
+  );
+}
+```
+
+### Using Jadis Components
+
+You can embed other Jadis components directly in JSX:
+
+```typescript
+templateHtml(): Node {
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <user-profile user={this.userData} />
+      <counter-component />
+    </div>
+  );
+}
+```
+
+Props are passed as JSX attributes:
+
+```typescript
+templateHtml(): Node {
+  return (
+    <name-input
+      label="Your name"
+      placeholder="Enter your name"
+      class="my-input"
+    />
+  );
+}
+```
 
 ## Notes on shadow DOM
 
@@ -75,9 +130,8 @@ export class TestComponentNoShadow extends Jadis {
   static readonly selector = 'test-no-shadow';
   static readonly useShadowDom = false;
 
-  templateHtml() {
-    // this template won't be inside
-    // a shadow DOM
+  templateHtml(): Node {
+    return <div>Hello</div>;
   }
 }
 
