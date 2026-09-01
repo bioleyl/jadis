@@ -1,10 +1,11 @@
-import { assert, createElement, html, Jadis } from '@jadis/core';
+import { createElement, } from '@jadis/core';
 
 import logo from '../../assets/logo.svg';
 import Counter from '../../components/Counter';
 import NameInput from '../../components/NameInput';
 import { myRouter } from '../../router';
 import style from './MainPage.css?inline';
+
 
 export default class MainPage extends Jadis {
   static readonly selector = 'main-page';
@@ -14,14 +15,16 @@ export default class MainPage extends Jadis {
     input: ref<NameInput>(NameInput.toString()),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
+  templateHtml(): Node {
+    return (
       <div class="header"></div>
-      ${NameInput.toTemplate({ props: { label: 'Your name', placeholder: 'Enter your name' } })}
+      <NameInput label="Your name" placeholder="Enter your name" />
       <div class="wrapper">
-        ${Array.from({ length: 3 }, (_, i) => this.createCounter(i))} 
+        {Array.from({ length: 3 }, (_, i) => (
+          <Counter />
+        ))}
       </div>
-    `;
+    );
   }
 
   templateCss(): string {
@@ -34,14 +37,16 @@ export default class MainPage extends Jadis {
     createElement('img', { attrs: { src: logo } }, header);
 
     this._refs.input.events.register('greet', (name) => {
-      assert(name, 'Name is required');
+      if (!name) { throw new Error('Name is required'); }
       myRouter.goto('hello', { name });
     });
   }
 
   private createCounter(id: number): Counter {
     const counter = createElement(Counter);
-    counter.events.register('change', (count) => console.log(`Counter id ${id}:`, count));
+    counter.events.register('change', (count) =>
+      console.log(`Counter id ${id}:`, count),
+    );
     return counter;
   }
 }

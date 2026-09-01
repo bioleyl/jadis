@@ -74,7 +74,7 @@ export abstract class Jadis extends HTMLElement {
    * }
    * ```
    */
-  templateHtml?(): DocumentFragment;
+  templateHtml?(): Node;
 
   /**
    * The CSS styles for the component.

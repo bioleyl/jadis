@@ -1,4 +1,5 @@
-import { html, Jadis } from '@jadis/core';
+
+
 
 export default class Counter extends Jadis {
   static readonly selector = 'counter-component';
@@ -21,15 +22,19 @@ export default class Counter extends Jadis {
     incrementButton: ref('button'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <p>
+        Count:' '
+        <span />
+      </p>
+    );
   }
 
   onConnect(): void {
-    this.on(this._refs.incrementButton, 'click', () => this._count.set((v) => v + 1));
+    this.on(this._refs.incrementButton, 'click', () =>
+      this._count.set((v) => v + 1),
+    );
   }
 }
 

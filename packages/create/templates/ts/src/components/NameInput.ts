@@ -1,4 +1,4 @@
-import { html, Jadis } from '@jadis/core';
+
 
 export default class NameInput extends Jadis {
   static readonly selector = 'name-input';
@@ -19,13 +19,13 @@ export default class NameInput extends Jadis {
     name: ref('span'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
+  templateHtml(): Node {
+    return (
       <label>
-        <span></span>:<input type="text"/>
+        <span />:
+        <input type="text" />
       </label>
-      <button>Greet</button>
-    `;
+    );
   }
 
   onConnect(): void {

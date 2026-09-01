@@ -447,7 +447,7 @@ function attrName(key: string): string {
   return key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
 }
 
-function fragmentToString(fragment: DocumentFragment): string {
+function fragmentToString(fragment: Node): string {
   const template = document.createElement('template');
   template.content.appendChild(fragment.cloneNode(true));
   return template.innerHTML;

@@ -11,6 +11,8 @@
     "noUncheckedSideEffectImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jadis/core",
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2020",
