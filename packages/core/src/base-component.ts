@@ -39,6 +39,14 @@ export abstract class Jadis extends HTMLElement {
   static readonly observedAttributes: Array<string> = [];
   /** Whether to use Shadow DOM for this component */
   static readonly useShadowDom: boolean = true;
+  /** Marker for JSX attribute type inference */
+  // biome-ignore lint/style/noExplicitAny: required for JSX attribute type inference
+  static readonly __jadisProps: Record<string, any> = {};
+  /** Instance-level access for JSX attribute type inference */
+  // biome-ignore lint/style/noExplicitAny: required for JSX attribute type inference
+  get __jadisProps(): Record<string, any> {
+    return (this.constructor as unknown as Record<string, any>).__jadisProps ?? {};
+  }
 
   readonly shadowRoot: ShadowRoot | null = null;
   protected readonly attributesCallback: Partial<Record<string, (value: string, oldValue: string) => void>> = {};

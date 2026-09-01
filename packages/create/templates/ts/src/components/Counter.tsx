@@ -1,3 +1,5 @@
+import { Jadis } from '@jadis/core';
+
 export default class Counter extends Jadis {
   static readonly selector = 'counter-component';
 

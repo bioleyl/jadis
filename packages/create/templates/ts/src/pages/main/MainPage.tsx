@@ -1,4 +1,4 @@
-import { createElement } from '@jadis/core';
+import { createElement, Jadis } from '@jadis/core';
 
 import logo from '../../assets/logo.svg';
 import Counter from '../../components/Counter';
@@ -16,13 +16,15 @@ export default class MainPage extends Jadis {
 
   templateHtml(): Node {
     return (
-      <div class="header"></div>
-      <NameInput label="Your name" placeholder="Enter your name" />
-      <div class="wrapper">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Counter />
-        ))}
-      </div>
+      <>
+        <div class="header"></div>
+        <NameInput label="Your name" placeholder="Enter your name" />
+        <div class="wrapper">
+          {Array.from({ length: 3 }, (_, _i) => (
+            <Counter />
+          ))}
+        </div>
+      </>
     );
   }
 
@@ -35,18 +37,10 @@ export default class MainPage extends Jadis {
 
     createElement('img', { attrs: { src: logo } }, header);
 
-    this._refs.input.events.register('greet', (name) => {
+    this._refs.input.events.register('greet', (name: string) => {
       if (!name) { throw new Error('Name is required'); }
       myRouter.goto('hello', { name });
     });
-  }
-
-  private createCounter(id: number): Counter {
-    const counter = createElement(Counter);
-    counter.events.register('change', (count) =>
-      console.log(`Counter id ${id}:`, count),
-    );
-    return counter;
   }
 }
 

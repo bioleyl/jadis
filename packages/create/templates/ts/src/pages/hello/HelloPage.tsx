@@ -1,4 +1,4 @@
-import { css } from '@jadis/core';
+import { css, Jadis } from '@jadis/core';
 
 import { myRouter } from '../../router';
 

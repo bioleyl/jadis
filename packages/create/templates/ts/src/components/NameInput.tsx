@@ -1,3 +1,5 @@
+import { Jadis } from '@jadis/core';
+
 export default class NameInput extends Jadis {
   static readonly selector = 'name-input';
 
