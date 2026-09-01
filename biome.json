@@ -48,7 +48,8 @@
       "!**/dist",
       "!**/build",
       "!**/coverage",
-      "!**/core/package.json"
+      "!**/core/package.json",
+      "!**/templates/**/*"
     ]
   },
   "formatter": {
@@ -83,6 +84,7 @@
       "trailingCommas": "none"
     }
   },
+
   "linter": {
     "enabled": true,
     "rules": {

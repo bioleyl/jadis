@@ -139,7 +139,6 @@ export declare namespace JSX {
 }
 
 // Global JSX namespace — needed for `react-jsx` transform
-// biome-ignore lint/style/useNamingConvention: JSX is a reserved namespace name
 declare global {
   // biome-ignore lint/style/useNamingConvention: JSX is a reserved namespace name
   namespace JSX {
@@ -273,19 +272,13 @@ function createJsxNode(
  */
 export function jsx(type: string, props: JadisProps | null | undefined, ...children: unknown[]): Node;
 export function jsx<T extends Jadis>(
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   type: JadisConstructor<T>,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   props: (ComponentProps<T> & CommonJsxAttributes) | null | undefined,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   ...children: unknown[]
 ): Node;
 export function jsx(
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   type: string | JadisConstructor,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   props: JadisProps | null | undefined,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   ...children: unknown[]
 ): Node {
   return createJsxNode(type, props, children);
@@ -294,19 +287,13 @@ export function jsx(
 /** Alias used by TS JSX transforms that emit `jsxs` for grouped children. */
 export function jsxs(type: string, props: JadisProps | null | undefined, ...children: unknown[]): Node;
 export function jsxs<T extends Jadis>(
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   type: JadisConstructor<T>,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   props: (ComponentProps<T> & CommonJsxAttributes) | null | undefined,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   ...children: unknown[]
 ): Node;
 export function jsxs(
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   type: string | JadisConstructor,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   props: JadisProps | null | undefined,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: required by function overload
   ...children: unknown[]
 ): Node {
   return createJsxNode(type, props, children);

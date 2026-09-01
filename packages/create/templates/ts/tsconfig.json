@@ -2,6 +2,8 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jadis/core",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleDetection": "force",
@@ -11,8 +13,6 @@
     "noUncheckedSideEffectImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@jadis/core",
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2020",
