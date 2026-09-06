@@ -1,6 +1,6 @@
 # React to a property change with `useChange`
 
-The `useChange` helper provides a simple and reactive way to manage internal state inside *Jadis* components.
+The `useChange` helper provides a small state container for managing values inside *Jadis* components. It calls your callback when the value changes; it does not automatically re-render the template.
 It creates a value container with `get` and `set` methods, and automatically calls a provided callback whenever the value changes.
 
 This makes it ideal for updating the DOM, emitting events, or triggering logic whenever a piece of component state is modified.
@@ -8,7 +8,11 @@ This makes it ideal for updating the DOM, emitting events, or triggering logic w
 ## Signature
 
 ```typescript
-this.useChange(<initialValue>, <onChange>, <options>): Readonly<ChangeHandler<T>>
+this.useChange<T>(
+  initialValue: T,
+  onChange: (newValue: T, oldValue: T) => void,
+  options?: { immediate?: boolean }
+): Readonly<ChangeStateHandler<T>>
 ```
 
 ### Parameters
@@ -24,7 +28,7 @@ Useful for setting initial DOM state without duplicating logic.
 
 ### Return value
 
-- A `ChangeHandler<T>` object with 2 methods:
+- A `ChangeStateHandler<T>` object with 2 methods:
   - `.get(): T`
   - `.set(valueOrUpdater): void`
 
@@ -44,7 +48,7 @@ This gives you a reactive, lightweight state system without needing proxies, obs
 
 Here’s a minimal example of using `useChange` to keep text inside an element in sync with a component state variable:
 
-```typescript
+```tsx
 class ToggleSwitch extends Jadis {
   private readonly toggleValue = this.useChange(
     false,
@@ -78,7 +82,7 @@ class ToggleSwitch extends Jadis {
 
 ## Example with a value
 
-```typescript
+```tsx
 import { Jadis } from "@jadis/core";
 
 export class Dice extends Jadis {

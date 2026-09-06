@@ -8,7 +8,7 @@ You can implement your own event system if you prefer, but *Jadis* **includes a 
 
 ## Signature
 
-The main idea is to pass an interface to the function's generic in TypeScript and in JSDoc. In JavaScript, we need to use an oject that represents the interface as close as possible.
+The main idea is to pass an interface to the function's generic in TypeScript and in JSDoc. In JavaScript, we need to use an object that represents the interface as closely as possible.
 
 In JavaScript an object or an array can not be described more precisely than **Object** and **Array**.
 
@@ -53,14 +53,14 @@ const events = this.useEvents({someEvent: String});
 ### Return value
 
 - An object with 2 methods: **register** and **emit**.
-  - `register` is  used to subscribe to an event
+  - `register` is used to subscribe to an event
   - `emit` is used to emit an event.
 
 ## UseEvents Usage
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -110,7 +110,7 @@ ChildComponent.register();
 ParentComponent.register();
 ```
 
-```typescript
+```tsx
 import { Jadis } from '@jadis/core';
 
 class ChildComponent extends Jadis {
@@ -159,7 +159,7 @@ ChildComponent.register();
 ParentComponent.register();
 ```
 
-```javascript [js-doc]
+```jsx [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */

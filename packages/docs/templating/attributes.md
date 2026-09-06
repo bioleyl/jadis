@@ -42,7 +42,7 @@ class Greeting extends Jadis {
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -75,7 +75,7 @@ export default class HelloPage extends Jadis {
 HelloPage.register();
 ```
 
-```typescript
+```tsx
 import { Jadis } from '@jadis/core';
 
 export default class HelloPage extends Jadis {

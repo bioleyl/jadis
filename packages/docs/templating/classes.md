@@ -10,7 +10,7 @@ this.toggleClass(<className>, <condition>): void
 
 ### Parameters
 
-- `className`: a `string` that representsthe name of the class to toggle
+- `className`: a `string` that represents the name of the class to toggle
 - `condition`:  a `boolean` the binary condition used to toggle between classes. If `true`, class is added, if `false`, class is removed.
 
 ### Return value
@@ -21,7 +21,7 @@ this.toggleClass(<className>, <condition>): void
 
 :::code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -67,7 +67,7 @@ export default class MyButton extends Jadis {
 MyButton.register();
 ```
 
-```typescript
+```tsx
 import { css, Jadis } from '@jadis/core';
 
 export default class MyButton extends Jadis {

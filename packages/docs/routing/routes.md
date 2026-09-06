@@ -7,7 +7,7 @@ You can add routes individually or organize them into a route group when parts o
 
 Routes support dynamic parameters (e.g. `:name`), which are passed as attributes to the corresponding component.
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 

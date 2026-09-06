@@ -83,12 +83,19 @@ Result:
 
 ### With Custom Components
 
-```typescript
-import { Jadis, createSelector, createElement } from '@jadis/core';
+```tsx
+import { Jadis, createElement } from '@jadis/core';
 
 class MyButton extends Jadis {
   static readonly selector = 'my-button';
+  label = '';
+
+  templateHtml(): Node {
+    return <button>{this.label}</button>;
+  }
 }
+
+MyButton.register();
 
 const btn = createElement(MyButton, {
   props: { label: 'Click me' },

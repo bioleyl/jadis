@@ -8,7 +8,7 @@ The most straightforward way for a parent to interact with a child is by calling
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -46,7 +46,7 @@ ChildComponent.register();
 ParentComponent.register();
 ```
 
-```typescript
+```tsx
 import { Jadis } from '@jadis/core';
 
 class ChildComponent extends Jadis {
@@ -81,7 +81,7 @@ ChildComponent.register();
 ParentComponent.register();
 ```
 
-```javascript [js-doc]
+```jsx [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */

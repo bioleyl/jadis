@@ -57,6 +57,8 @@ type AppEvents = {
 
 const bus = new Bus<AppEvents>();
 
+const fetchData = async (): Promise<string[]> => ['ready'];
+
 class LogPanel extends Jadis {
   static readonly selector = 'log-panel';
 

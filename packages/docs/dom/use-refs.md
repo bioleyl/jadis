@@ -41,7 +41,7 @@ Each getter internally calls [`getElement()`](./get-element.md), ensuring the el
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -72,7 +72,7 @@ class FormComponent extends Jadis {
 }
 ```
 
-```typescript
+```tsx
 import { Jadis } from '@jadis/core';
 
 class FormComponent extends Jadis {
@@ -100,7 +100,7 @@ class FormComponent extends Jadis {
 }
 ```
 
-```javascript [js-doc]
+```jsx [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */

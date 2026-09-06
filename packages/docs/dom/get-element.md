@@ -7,25 +7,32 @@ If you need to access an element inside another component (which is typically di
 ## Signature
 
 ```typescript
-this.getElement<T>(<query>): <HTMLElement>
+this.getElement<Tag extends keyof HTMLElementTagNameMap>(
+  query: Tag
+): HTMLElementTagNameMap[Tag];
+
+this.getElement<Element extends HTMLElement>(query: string): Element;
 ```
+
+A known tag name is inferred automatically; pass an element type for a CSS selector or custom element:
 
 ### Parameters
 
-- `T`: A generic type to specify the element type if it can't be infered
-- `query`: The css query string to fetch the element in the component's dom. Automatically inferred if a tag name is provided (f.e. 'div' -> HTMLDivElement).
+- `Element`: The element type to use when a selector's type cannot be inferred.
+- `Tag`: A known HTML tag name, which maps to its corresponding `HTMLElement` subtype.
+- `query`: The CSS selector to find in the component's DOM. For example, `'div'` returns an `HTMLDivElement` and `this.getElement<HTMLInputElement>('#input')` returns an `HTMLInputElement`.
   Supports chained selectors using the format `parent-selector >>> child-selector >>> nested-selector`
   Each segment is resolved step-by-step, optionally entering shadow roots when present.
 
 ### Return value
 
-- An `HTMLElement`. You can cast it to a more specific element type as needed, for example, `HTMLButtonElement`, `HTMLInputElement`, or a custom class.
+- The inferred element type for a known tag name, or the explicit generic type for a CSS selector. The method throws if the selector cannot be found.
 
 ## Example
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -56,7 +63,7 @@ class ParentComponent extends Jadis {
 }
 ```
 
-```typescript
+```tsx
 import { Jadis } from '@jadis/core';
 
 class ButtonComponent extends Jadis {
@@ -84,7 +91,7 @@ class ParentComponent extends Jadis {
 }
 ```
 
-```javascript [js-doc]
+```jsx [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */

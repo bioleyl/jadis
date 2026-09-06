@@ -6,7 +6,7 @@ Every Jadis component follows the [Custom Elements lifecycle](https://developer.
 
 ### `onConnect()`
 
-Called when the component is inserted into the DOM. This is the primary place to initialize your component: set up event listeners, fetch data, or perform one-time setup.
+Called after the component is connected and its template has been rendered. This is the place to set up event listeners, fetch data, or perform connection-specific setup. It runs again if the component reconnects.
 
 ```typescript
 class MyComponent extends Jadis {
@@ -19,7 +19,7 @@ class MyComponent extends Jadis {
 
 ### `onDisconnect()`
 
-Called when the component is removed from the DOM. Use this for cleanup: cancel timers, remove global event listeners, or abort ongoing requests.
+Called when the component is removed from the DOM. Use this for cleanup that is not tied to `killSignal`, such as canceling timers or stopping external work. Listeners registered through Jadis helpers are cleaned up automatically.
 
 ```typescript
 class MyComponent extends Jadis {
@@ -55,19 +55,21 @@ class MyComponent extends Jadis {
 ## Lifecycle Timeline
 
 ```
-Constructor → connectedCallback(onConnect) → ... → disconnectedCallback(onDisconnect)
+Constructor → connectedCallback (render template) → onConnect → ... → disconnectedCallback → onDisconnect
 ```
 
 1. **Constructor** — Runs when the class is instantiated. Shadow DOM is attached here if `useShadowDom` is `true`.
-2. **`onConnect()`** — Runs after the component is appended to the document. Templates are rendered before this hook fires.
-3. **Active** — The component is in the DOM and responding to user interaction.
-4. **`onDisconnect()`** — Runs when the component is removed. The internal `killSignal` is aborted, cleaning up all registered listeners.
+2. **`connectedCallback()`** — Runs when the component is connected. On the first connection it renders `templateHtml()` and `templateCss()` before scheduling `onConnect()`; the rendered DOM is reused on reconnection.
+3. **`onConnect()`** — Runs asynchronously after the component is connected. It runs again after each reconnection.
+4. **Active** — The component is in the DOM and responding to user interaction.
+5. **`disconnectedCallback()` / `onDisconnect()`** — The callback aborts `killSignal` and then calls `onDisconnect()` when the component is removed.
 
 ## Important Notes
 
-- Templates (`templateHtml()` / `templateCss()`) are rendered **before** `onConnect()` is called.
-- The `killSignal` is automatically aborted on disconnect, canceling all event listeners registered via `this.on()` and `useEvents()`.
-- Avoid heavy work in the constructor. Defer initialization to `onConnect()`.
+- Templates render only on the first connection; reconnection reuses the existing DOM.
+- `onConnect()` runs on a later task, not synchronously inside `appendChild()`.
+- The `killSignal` is automatically aborted on disconnect, canceling listeners registered via `this.on()`, `useEvents()`, and `onBus()`.
+- Avoid heavy work in the constructor. Defer connection-specific work to `onConnect()`.
 
 ## See Also
 

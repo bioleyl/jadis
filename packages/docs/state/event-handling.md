@@ -1,6 +1,6 @@
 # Event Handling in *Jadis* with `this.on`
 
-For typical DOM event listeners, *Jadis* offers a built-in `on` method that simplifies events handling. It automatically registers the event and cleans it up when the component unmounts, so you don't need to worry about the signal manually.
+For typical DOM event listeners, *Jadis* offers a built-in `on` method that simplifies events handling. It automatically registers the event with the component's cleanup signal and removes it when the component disconnects, so you don't need to manage an `AbortSignal` manually.
 
 ## Signature
 
@@ -20,7 +20,7 @@ this.on(<element>, <eventName>, <callback>)
   
 ## Example
 
-```typescript
+```tsx
 class ButtonComponent extends Jadis {
   templateHtml(): Node {
     return <button>Click me</button>;

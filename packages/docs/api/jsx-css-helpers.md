@@ -1,6 +1,6 @@
 # JSX and `css()`
 
-Jadis 1.0 uses JSX for component templates and keeps `css()` as the helper for interpolated component styles. The legacy `html()` tagged template helper is no longer part of the public API.
+Jadis 1.0 uses JSX for component templates and keeps `css()` as the helper for interpolated component styles. Component templates are real DOM nodes, not HTML strings.
 
 ## JSX
 

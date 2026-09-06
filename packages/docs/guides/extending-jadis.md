@@ -41,7 +41,7 @@ export abstract class CustomJadis extends Jadis {
 
 As soon as the component starts to load, `loadData` is called to avoid losing time. When the promise is resolved, the content is placed in the right location and the DOM used for loading is removed.
 
-```typescript
+```tsx
 import { CustomJadis } from "./custom-jadis";
 
 export class CustomComponent extends CustomJadis {

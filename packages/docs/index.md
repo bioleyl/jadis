@@ -5,7 +5,7 @@ layout: home
 hero:
   name: 'Jadis'
   text: 'Web Components, Simplified'
-  tagline: A minimal JavaScript toolkit for building native Web Components — no virtual DOM, no reactivity system, no compile step. Just clean, readable, native code.
+  tagline: A minimal JavaScript toolkit for building native Web Components — no virtual DOM, no reactivity system, no framework runtime. Use JSX or direct DOM helpers.
   image:
     src: /logo.svg
     alt: Jadis
@@ -24,12 +24,12 @@ features:
     link: /guides/first-component
   - icon: ⚡
     title: Zero Dependencies
-    details: No build tools, no transpilation, no runtime overhead. Import and use. Works in any modern browser out of the box.
+    details: No runtime dependencies or virtual DOM. Use JSX with your existing build tool, or use createElement() directly in the browser.
     link: /guides/installation
   - icon: 📝
     title: Simple Templating
-    details: Write HTML templates using tagged template literals. No JSX, no DSL — just plain HTML with interpolation.
-    link: /templating/css
+    details: Build real DOM with JSX, or use createElement() when you do not need a JSX transform.
+    link: /guides/templates
   - icon: 🔌
     title: Type-Safe APIs
     details: Full TypeScript support with automatic type inference. JSDoc-friendly for JavaScript projects too.
