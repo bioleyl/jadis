@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "@biomejs/biome": "2.2.0"
+    "@biomejs/biome": "2.2.0",
+    "husky": "9.1.7"
   },
   "engineStrict": true,
   "engines": {
@@ -17,7 +18,8 @@
     "publish:create": "npm publish --workspace=packages/create --access public",
     "test": "npm run test --workspaces --if-present",
     "verify:packages": "node scripts/verify-packages.mjs",
-    "check": "biome check"
+    "check": "biome check",
+    "prepare": "husky"
   },
   "version": "1.0.0",
   "workspaces": [
