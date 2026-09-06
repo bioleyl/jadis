@@ -1,8 +1,7 @@
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
-import { createSelector } from '@jadis/core';
+import { createSelector, Jadis } from '@jadis/core';
 
 export default class NameInput extends Jadis {
   static selector = createSelector('name-input');
@@ -24,10 +23,13 @@ export default class NameInput extends Jadis {
 
   templateHtml() {
     return (
-      <label>
-        <span />:
-        <input type="text" />
-      </label>
+      <>
+        <label>
+          <span />:
+          <input type="text" />
+        </label>
+        <button type="button">Greet</button>
+      </>
     );
   }
 

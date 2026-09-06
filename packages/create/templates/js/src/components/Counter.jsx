@@ -1,8 +1,7 @@
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
-import { createSelector } from '@jadis/core';
+import { createSelector, Jadis } from '@jadis/core';
 
 export default class Counter extends Jadis {
   static selector = createSelector('counter-component');
@@ -26,17 +25,19 @@ export default class Counter extends Jadis {
 
   templateHtml() {
     return (
-      <p>
-        Count:{' '}
-        <span />
-      </p>
+      <>
+        <p>
+          Count: <span />
+        </p>
+        <slot />
+        <button type="button">Increment</button>
+        <slot name="footer" />
+      </>
     );
   }
 
   onConnect() {
-    this.on(this.refs.incrementButton, 'click', () =>
-      this.count.set((v) => v + 1),
-    );
+    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
   }
 }
 

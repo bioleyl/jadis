@@ -10,7 +10,11 @@ export default class HelloPage extends Jadis {
     name: ref('span'),
   }));
 
-  private readonly _attrs = this.useAttributes('name');
+  private readonly _attrs = this.useAttributes({
+    name: (value) => {
+      this._refs.name.textContent = value ?? '';
+    },
+  });
 
   templateHtml(): Node {
     return (
@@ -20,7 +24,7 @@ export default class HelloPage extends Jadis {
         </h1>
         <p>Welcome to the Hello Page.</p>
         <p>Click the button to go back to the main page.</p>
-        <button>Go Back</button>
+        <button type="button">Go Back</button>
       </>
     );
   }

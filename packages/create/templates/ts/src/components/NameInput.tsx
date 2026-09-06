@@ -21,10 +21,13 @@ export default class NameInput extends Jadis {
 
   templateHtml(): Node {
     return (
-      <label>
-        <span />:
-        <input type="text" />
-      </label>
+      <>
+        <label>
+          <span />:
+          <input type="text" />
+        </label>
+        <button type="button">Greet</button>
+      </>
     );
   }
 

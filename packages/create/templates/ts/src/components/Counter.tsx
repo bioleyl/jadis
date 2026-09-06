@@ -23,10 +23,15 @@ export default class Counter extends Jadis {
 
   templateHtml(): Node {
     return (
-      <p>
-        Count:{' '}
-        <span />
-      </p>
+      <>
+        <p>
+          Count:{' '}
+          <span />
+        </p>
+        <slot />
+        <button type="button">Increment</button>
+        <slot name="footer" />
+      </>
     );
   }
 

@@ -1,8 +1,7 @@
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
-import { createElement } from '@jadis/core';
+import { createElement, createSelector, Jadis } from '@jadis/core';
 
 import logo from '../../assets/logo.svg';
 import Counter from '../../components/Counter';
@@ -26,7 +25,7 @@ export default class MainPage extends Jadis {
         <div class="header" />
         <NameInput label="Your name" placeholder="Enter your name" />
         <div class="wrapper">
-          {Array.from({ length: 3 }, (_, i) => (
+          {Array.from({ length: 3 }, (_, _i) => (
             <Counter />
           ))}
         </div>
@@ -44,7 +43,9 @@ export default class MainPage extends Jadis {
     createElement('img', { attrs: { src: logo } }, header);
 
     this.refs.input.events.register('greet', (name) => {
-      if (!name) throw new Error('Name is required');
+      if (!name) {
+        throw new Error('Name is required');
+      }
       myRouter.goto('hello', { name });
     });
   }
