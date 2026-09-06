@@ -5,23 +5,23 @@
   },
   "description": "Jadis is a minimal JavaScript library for building web interfaces using native Web Components.",
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@rollup/plugin-commonjs": "29.0.3",
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-typescript": "12.3.0",
     "@types/jest": "30.0.0",
-    "@vitest/coverage-v8": "4.1.7",
-    "@vitest/ui": "4.1.7",
-    "c8": "11.0.0",
-    "jest": "30.4.2",
+    "@vitest/coverage-v8": "5.0.0",
+    "@vitest/ui": "5.0.0",
+    "c8": "12.0.0",
+    "jest": "30.5.1",
     "jsdom": "29.1.1",
     "rimraf": "6.1.3",
-    "rollup": "4.60.4",
+    "rollup": "4.63.1",
     "rollup-plugin-delete": "3.0.2",
-    "rollup-plugin-dts": "6.4.1",
-    "ts-jest": "29.4.11",
+    "rollup-plugin-dts": "6.5.1",
     "tslib": "2.8.1",
-    "typescript": "6.0.3",
-    "vitest": "4.1.7"
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
   },
   "exports": {
     ".": {
@@ -40,7 +40,9 @@
       "require": "./dist/cjs/jsx-dev-runtime.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "homepage": "https://bioleyl.github.io/jadis/",
   "keywords": [
     "jadis",
@@ -77,9 +79,11 @@
     "build:bundle": "rollup -c",
     "build:types": "tsc --emitDeclarationOnly --removeComments false --outDir dist/dts",
     "clean": "rimraf dist && rimraf build",
+    "test:browser": "playwright test --config=playwright.config.ts",
     "prepack": "npm run clean && npm run build",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage --reporter=html"
+    "test:coverage": "vitest run --coverage --reporter=html",
+    "test:types": "tsc --project tests/types/tsconfig.json"
   },
   "type": "module",
   "types": "./dist/dts/index.d.ts",

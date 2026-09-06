@@ -151,6 +151,10 @@ export abstract class Jadis extends HTMLElement {
   }
 
   connectedCallback(): void {
+    if (this._abortController.signal.aborted) {
+      this._abortController = new AbortController();
+    }
+
     this.renderTemplate();
     this._isConnected = true;
     this.observeAttributes();

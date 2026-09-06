@@ -89,6 +89,19 @@ type CommonJsxAttributes = {
 };
 
 type JadisProps = BaseProps & Record<string, unknown>;
+type JsxEventHandler = (event: Event) => void;
+type JsxEventProps = {
+  [key: `on${string}`]: JsxEventHandler | undefined;
+};
+type IntrinsicElementProps<Tag extends keyof HTMLElementTagNameMap> = BaseProps &
+  Omit<Partial<SafeElementValues<HTMLElementTagNameMap[Tag]>>, 'children' | 'style'> &
+  CommonJsxAttributes &
+  JsxEventProps;
+export type IntrinsicElements = {
+  [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementProps<Tag>;
+} & {
+  [elementName: `${string}-${string}`]: JadisProps;
+};
 
 type ComponentProps<T extends Jadis> = SafeElementValues<T> & BaseProps;
 
@@ -132,9 +145,9 @@ export declare namespace JSX {
     [key: `data-${string}`]: string | number | boolean | undefined;
     [key: `aria-${string}`]: string | number | boolean | undefined;
   }
-  interface IntrinsicElements {
-    [elementName: string]: JadisProps;
-  }
+  // Standard HTML elements use element-specific properties. Hyphenated custom
+  // elements remain open for attributes passed to registered web components.
+  type IntrinsicElements = import('./jsx-runtime').IntrinsicElements;
 }
 
 // Global JSX namespace — needed for `react-jsx` transform
@@ -164,9 +177,9 @@ declare global {
       [key: `data-${string}`]: string | number | boolean | undefined;
       [key: `aria-${string}`]: string | number | boolean | undefined;
     }
-    interface IntrinsicElements {
-      [elementName: string]: JadisProps;
-    }
+    // Standard HTML elements use element-specific properties. Hyphenated custom
+    // elements remain open for attributes passed to registered web components.
+    type IntrinsicElements = import('./jsx-runtime').IntrinsicElements;
   }
 }
 

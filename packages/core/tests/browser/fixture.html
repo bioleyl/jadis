@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <body>
+    <browser-attribute-test name="before" label="initial"></browser-attribute-test>
+    <script type="module">
+      import { createElement, Jadis } from '/packages/core/dist/esm/index.mjs';
+
+      class BrowserAttributeTest extends Jadis {
+        static selector = 'browser-attribute-test';
+
+        refs = this.useRefs((ref) => ({
+          label: ref('#label'),
+          name: ref('#name'),
+        }));
+
+        attributes = this.useAttributes({
+          label: (value) => {
+            this.refs.label.textContent = value ?? '';
+          },
+          name: (value) => {
+            this.refs.name.textContent = value ?? '';
+          },
+        });
+
+        templateHtml() {
+          const fragment = document.createDocumentFragment();
+          createElement('output', { attrs: { id: 'name' } }, fragment);
+          createElement('output', { attrs: { id: 'label' } }, fragment);
+          return fragment;
+        }
+      }
+
+      BrowserAttributeTest.register();
+      window.__jadisReady = true;
+    </script>
+  </body>
+</html>
