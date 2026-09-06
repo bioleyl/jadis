@@ -70,20 +70,20 @@ jobs:
           git push origin "create-v${{ env.VERSION }}"
       
       - name: Create GitHub Release
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: create-v${{ env.VERSION }}
-          release_name: '@jadis/create v${{ env.VERSION }}'
-          body: |
-            ## @jadis/create v${{ env.VERSION }}
-            
-            ${{ inputs.release_notes }}
-            
-            ### Usage
-            ```bash
-            npm create @jadis@${{ env.VERSION }}
-            ```
-          draft: false
-          prerelease: ${{ inputs.prerelease }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          printf -v notes '## @jadis/create v%s\n\n%s\n\n### Usage\n```bash\nnpm create @jadis@%s\n```' \
+            "$VERSION" "$RELEASE_NOTES" "$VERSION"
+
+          release_args=(
+            --title "@jadis/create v$VERSION"
+            --notes "$notes"
+          )
+          if [[ "$PRERELEASE" == "true" ]]; then
+            release_args+=(--prerelease)
+          fi
+
+          gh release create "create-v$VERSION" "${release_args[@]}"
