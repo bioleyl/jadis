@@ -1,0 +1,56 @@
+name: Verify project
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting and linting
+        run: npm run check
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build core package
+        run: npm run build --workspace=@jadis/core
+
+      - name: Check JSX types
+        run: npm run test:types --workspace=@jadis/core
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser tests
+        run: npm run test:browser --workspace=@jadis/core
+
+      - name: Build generated JavaScript template
+        run: npm run build --workspace=jadis-js
+
+      - name: Build generated TypeScript template
+        run: npm run build --workspace=jadis-ts
+
+      - name: Verify packed packages
+        run: npm run verify:packages
+
+      - name: Build documentation
+        run: npm run docs:build

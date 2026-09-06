@@ -48,6 +48,8 @@
       "!**/dist",
       "!**/build",
       "!**/coverage",
+      "!**/test-results",
+      "!**/.vitepress/cache",
       "!**/core/package.json",
       "!**/*.tsx"
     ]
