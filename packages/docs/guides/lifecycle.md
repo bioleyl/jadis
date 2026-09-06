@@ -55,14 +55,14 @@ class MyComponent extends Jadis {
 ## Lifecycle Timeline
 
 ```
-Constructor → render template → connectedCallback → onConnect → ... → disconnectedCallback → onDisconnect
+Constructor → connectedCallback (render template) → onConnect → ... → disconnectedCallback → onDisconnect
 ```
 
 1. **Constructor** — Runs when the class is instantiated. Shadow DOM is attached here if `useShadowDom` is `true`.
-2. **Render** — `templateHtml()` and `templateCss()` run on the first connection, before `onConnect()`; the rendered DOM is reused on reconnection.
+2. **`connectedCallback()`** — Runs when the component is connected. On the first connection it renders `templateHtml()` and `templateCss()` before scheduling `onConnect()`; the rendered DOM is reused on reconnection.
 3. **`onConnect()`** — Runs asynchronously after the component is connected. It runs again after each reconnection.
 4. **Active** — The component is in the DOM and responding to user interaction.
-5. **`onDisconnect()`** — Runs when the component is removed. The internal `killSignal` is aborted first, cleaning up all registered listeners.
+5. **`disconnectedCallback()` / `onDisconnect()`** — The callback aborts `killSignal` and then calls `onDisconnect()` when the component is removed.
 
 ## Important Notes
 

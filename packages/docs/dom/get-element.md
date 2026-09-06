@@ -7,21 +7,26 @@ If you need to access an element inside another component (which is typically di
 ## Signature
 
 ```typescript
-this.getElement<Element extends HTMLElement = HTMLElement>(query: string): Element
+this.getElement<Tag extends keyof HTMLElementTagNameMap>(
+  query: Tag
+): HTMLElementTagNameMap[Tag];
+
+this.getElement<Element extends HTMLElement>(query: string): Element;
 ```
 
-When `query` is a known HTML tag name, TypeScript infers its element type. Pass a generic for a CSS selector or custom element:
+A known tag name is inferred automatically; pass an element type for a CSS selector or custom element:
 
 ### Parameters
 
-- `Element`: An optional element type for selectors whose type cannot be inferred.
-- `query`: The CSS selector to find in the component's DOM. A tag name is inferred automatically (for example, `'div'` becomes `HTMLDivElement`).
+- `Element`: The element type to use when a selector's type cannot be inferred.
+- `Tag`: A known HTML tag name, which maps to its corresponding `HTMLElement` subtype.
+- `query`: The CSS selector to find in the component's DOM. For example, `'div'` returns an `HTMLDivElement` and `this.getElement<HTMLInputElement>('#input')` returns an `HTMLInputElement`.
   Supports chained selectors using the format `parent-selector >>> child-selector >>> nested-selector`
   Each segment is resolved step-by-step, optionally entering shadow roots when present.
 
 ### Return value
 
-- An `HTMLElement`. You can cast it to a more specific element type as needed, for example, `HTMLButtonElement`, `HTMLInputElement`, or a custom class.
+- The inferred element type for a known tag name, or the explicit generic type for a CSS selector. The method throws if the selector cannot be found.
 
 ## Example
 
