@@ -1,9 +1,10 @@
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const rootDirectory = resolve(import.meta.dirname, '..');
+const rootDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const temporaryDirectory = mkdtempSync(join(tmpdir(), 'jadis-packages-'));
 
 function packWorkspace(workspace) {

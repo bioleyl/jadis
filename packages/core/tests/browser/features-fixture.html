@@ -5,7 +5,14 @@
       <span slot="footer">Footer content</span>
     </browser-feature-test>
     <script type="module">
-      import { css, Fragment, Jadis, jsx } from '/packages/core/dist/esm/index.mjs';
+      import {
+        createComponentVNode,
+        css,
+        Fragment,
+        Jadis,
+        jsx,
+        mountVNodes,
+      } from '/packages/core/dist/esm/index.mjs';
 
       class BrowserFeatureTest extends Jadis {
         static selector = 'browser-feature-test';
@@ -52,10 +59,28 @@
         }
       }
 
+      class BrowserVNodeChild extends Jadis {
+        static selector = 'browser-vnode-child';
+
+        templateHtml() {
+          return document.createElement('slot');
+        }
+      }
+
       BrowserFeatureTest.register();
+      BrowserVNodeChild.register();
       window.createFeatureTemplate = () => {
         const element = BrowserFeatureTest.toTemplate({ attrs: { 'data-template': 'true' } });
         document.body.appendChild(element);
+      };
+      window.mountVNodeTree = () => {
+        const parent = document.createElement('div');
+        parent.id = 'vnode-mount';
+        const child = document.createElement('span');
+        child.textContent = 'Projected child';
+        const component = createComponentVNode(BrowserVNodeChild, { children: [child] });
+        mountVNodes(parent, [component]);
+        document.body.appendChild(parent);
       };
       window.__jadisFeaturesReady = true;
     </script>

@@ -44,6 +44,18 @@ test.describe('Jadis component features', () => {
     await expect(component.locator('output').first()).toHaveText('0');
   });
 
+  test('mounts component VNodes and projects their children', async ({ page }) => {
+    await page.evaluate(() => window.mountVNodeTree());
+
+    const component = page.locator('#vnode-mount browser-vnode-child');
+    await expect(component).toHaveCount(1);
+    await expect(
+      component.evaluate(
+        (element) => element.shadowRoot?.querySelector('slot')?.assignedElements()[0]?.textContent
+      )
+    ).resolves.toBe('Projected child');
+  });
+
   test('reconnects event listeners with a fresh kill signal', async ({ page }) => {
     const component = page.locator('browser-feature-test');
 
@@ -61,5 +73,6 @@ declare global {
   interface Window {
     __jadisFeaturesReady?: boolean;
     createFeatureTemplate(): void;
+    mountVNodeTree(): void;
   }
 }

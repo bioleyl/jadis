@@ -9,8 +9,8 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
   },
   webServer: {
-    command: 'npm run build && python3 -m http.server 4173 --directory ../..',
-    reuseExistingServer: true,
+    command: 'npm run build && npx --yes serve -l 4173 ../..',
+    reuseExistingServer: false,
     timeout: 120_000,
     url: 'http://127.0.0.1:4173/packages/core/tests/browser/fixture.html',
   },

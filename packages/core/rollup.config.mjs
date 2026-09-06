@@ -2,7 +2,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import del from 'rollup-plugin-delete';
-import dts from 'rollup-plugin-dts';
 
 // Entry points for the main bundle and JSX runtime
 const entries = [

@@ -247,7 +247,7 @@ function createJsxNode(
       continue;
     }
 
-    if (typeof value === 'function') {
+    if (typeof value === 'function' && key.startsWith('on')) {
       const eventName = key.slice(2).toLowerCase();
       el.addEventListener(eventName, value as EventListener);
       continue;
@@ -389,7 +389,7 @@ function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
       }
       if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
         el.setAttribute(key, String(value));
-      } else if (typeof value === 'function') {
+      } else if (typeof value === 'function' && key.startsWith('on')) {
         const eventName = key.slice(2).toLowerCase();
         el.addEventListener(eventName, value as EventListener);
       } else {
@@ -413,14 +413,15 @@ function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
         if (!propsObj.className) {
           instance.setAttribute('class', toClassName(String(value)));
         }
-      } else if (typeof value === 'function') {
+      } else if (typeof value === 'function' && key.startsWith('on')) {
         const eventName = key.slice(2).toLowerCase();
         instance.addEventListener(eventName, value as EventListener);
       } else if (!RESERVED_PROPS.has(key)) {
         (instance as unknown as Record<string, unknown>)[key] = value;
       }
     }
-    mountVNodes(instance.shadowRoot ?? instance, children);
+    mountVNodes(instance, children);
+    parent.appendChild(instance);
   }
 }
 
