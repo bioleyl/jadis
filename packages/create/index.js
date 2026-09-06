@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 
+const fs = require('node:fs');
+const cwd = process.cwd();
+const path = require('node:path');
+
+const supportedTemplates = ['js', 'ts', 'vanilla'];
 const [template, projectName] = process.argv.slice(2);
 
-if (template !== 'js' && template !== 'ts') {
-  console.error('Please specify a valid template: "js" or "ts".');
+if (!supportedTemplates.includes(template)) {
+  console.error(`Please specify a valid template: ${supportedTemplates.map((item) => `"${item}"`).join(', ')}.`);
   process.exit(1);
 }
 
@@ -11,10 +16,6 @@ if (!projectName) {
   console.error('Please specify a project name.');
   process.exit(1);
 }
-
-const fs = require('node:fs');
-const cwd = process.cwd();
-const path = require('node:path');
 
 const templatePath = path.join(__dirname, 'templates', template);
 const projectPath = path.join(cwd, projectName);
@@ -46,5 +47,10 @@ console.log(`✅ Project "${projectName}" created successfully with the "${templ
 
 console.log('Next steps:\n');
 console.log(`  1. cd ${projectName}`);
-console.log('  2. npm install     # install dependencies');
-console.log('  3. npm run dev     # start the project\n');
+
+if (template === 'vanilla') {
+  console.log('  2. npx serve .     # start a static HTTP server\n');
+} else {
+  console.log('  2. npm install     # install dependencies');
+  console.log('  3. npm run dev     # start the project\n');
+}
