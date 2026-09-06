@@ -23,7 +23,6 @@ this.toggleClass(<className>, <condition>): void
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { css, createSelector, Jadis } from '@jadis/core';

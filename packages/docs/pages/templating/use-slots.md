@@ -13,7 +13,6 @@ closing tags of your external component will be rendered inside the `<slot></slo
 ```javascript
 // MyComponent.js with a slot
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 export class MyComponent extends Jadis {
@@ -68,7 +67,6 @@ Populate the slot
 ```javascript
 // MainPage.js using MyComponent
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 class MainPage extends Jadis {

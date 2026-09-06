@@ -30,7 +30,6 @@ Each getter internally calls [`getElement()`](./get-element.md), ensuring the el
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';
@@ -91,7 +90,6 @@ class FormComponent extends Jadis {
 ```javascript [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';

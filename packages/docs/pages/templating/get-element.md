@@ -27,7 +27,6 @@ this.getElement<T>(<query>): <HTMLElement>
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';
@@ -88,7 +87,6 @@ class ParentComponent extends Jadis {
 ```javascript [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';

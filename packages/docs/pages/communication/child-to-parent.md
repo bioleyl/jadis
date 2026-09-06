@@ -62,7 +62,6 @@ const events = this.useEvents({someEvent: String});
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';
@@ -163,7 +162,6 @@ ParentComponent.register();
 ```javascript [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';

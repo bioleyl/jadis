@@ -1,6 +1,6 @@
 # *Jadis*
 
-**Jadis** is a minimal JavaScript toolkit for building web interfaces using native Web Components: no virtual DOM, no reactivity system, no compile step. Just clean, readable, native code.
+**Jadis** is a minimal JavaScript toolkit for building web interfaces using native Web Components: no virtual DOM, no reactivity system, and no framework runtime. Use native DOM APIs directly, with optional JSX support through standard TypeScript or JavaScript tooling.
 
 > The web, like it used to be.
 
@@ -20,9 +20,9 @@ Modern frontend frameworks are powerful, but they come at a cost:
 *Jadis* is dedicated to simplicity and bringing things back to the basics:
 
 - Native Web Components
-- No framework-specific syntax
+- No framework-specific runtime or component model
 - Zero dependencies
-- Works with just a browser
+- Works directly with native browser APIs
 
 ## What You Get
 
@@ -39,7 +39,7 @@ npm install @jadis/core
 ## Example
 
 ```typescript
-import { jsx } from '@jadis/core';
+import { Jadis } from '@jadis/core';
 
 class HelloWorld extends Jadis {
   static readonly selector = 'hello-world';
@@ -75,6 +75,8 @@ To enable JSX in TypeScript, add these settings to your `tsconfig.json`:
 }
 ```
 
+For JavaScript, use the same JSX settings in `jsconfig.json` together with `"checkJs": true`.
+
 ## Philosophy
 
 *Jadis* isn't trying to replace React or Vue. It's here for when you want to:
@@ -103,7 +105,7 @@ Avoid it if you need:
 - No virtual DOM, but real DOM, updated by you
 - No magic reactivity, but direct control over state and updates
 - No decorators or class gymnastics: it works with both TypeScript and vanilla JS
-- No complex build setup: just a browser and a script tag
+- Use native browser APIs directly, or use Vite when using JSX and TypeScript
 - No over-engineered reactive stores: just event buses when you need global state, and they still work beautifully
 
 > You'd be surprised how much you can build without the "modern essentials".

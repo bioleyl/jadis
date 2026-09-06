@@ -10,7 +10,6 @@ The most straightforward way for a parent to interact with a child is by calling
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';
@@ -85,7 +84,6 @@ ParentComponent.register();
 ```javascript [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';

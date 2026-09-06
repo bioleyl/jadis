@@ -45,7 +45,6 @@ Once the bus is defined, you can **register listeners** or **emit events** freel
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Bus, Jadis, createSelector } from '@jadis/core';
@@ -132,7 +131,6 @@ EmitterComponent.register();
 ```javascript [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Bus, Jadis, createSelector } from '@jadis/core';

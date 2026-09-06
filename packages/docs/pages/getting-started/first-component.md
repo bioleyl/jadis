@@ -47,7 +47,6 @@ We’ll create a reusable button that shows a label and keeps track of how many 
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector } from '@jadis/core';

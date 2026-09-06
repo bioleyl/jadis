@@ -9,7 +9,6 @@ Routes support dynamic parameters (e.g. `:name`), which are passed as attributes
 
 ```javascript
 /// <reference types="@jadis/core/jsx-runtime" />
-/** @jsx jsx */
 /** @jsxImportSource @jadis/core */
 
 import { Jadis, createSelector, Router, defineRoutes } from '@jadis/core';

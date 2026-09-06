@@ -3,7 +3,7 @@
 The `templateHtml()` method defines the HTML structure of the component. It is intended to be overridden by subclasses or component implementations that need to supply their own visual layout. When implemented, this method should return a `Node` containing the component's rendered HTML.
 
 :::info Info: *Jadis* uses **JSX** for templating
-Configure your project with the following tsconfig to enable JSX:
+Configure your `tsconfig.json` or `jsconfig.json` to enable JSX:
 ```json
 {
   "compilerOptions": {
@@ -37,7 +37,6 @@ Override this method in your component to provide a custom HTML template using J
 ```javascript
 // Add these JSDoc pragmas at the top of your file:
 // /// <reference types="@jadis/core/jsx-runtime" />
-// /** @jsx jsx */
 // /** @jsxImportSource @jadis/core */
 
 templateHtml() {
@@ -61,6 +60,36 @@ templateHtml(): Node {
 ```
 
 :::
+
+### Without JSX
+
+JSX is optional. If you want to run Jadis directly in the browser without a JSX transform, use the `createElement` helper:
+
+```typescript
+import { createElement, Jadis } from '@jadis/core';
+
+class HelloWorld extends Jadis {
+  static readonly selector = 'hello-world';
+
+  templateHtml(): Node {
+    const fragment = document.createDocumentFragment();
+    const heading = createElement('h1', {}, fragment);
+    heading.textContent = 'Hello, Jadis!';
+
+    const paragraph = createElement(
+      'p',
+      { props: { textContent: 'This component does not use JSX.' } },
+      fragment
+    );
+
+    return fragment;
+  }
+}
+
+HelloWorld.register();
+```
+
+`createElement` supports element properties, HTML attributes, and appending to a `DocumentFragment`, `ShadowRoot`, or regular element. See the [`createElement` helper documentation](../helpers/create-element.md) for more examples.
 
 ### Using Fragments
 
