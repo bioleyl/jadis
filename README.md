@@ -8,6 +8,8 @@
 
 You can find the full documentation on [github pages](https://bioleyl.github.io/jadis/).
 
+For AI-assisted development, see the [AI-SKILL.md](AI-SKILL.md) guide.
+
 ## Why *Jadis*?
 
 Modern frontend frameworks are powerful, but they come at a cost:
