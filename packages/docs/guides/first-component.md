@@ -124,4 +124,4 @@ Or you can use it with `toTemplate()`, see [dedicated page](../templating/to-tem
 
 ## Adding style with CSS
 
-See [documentation about adding style](../templating/add-style.md).
+See [documentation about adding style](../templating/css.md).

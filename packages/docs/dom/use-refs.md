@@ -10,7 +10,20 @@ Instead of writing multiple getters, `useRefs` lets you define all your element 
 ## Signature
 
 ```typescript
-this.useRefs(<mapFn>): Readonly<ElementMap>  
+this.useRefs<ElementMap>(
+  (ref: <Element extends HTMLElement = HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+    query: Tag
+  ) => SelectorToElementWithFallback<Tag, Element>) => ElementMap
+): Readonly<ElementMap>
+```
+
+`ref()` supports both tag-name inference and an explicit element type:
+
+```typescript
+const refs = this.useRefs((ref) => ({
+  input: ref<HTMLInputElement>('input'),
+  button: ref('button'), // inferred as HTMLButtonElement
+}));
 ```
 
 ### Parameters

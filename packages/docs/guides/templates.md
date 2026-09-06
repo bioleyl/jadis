@@ -89,7 +89,7 @@ class HelloWorld extends Jadis {
 HelloWorld.register();
 ```
 
-`createElement` supports element properties, HTML attributes, and appending to a `DocumentFragment`, `ShadowRoot`, or regular element. See the [`createElement` helper documentation](../helpers/create-element.md) for more examples.
+`createElement` supports element properties, HTML attributes, and appending to a `DocumentFragment`, `ShadowRoot`, or regular element. See the [`createElement` helper documentation](../api/create-element.md) for more examples.
 
 ### Using Fragments
 

@@ -1,7 +1,7 @@
 # Declaring Routes
 
 You can add routes individually or organize them into a route group when parts of your app share a common URL prefix.  
-[See the dedicated documentation](using-route-groups.md) about route groups.
+[See the dedicated documentation](route-groups.md) about route groups.
 
 ## Add Individual Routes
 

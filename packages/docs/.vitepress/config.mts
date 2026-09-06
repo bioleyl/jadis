@@ -3,139 +3,188 @@ import { defineConfig } from 'vitepress';
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   base: '/jadis/',
-  description: 'Jadis official documentation',
+  description: 'Jadis — A minimal JavaScript toolkit for building web interfaces with native Web Components.',
+  head: [
+    ['link', { rel: 'icon', href: '/jadis/favicon.png' }],
+  ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: '/logo.svg',
     search: {
       provider: 'local',
     },
     nav: [
       {
         link: '/',
-        text: 'Home',
+        text: 'Docs',
       },
       {
-        link: '/pages/examples/index',
+        link: '/guides/examples',
         text: 'Examples',
       },
     ],
 
-    sidebar: [
-      {
-        items: [
-          {
-            link: '/pages/getting-started/installation',
-            text: 'Installation',
-          },
-          {
-            link: '/pages/getting-started/first-component',
-            text: 'First component',
-          },
-        ],
-        text: 'Getting Started',
-      },
-      {
-        items: [
-          {
-            link: '/pages/templating/create-template',
-            text: 'Basics of templating',
-          },
-          {
-            link: '/pages/templating/add-style',
-            text: 'Add css style to components',
-          },
-          {
-            link: '/pages/templating/toggle-class',
-            text: 'Toggle classes in components'
-          },
-          {
-            link: '/pages/templating/use-attributes',
-            text: 'Use attributes in your component'
-          },
-          {
-            link: '/pages/templating/get-element',
-            text: 'Get elements from template'
-          },
-          {
-            link: '/pages/templating/use-slots',
-            text: 'Use slots in your component'
-          },
-          {
-            link: '/pages/templating/to-template',
-            text: 'Add components to template'
-          }, 
-          {
-            link: '/pages/templating/use-refs',
-            text: 'Point to an element in the DOM'
-          },
-          {
-            link: '/pages/templating/use-change',
-            text: 'React to a property change'
-          },
-          {
-            link: '/pages/templating/event-handling',
-            text: 'Handle events with simplicity'
-          }
-        ],
-        text: 'Templating',
-      },
-      {
-        items: [
-          {
-            link: '/pages/communication/parent-to-child',
-            text: 'Parent to child',
-          },
-          {
-            link: '/pages/communication/child-to-parent',
-            text: 'Child to parent',
-          },
-          {
-            link: '/pages/communication/cross-components',
-            text: 'Cross-Components ',
-          },
-        ],
-        text: 'Communication',
-      },
-      {
-        items: [
-          {
-            link: '/pages/routing/configuration',
-            text: 'Configuration',
-          },
-          {
-            link: '/pages/routing/declaring-routes',
-            text: 'Declaring routes',
-          },
-          {
-            link: '/pages/routing/using-route-groups',
-            text: 'Using route groups',
-          },
-        ],
-        text: 'Routing',
-      },
-      {
-        items: [
-          {
-            link: '/pages/helpers/create-element',
-            text: 'createElement',
-          },
-          {
-            link: '/pages/helpers/kill-signal',
-            text: 'killSignal',
-          },
-        ],
-        text: 'Helpers',
-      },
-      {
-        items: [
-          {
-            link: '/pages/customization/extending-jadis',
-            text: 'Extending Jadis',
-          }
-        ],
-        text: 'Customization',
-      }
-    ],
+    sidebar: {
+      '/': [
+        {
+          text: 'Getting Started',
+          items: [
+            {
+              link: '/guides/installation',
+              text: 'Installation',
+            },
+            {
+              link: '/guides/first-component',
+              text: 'Your First Component',
+            },
+          ],
+        },
+        {
+          text: 'Core Concepts',
+          items: [
+            {
+              link: '/guides/lifecycle',
+              text: 'Lifecycle',
+            },
+            {
+              link: '/guides/templates',
+              text: 'Templates',
+            },
+            {
+              link: '/guides/shadow-dom',
+              text: 'Shadow DOM',
+            },
+          ],
+        },
+        {
+          text: 'Templating',
+          items: [
+            {
+              link: '/templating/css',
+              text: 'Styles',
+            },
+            {
+              link: '/templating/classes',
+              text: 'Toggle Classes',
+            },
+            {
+              link: '/templating/attributes',
+              text: 'Attributes',
+            },
+            {
+              link: '/templating/slots',
+              text: 'Slots',
+            },
+            {
+              link: '/templating/to-template',
+              text: 'toTemplate()',
+            },
+          ],
+        },
+        {
+          text: 'DOM Helpers',
+          items: [
+            {
+              link: '/dom/get-element',
+              text: 'getElement()',
+            },
+            {
+              link: '/dom/use-refs',
+              text: 'useRefs()',
+            },
+          ],
+        },
+        {
+          text: 'State & Events',
+          items: [
+            {
+              link: '/state/use-change',
+              text: 'useChange()',
+            },
+            {
+              link: '/state/event-handling',
+              text: 'Event Handling',
+            },
+            {
+              link: '/state/use-events',
+              text: 'useEvents()',
+            },
+          ],
+        },
+        {
+          text: 'Communication',
+          items: [
+            {
+              link: '/communication/parent-to-child',
+              text: 'Parent to Child',
+            },
+            {
+              link: '/communication/child-to-parent',
+              text: 'Child to Parent',
+            },
+            {
+              link: '/communication/cross-components',
+              text: 'Cross-Component',
+            },
+          ],
+        },
+        {
+          text: 'Routing',
+          items: [
+            {
+              link: '/routing/overview',
+              text: 'Overview',
+            },
+            {
+              link: '/routing/routes',
+              text: 'Declaring Routes',
+            },
+            {
+              link: '/routing/route-groups',
+              text: 'Route Groups',
+            },
+          ],
+        },
+        {
+          text: 'API Reference',
+          items: [
+            {
+              link: '/api/jadis-class',
+              text: 'Jadis Class',
+            },
+            {
+              link: '/api/html-css-helpers',
+              text: 'JSX / css()',
+            },
+            {
+              link: '/api/create-element',
+              text: 'createElement()',
+            },
+            {
+              link: '/api/bus-class',
+              text: 'Bus Class',
+            },
+            {
+              link: '/api/create-selector',
+              text: 'createSelector()',
+            },
+            {
+              link: '/api/router-class',
+              text: 'Router Class',
+            },
+          ],
+        },
+        {
+          text: 'Customization',
+          items: [
+            {
+              link: '/guides/extending-jadis',
+              text: 'Extending Jadis',
+            },
+          ],
+        },
+      ],
+    },
     socialLinks: [{ icon: 'github', link: 'https://github.com/bioleyl/jadis' }],
   },
   title: 'Jadis',

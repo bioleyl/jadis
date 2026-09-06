@@ -46,7 +46,7 @@ A more convenient way to style a component is to isolate CSS in a separate file 
 `?inline` query if you are using Vite.
 
 ```javascript
-import { Jadis, createSelector, css, createSelector } from '@jadis/core';
+import { Jadis, createSelector } from '@jadis/core';
 import style from './your-css-file.css?inline'; 
 
 class ClickButton extends Jadis {
@@ -65,7 +65,7 @@ class ClickButton extends Jadis {
 
 ```
 
-See [documentation about toggling classes in components](../templating/toggle-class.md).
+See [documentation about toggling classes in components](./classes.md).
 
 :::info
 **?inline** is Vite specific in order to load css as plain text in a variable.

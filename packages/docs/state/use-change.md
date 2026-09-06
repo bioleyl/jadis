@@ -82,7 +82,7 @@ class ToggleSwitch extends Jadis {
 import { Jadis } from "@jadis/core";
 
 export class Dice extends Jadis {
-  static readonly selector = 'toggle-value';
+  static readonly selector = 'toggle-value-component';
   private readonly toggleValue = this.useChange(
     0,
     (value) => {
@@ -133,6 +133,6 @@ No casts or generics are needed: TypeScript infers everything.
 
 `useChange` works seamlessly with:
 
-- `useRefs` (to update DOM nodes), see the documentation about it [on its dedicated page](../templating/use-refs.md).
+- `useRefs` (to update DOM nodes), see the documentation about it [on its dedicated page](../dom/use-refs.md).
 - `useEvents` (to emit change events), see the documentation about it [on the child to parent communication page](../communication/child-to-parent.md).
   

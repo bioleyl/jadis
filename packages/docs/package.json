@@ -2,7 +2,7 @@
   "author": "Leal Bioley <lb@syware.ch>",
   "description": "Jadis documentation",
   "devDependencies": {
-    "vitepress": "1.6.4"
+    "vitepress": "v2.0.0-alpha.17"
   },
   "license": "ISC",
   "main": "index.js",

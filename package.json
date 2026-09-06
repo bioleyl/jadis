@@ -19,7 +19,9 @@
     "test": "npm run test --workspaces --if-present",
     "verify:packages": "node scripts/verify-packages.mjs",
     "check": "biome check",
-    "prepare": "husky"
+    "prepare": "husky",
+    "set-version": "node scripts/set-version.mjs",
+    "deps": "node scripts/update-deps.mjs"
   },
   "version": "1.0.0",
   "workspaces": [
