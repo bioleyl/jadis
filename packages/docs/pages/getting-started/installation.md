@@ -29,18 +29,19 @@ You can also start from scratch using the official *Jadis* package:
 
 ```bash
 npm install @jadis/core
+npm install --save-dev typescript vite
 ```
 
-Then create a file named `index.js` with the following content:
+For a JSX project, create a file named `src/main.tsx` (or `src/main.jsx` for JavaScript) with the following content:
 
-```javascript
-import { Jadis, createSelector, html } from '@jadis/core';
+```tsx
+import { Jadis } from '@jadis/core';
 
 class HelloWorld extends Jadis {
-  static selector = createSelector('hello-world');
+  static readonly selector = 'hello-world';
 
-  templateHtml() {
-    return html`<p>Hello, <span id="name"></span></p>`;
+  templateHtml(): Node {
+    return <p>Hello, <span id="name"></span></p>;
   }
 
   onConnect() {
@@ -50,6 +51,8 @@ class HelloWorld extends Jadis {
 HelloWorld.register();
 ```
 
+JSX must be transformed by TypeScript or a JavaScript bundler before the browser can run it. The boilerplate templates include the required Vite and JSX configuration.
+
 Then in your HTML:
 
 ```html
@@ -58,7 +61,7 @@ Then in your HTML:
 
 ## Using a CDN
 
-You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@0.12.2):
+You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@1.0.0). This example uses DOM APIs directly so it can run without a JSX transform:
 
 ```html
 <!DOCTYPE html>
@@ -73,22 +76,20 @@ You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/co
     <script type="importmap">
       {
         "imports": {
-          "jadis": "https://esm.sh/@jadis/core@0.12.2"
+          "jadis": "https://esm.sh/@jadis/core@1.0.0"
         }
       }
     </script>
     <script type="module">
-      import { Jadis, createSelector, html } from 'jadis';
+      import { createElement, Jadis } from 'jadis';
 
       class HelloWorld extends Jadis {
-        static selector = createSelector('hello-world');
+        static selector = 'hello-world';
 
         templateHtml() {
-          return html`<p>Hello, <span id="name"></span></p>`;
-        }
-
-        onConnect() {
-          this.getElement('#name').textContent = 'Jadis developers';
+          const paragraph = createElement('p');
+          paragraph.textContent = 'Hello, Jadis developers';
+          return paragraph;
         }
       }
 

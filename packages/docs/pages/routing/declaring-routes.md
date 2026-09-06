@@ -8,7 +8,10 @@ You can add routes individually or organize them into a route group when parts o
 Routes support dynamic parameters (e.g. `:name`), which are passed as attributes to the corresponding component.
 
 ```javascript
-import { Jadis, html, createSelector, Router, defineRoutes } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector, Router, defineRoutes } from '@jadis/core';
 
 class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
@@ -18,7 +21,7 @@ class HelloPage extends Jadis {
   }));
 
   templateHtml() {
-    return html`<h1>Hello, <span id="name"></span>!</h1>`;
+    return <h1>Hello, <span id="name"></span>!</h1>;
   }
 
   onConnect() {

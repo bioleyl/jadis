@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "checkJs": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jadis/core",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "target": "ES2020"

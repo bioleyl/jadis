@@ -29,16 +29,21 @@ Each getter internally calls [`getElement()`](./get-element.md), ensuring the el
 ::: code-group
 
 ```javascript
-import { html, Jadis, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class FormComponent extends Jadis {
   static selector = createSelector('form-component');
 
   templateHtml() {
-    return html`
-      <input class="my-input" />
-      <button>Submit</button>
-    `;
+    return (
+      <>
+        <input class="my-input" />
+        <button>Submit</button>
+      </>
+    );
   }
 
   refs = this.useRefs((ref) => ({
@@ -55,16 +60,18 @@ class FormComponent extends Jadis {
 ```
 
 ```typescript
-import { html, Jadis } from '@jadis/core';
+import { Jadis } from '@jadis/core';
 
 class FormComponent extends Jadis {
   static readonly selector = 'form-component';
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <input class="my-input" />
-      <button>Submit</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <input class="my-input" />
+        <button>Submit</button>
+      </>
+    );
   }
 
   readonly refs = this.useRefs((ref) => ({
@@ -82,20 +89,25 @@ class FormComponent extends Jadis {
 
 ```javascript [js-doc]
 // @ts-check
-import { html, Jadis, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class FormComponent extends Jadis {
   static selector = createSelector('form-component');
 
- templateHtml() {
-    return html`
-      <input class="my-input" />
-      <button>Submit</button>
-    `;
+  templateHtml() {
+    return (
+      <>
+        <input class="my-input" />
+        <button>Submit</button>
+      </>
+    );
   }
 
   refs = this.useRefs((ref) => ({
-    /** @type HTMLInputElement */
+    /** @type {HTMLInputElement} */
     input: ref('input.my-input'),
     button: ref('button'),
   }));

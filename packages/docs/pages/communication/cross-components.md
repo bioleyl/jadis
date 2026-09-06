@@ -44,7 +44,10 @@ Once the bus is defined, you can **register listeners** or **emit events** freel
 ::: code-group
 
 ```javascript
-import { Bus, Jadis, html, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Bus, Jadis, createSelector } from '@jadis/core';
 
 const myBus = new Bus({
   someEvent: String,
@@ -56,7 +59,7 @@ class ReceiverComponent extends Jadis {
   static selector = createSelector('receiver-component');
 
   templateHtml() {
-    return html`<p></p>`;
+    return <p></p>;
   }
 
   onConnect() {
@@ -70,7 +73,7 @@ class EmitterComponent extends Jadis {
   static selector = createSelector('emitter-component');
 
   templateHtml() {
-    return html`<button>ClickMe</button>`;
+    return <button>ClickMe</button>;
   }
 
   onConnect() {
@@ -85,7 +88,7 @@ EmitterComponent.register();
 ```
 
 ```typescript
-import { Bus, Jadis, html } from '@jadis/core';
+import { Bus, Jadis } from '@jadis/core';
 
 const myBus = new Bus<{
   someEvent: string;
@@ -96,8 +99,8 @@ const myBus = new Bus<{
 class ReceiverComponent extends Jadis {
   static readonly selector = 'receiver-component';
 
-  templateHtml(): DocumentFragment {
-    return html`<p></p>`;
+  templateHtml(): Node {
+    return <p></p>;
   }
 
   onConnect(): void {
@@ -110,8 +113,8 @@ class ReceiverComponent extends Jadis {
 class EmitterComponent extends Jadis {
   static readonly selector = 'emitter-component';
 
-  templateHtml(): DocumentFragment {
-    return html`<button>ClickMe</button>`;
+  templateHtml(): Node {
+    return <button>ClickMe</button>;
   }
 
   onConnect(): void {
@@ -127,7 +130,10 @@ EmitterComponent.register();
 
 ```javascript [js-doc]
 // @ts-check
-import { Bus, Jadis, html, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Bus, Jadis, createSelector } from '@jadis/core';
 
 /** @type {Bus<{ someEvent: string, anotherEvent: number, noPayloadEvent: undefined }>} */
 const myBus = new Bus();
@@ -136,7 +142,7 @@ class ReceiverComponent extends Jadis {
   static selector = createSelector('receiver-component');
 
   templateHtml() {
-    return html`<p></p>`;
+    return <p></p>;
   }
 
   onConnect() {
@@ -148,7 +154,10 @@ class ReceiverComponent extends Jadis {
 
 class EmitterComponent extends Jadis {
   static selector = createSelector('emitter-component');
-  static template = html`<button>ClickMe</button>`;
+
+  templateHtml() {
+    return <button>ClickMe</button>;
+  }
 
   onConnect() {
     this.getElement('button').addEventListener('click', () => {

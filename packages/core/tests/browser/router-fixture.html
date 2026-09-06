@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <body>
+    <div id="router-app"></div>
+    <script type="module">
+      import { defineRouteGroup, defineRoutes, Jadis, Router } from '/packages/core/dist/esm/index.mjs';
+
+      class BrowserBase extends Jadis {
+        static selector = 'browser-base';
+
+        templateHtml() {
+          const output = document.createElement('output');
+          output.textContent = 'base';
+          return output;
+        }
+      }
+
+      class BrowserHome extends Jadis {
+        static selector = 'browser-home';
+
+        templateHtml() {
+          const output = document.createElement('output');
+          output.textContent = 'home';
+          return output;
+        }
+      }
+
+      class BrowserDetails extends Jadis {
+        static selector = 'browser-details';
+
+        templateHtml() {
+          const output = document.createElement('output');
+          output.textContent = `details:${this.getAttribute('id')}`;
+          return output;
+        }
+      }
+
+      class BrowserRoot extends Jadis {
+        static selector = 'browser-root';
+
+        templateHtml() {
+          return document.createElement('slot');
+        }
+      }
+
+      BrowserBase.register();
+      BrowserHome.register();
+      BrowserDetails.register();
+      BrowserRoot.register();
+
+      const routes = defineRoutes({
+        base: { page: BrowserBase, path: '/' },
+        home: { page: BrowserHome, path: '/home' },
+        details: { page: BrowserDetails, path: '/details/:id' },
+        group: defineRouteGroup(
+          '/group',
+          { home: { page: BrowserHome, path: '/home' } },
+          { rootComponentSelector: 'browser-root' }
+        ),
+      });
+
+      window.startRouter = (mode) => {
+        window.history.replaceState({}, '', '/');
+        const router = new Router(routes, { mode });
+        router.mountOn(document.querySelector('#router-app'));
+        window.__jadisRouter = router;
+      };
+      window.__jadisRouterReady = true;
+    </script>
+  </body>
+</html>

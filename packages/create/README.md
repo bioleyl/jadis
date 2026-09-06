@@ -1,6 +1,6 @@
 # @jadis/create
 
-A simple CLI to scaffold a new project using [Jadis](https://www.npmjs.com/package/@jadis/core). No build tools, no fuss, just the web.
+A simple CLI to scaffold projects using [Jadis](https://www.npmjs.com/package/@jadis/core). It provides Vite-based JavaScript and TypeScript templates with JSX support, plus a vanilla template that uses native browser modules without a bundler.
 
 ## Usage
 
@@ -16,6 +16,12 @@ npx @jadis/create ts my-app
 
 This will create a new directory called `my-app` with a minimal and ready-to-code *Jadis* setup.
 
+For a no-bundler project:
+
+```bash
+npx @jadis/create vanilla my-app
+```
+
 ## Run the Project
 
 ```bash
@@ -24,11 +30,16 @@ npm install
 npm run dev
 ```
 
-This will start a local dev server with instant reload.
+This will start a local dev server with instant reload. The vanilla template instead uses a static HTTP server:
+
+```bash
+cd my-app
+npx serve .
+```
 
 ## Why This CLI?
 
-Because *Jadis* is about simplicity. This CLI gives you only what you need to start: no boilerplate bloat, no unnecessary complexity, no heavy dependencies.
+Because *Jadis* is about simplicity. This CLI gives you only what you need to start: minimal boilerplate, JSX-ready configuration, and no unnecessary framework dependencies.
 
 ## License
 

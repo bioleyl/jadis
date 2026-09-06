@@ -40,7 +40,6 @@ export type EventValue<T> = [T] extends [StringConstructor]
                   : T;
 
 export type ComponentSelector = `${string}-${string}`;
-export type HtmlMarkupValue = string | number | boolean | Node | Node[] | null | undefined;
 export type AppendableElement = HTMLElement | ShadowRoot | DocumentFragment;
 
 export type ElementValues<T extends HTMLElement> = {
@@ -70,3 +69,15 @@ export type KeysWithUndefined<T extends Record<string, unknown>> = {
 export type KeysWithoutUndefined<T extends Record<string, unknown>> = {
   [K in EventKey<T>]-?: HasUndefined<T[K]> extends true ? never : K;
 }[EventKey<T>];
+
+/**
+ * Remove index signatures from a type. Used for JSX prop safety.
+ */
+export type RemoveIndexSignature<T> = {
+  [K in keyof T as string extends K ? never : number extends K ? never : K]: T[K];
+};
+
+/**
+ * Element values safe for JSX props — strips index signatures.
+ */
+export type SafeElementValues<T extends HTMLElement> = RemoveIndexSignature<ElementValues<T>>;

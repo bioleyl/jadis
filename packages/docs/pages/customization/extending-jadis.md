@@ -42,7 +42,6 @@ export abstract class CustomJadis extends Jadis {
 As soon as the component starts to load, `loadData` is called to avoid losing time. When the promise is resolved, the content is placed in the right location and the DOM used for loading is removed.
 
 ```typescript
-import { html } from "@jadis/core";
 import { CustomJadis } from "./custom-jadis";
 
 export class CustomComponent extends CustomJadis {
@@ -65,11 +64,13 @@ export class CustomComponent extends CustomJadis {
     this._refs.content.textContent = await this._data;
   }
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <div class="loading">Loading ...</div>
-      <div class="content"></div>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <div class="loading">Loading ...</div>
+        <div class="content"></div>
+      </>
+    );
   }
 
   private async loadData(): Promise<string> {

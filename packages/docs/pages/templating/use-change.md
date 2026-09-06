@@ -59,11 +59,13 @@ class ToggleSwitch extends Jadis {
     button: ref<HTMLButtonElement>('button'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <span></span>
-      <button>Toggle</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <span></span>
+        <button>Toggle</button>
+      </>
+    );
   }
 
   onConnect() {
@@ -77,7 +79,7 @@ class ToggleSwitch extends Jadis {
 ## Example with a value
 
 ```typescript
-import { Jadis, html } from "@jadis/core";
+import { Jadis } from "@jadis/core";
 
 export class Dice extends Jadis {
   static readonly selector = 'toggle-value';
@@ -94,11 +96,13 @@ export class Dice extends Jadis {
     button: ref<HTMLButtonElement>('button')
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <span></span>
-      <button>Roll</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <span></span>
+        <button>Roll</button>
+      </>
+    );
   }
 
   onConnect(): void {

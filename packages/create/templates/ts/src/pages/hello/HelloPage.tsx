@@ -1,4 +1,4 @@
-import { css, html, Jadis } from '@jadis/core';
+import { css, Jadis } from '@jadis/core';
 
 import { myRouter } from '../../router';
 
@@ -10,15 +10,23 @@ export default class HelloPage extends Jadis {
     name: ref('span'),
   }));
 
-  private readonly _attrs = this.useAttributes('name');
+  private readonly _attrs = this.useAttributes({
+    name: (value) => {
+      this._refs.name.textContent = value ?? '';
+    },
+  });
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <h1>Hello, <span></span>!</h1>
-      <p>Welcome to the Hello Page.</p>
-      <p>Click the button to go back to the main page.</p>
-      <button>Go Back</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <h1>
+          Hello, <span />!
+        </h1>
+        <p>Welcome to the Hello Page.</p>
+        <p>Click the button to go back to the main page.</p>
+        <button type="button">Go Back</button>
+      </>
+    );
   }
 
   templateCss(): string {

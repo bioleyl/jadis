@@ -1,4 +1,7 @@
-import { createSelector, css, html, Jadis } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { createSelector, css, Jadis } from '@jadis/core';
 
 import { myRouter } from '../../router';
 
@@ -10,15 +13,23 @@ export default class HelloPage extends Jadis {
     name: ref('span'),
   }));
 
-  attrs = this.useAttributes('name');
+  attrs = this.useAttributes({
+    name: (value) => {
+      this.refs.name.textContent = value ?? '';
+    },
+  });
 
   templateHtml() {
-    return html`
-      <h1>Hello, <span></span>!</h1>
-      <p>Welcome to the Hello Page.</p>
-      <p>Click the button to go back to the main page.</p>
-      <button>Go Back</button>
-    `;
+    return (
+      <>
+        <h1>
+          Hello, <span />!
+        </h1>
+        <p>Welcome to the Hello Page.</p>
+        <p>Click the button to go back to the main page.</p>
+        <button type="button">Go Back</button>
+      </>
+    );
   }
 
   templateCss() {

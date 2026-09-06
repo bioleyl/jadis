@@ -46,7 +46,10 @@ We’ll create a reusable button that shows a label and keeps track of how many 
 ::: code-group
 
 ```javascript
-import { Jadis, html, createSelector } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class CounterButton extends Jadis {
   static selector = createSelector('counter-component');
@@ -61,10 +64,12 @@ class CounterButton extends Jadis {
   }));
 
   templateHtml() {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
+    return (
+      <>
+        <p>Count: <span></span></p>
+        <button>Increment</button>
+      </>
+    );
   }
 
   onConnect() {
@@ -76,7 +81,7 @@ CounterButton.register();
 ```
 
 ```typescript
-import { Jadis, html } from '@jadis/core';
+import { Jadis } from '@jadis/core';
 
 class CounterButton extends Jadis {
   static readonly selector = 'counter-component';
@@ -90,11 +95,13 @@ class CounterButton extends Jadis {
     incrementButton: ref('button'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <p>Count: <span></span></p>
+        <button>Increment</button>
+      </>
+    );
   }
 
   onConnect(): void {

@@ -2,15 +2,21 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import del from 'rollup-plugin-delete';
-import dts from 'rollup-plugin-dts';
 
-export default [
+// Entry points for the main bundle and JSX runtime
+const entries = [
+  { input: 'src/index.ts', name: 'index' },
+  { input: 'src/helpers/jsx-runtime.ts', name: 'jsx-runtime' },
+  { input: 'src/helpers/jsx-dev-runtime.ts', name: 'jsx-dev-runtime' },
+];
+
+export default entries.flatMap(({ input, name }) => [
   // ESM
   {
     external: [],
-    input: 'src/index.ts',
+    input,
     output: {
-      file: 'dist/esm/index.mjs',
+      file: `dist/esm/${name}.mjs`,
       format: 'esm',
       sourcemap: true,
     },
@@ -18,16 +24,16 @@ export default [
       resolve(),
       commonjs(),
       typescript({ declaration: false, tsconfig: './tsconfig.json' }),
-      del({ runOnce: true, targets: 'dist/esm' }),
+      del({ runOnce: true, targets: `dist/esm/${name}*` }),
     ],
   },
 
   // CJS
   {
     external: [],
-    input: 'src/index.ts',
+    input,
     output: {
-      file: 'dist/cjs/index.js',
+      file: `dist/cjs/${name}.js`,
       format: 'cjs',
       sourcemap: true,
     },
@@ -35,21 +41,7 @@ export default [
       resolve(),
       commonjs(),
       typescript({ declaration: false, tsconfig: './tsconfig.json' }),
-      del({ runOnce: true, targets: 'dist/cjs' }),
+      del({ runOnce: true, targets: `dist/cjs/${name}*` }),
     ],
   },
-
-  // Types
-  {
-    input: 'dist/dts/index.d.ts',
-    output: {
-      file: 'dist/types/index.d.ts',
-      format: 'es',
-    },
-    plugins: [
-      dts(),
-      del({ runOnce: true, targets: 'dist/types' }),
-      del({ hook: 'buildEnd', targets: 'dist/dts' }),
-    ],
-  },
-];
+]);
