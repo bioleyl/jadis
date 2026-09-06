@@ -1,4 +1,4 @@
-import { ChangeHandler } from './change.helper';
+import { applyElementAttributes, applyElementProperty } from './element.helper';
 
 import type { Jadis, JadisConstructor } from '../base-component';
 import type { AppendableElement, SafeElementValues } from './type.helper';
@@ -13,10 +13,6 @@ export const Fragment = Symbol('JadisFragment');
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-function toKebabCase(str: string): string {
-  return str.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? `-${$.toLowerCase()}` : $.toLowerCase()));
-}
 
 function toClassName(value: string | number | boolean): string {
   return String(value).trim();
@@ -111,9 +107,12 @@ type ComponentProps<T extends Jadis> = SafeElementValues<T> & BaseProps;
  */
 // biome-ignore lint/style/useNamingConvention: JSX is a reserved namespace name
 export declare namespace JSX {
+  // All Jadis subclasses are valid JSX element classes
   interface ElementClass extends Jadis {}
+  // Points to static __jadisProps on the constructor for attribute type inference
   interface ElementAttributesProperty {
-    __jadisProps: unknown;
+    // biome-ignore lint/suspicious/noExplicitAny: TypeScript JSX requires an open attribute marker
+    __jadisProps: any;
   }
   // biome-ignore lint/suspicious/noExplicitAny: JSX.Element must be any per JSX spec
   type Element = any;
@@ -144,7 +143,8 @@ declare global {
   namespace JSX {
     interface ElementClass extends Jadis {}
     interface ElementAttributesProperty {
-      __jadisProps: unknown;
+      // biome-ignore lint/suspicious/noExplicitAny: TypeScript JSX requires an open attribute marker
+      __jadisProps: any;
     }
     // biome-ignore lint/suspicious/noExplicitAny: JSX.Element must be any per JSX spec
     type Element = any;
@@ -204,10 +204,7 @@ function createJsxNode(
   }
 
   // Set attrs
-  const attrs = props?.attrs ?? {};
-  for (const [key, value] of Object.entries(attrs)) {
-    el.setAttribute(toKebabCase(key), String(value));
-  }
+  applyElementAttributes(el, props?.attrs ?? {});
 
   // Separate reserved vs direct props
   const directProps: Record<string, unknown> = {};
@@ -232,25 +229,18 @@ function createJsxNode(
       continue;
     }
 
-    const target = el;
-    const currentValue = target[key as keyof typeof target];
-
-    if (currentValue instanceof ChangeHandler) {
-      currentValue.set(value as Parameters<ChangeHandler<unknown>['set']>[0]);
-      continue;
-    }
-
     if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
-      el.setAttribute(key, String(value));
+      applyElementAttributes(el, { [key]: value });
       continue;
     }
 
     if (typeof value === 'function') {
       const eventName = key.slice(2).toLowerCase();
       el.addEventListener(eventName, value as EventListener);
-    } else {
-      (target as unknown as Record<string, unknown>)[key] = value;
+      continue;
     }
+
+    applyElementProperty(el, key, value);
   }
 
   // Append children

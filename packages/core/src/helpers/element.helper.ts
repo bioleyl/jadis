@@ -1,7 +1,7 @@
-import { ChangeHandler } from './change.helper';
 import { toKebabCase } from './string.helper';
 
 import type { JadisConstructor } from '../base-component';
+import type { ChangeHandler } from './change.helper';
 import type { AppendableElement, ElementValues, OptionsWithProps } from './type.helper';
 
 /**
@@ -16,6 +16,46 @@ import type { AppendableElement, ElementValues, OptionsWithProps } from './type.
  * const newElement = createElement('div', {attrs: { class: 'my-class', id: 'my-id' },
  * props: {myProp: propValue}}, document.body);
  */
+type ChangeHandlerValue = Parameters<ChangeHandler<unknown>['set']>[0];
+type ChangeHandlerLike = {
+  set(value: ChangeHandlerValue): void;
+};
+
+function isChangeHandlerLike(value: unknown): value is ChangeHandlerLike {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  return 'set' in value && typeof value.set === 'function';
+}
+
+export function applyElementAttributes(element: HTMLElement, attrs: Record<string, unknown>): void {
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value === undefined) {
+      continue;
+    }
+
+    element.setAttribute(toKebabCase(key), String(value));
+  }
+}
+
+export function applyElementProperty(element: HTMLElement, key: string, value: unknown): void {
+  if (value === undefined) {
+    return;
+  }
+
+  const target = element as unknown as Record<string, unknown>;
+  const currentValue = target[key];
+
+  if (isChangeHandlerLike(currentValue)) {
+    const changeHandler = currentValue as unknown as ChangeHandlerLike;
+    changeHandler.set(value as ChangeHandlerValue);
+    return;
+  }
+
+  target[key] = value;
+}
+
 export function createElement<Tag extends keyof HTMLElementTagNameMap>(
   tag: Tag,
   options?: OptionsWithProps<ElementValues<HTMLElementTagNameMap[Tag]>>,
@@ -38,18 +78,11 @@ export function createElement<Tag extends keyof HTMLElementTagNameMap | HTMLElem
 ): HTMLElement {
   const el = document.createElement(tag.toString());
 
-  Object.entries(options.props ?? {}).forEach(([key, value]) => {
-    const prop = el as HTMLElement & Record<string, unknown>;
-    if (prop[key] instanceof ChangeHandler) {
-      prop[key].set(value);
-    } else {
-      prop[key] = value;
-    }
-  });
+  for (const [key, value] of Object.entries(options.props ?? {})) {
+    applyElementProperty(el, key, value);
+  }
 
-  Object.entries(options.attrs ?? {}).forEach(([key, value]) => {
-    el.setAttribute(toKebabCase(key), String(value));
-  });
+  applyElementAttributes(el, options.attrs ?? {});
 
   appendTo?.appendChild(el);
   return el;
