@@ -2,7 +2,9 @@ packages/*/dist
 tsconfig.tsbuildinfo
 node_modules
 coverage
+test-results
 dist
 build
 html
 cache
+.agents

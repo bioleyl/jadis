@@ -1,108 +1,266 @@
-# Slots
+# Use slots in a *Jadis* component
 
-Jadis components support [HTML slots](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot), enabling content projection from parent components. This is the standard Web Components mechanism for building composable, reusable components.
+In *Jadis*, much similar to how it works in web components, you can use slots in your templates, so as to create more flexible components.
 
-## Default Slots
+## Usage
 
-A default slot accepts any content placed between the component's opening and closing tags:
+It is very simple: you use a `slot` tag in the template where you want to populate
+with content from elsewhere, like from another component. The content between both opening and
+closing tags of your external component will be rendered inside the `<slot></slot>` tags.
 
-```typescript
-import { Jadis, html, createSelector } from '@jadis/core';
+:::code-group
 
-class Card extends Jadis {
-  static selector = createSelector('card');
+```javascript
+// MyComponent.js with a slot
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <div class="card">
-        <slot></slot>
-      </div>
-    `;
-  }
+export class MyComponent extends Jadis {
+  static selector = createSelector('my-component');
 
-  templateCss(): string {
+  templateHtml() { // [!code focus]
+    return <div class="container"><slot></slot></div>; // [!code focus]
+  } // [!code focus]
+
+  templateCss() {
     return css`
-      .card {
-        padding: 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+      .container {
+        background-color: darkblue;
+        color: white;
       }
     `;
   }
 }
 
-Card.register();
+MyComponent.register();
+
 ```
-
-Usage:
-
-```html
-<card>
-  <p>This content is projected into the slot.</p>
-</card>
-```
-
-## Named Slots
-
-Components can define multiple slots, each identified by a `name` attribute:
 
 ```typescript
-templateHtml(): DocumentFragment {
-  return html`
-    <div class="layout">
-      <header><slot name="header"></slot></header>
-      <main><slot></slot></main>
-      <footer><slot name="footer"></slot></footer>
+// MyComponent.ts with a slot
+export class MyComponent extends Jadis {
+  static readonly selector = 'my-component';
+
+  templateHtml(): Node { // [!code focus]
+    return <div class="container"><slot></slot></div>; // [!code focus] 
+  } // [!code focus]
+
+  templateCss(): string {
+    return css`
+      .container {
+        background-color: darkblue;
+        color: white;
+      }
+    `;
+  }
+}
+
+MyComponent.register();
+```
+
+:::
+
+Populate the slot
+
+:::code-group
+
+```javascript
+// MainPage.js using MyComponent
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+class MainPage extends Jadis {
+  static selector = createSelector('main-page');
+
+  templateHtml() { // [!code focus]
+    return ( // [!code focus]
+      <my-component> // [!code focus]
+        <h1>My Title</h1> // [!code focus]
+        <p>Hello there</p> // [!code focus]
+      </my-component> // [!code focus]
+    ); // [!code focus]
+  } // [!code focus]
+}
+
+MainPage.register();
+```
+
+```typescript
+// MainPage.ts using MyComponent
+class MainPage extends Jadis {
+  static readonly selector = 'main-page';
+
+  templateHtml(): Node { // [!code focus]
+    return ( // [!code focus]
+      <my-component> // [!code focus]
+        <h1>My Title</h1> // [!code focus]
+        <p>Hello there</p> // [!code focus]
+      </my-component> // [!code focus]
+    ); // [!code focus]
+  } // [!code focus]
+}
+
+MainPage.register();
+```
+
+:::
+
+The `<h1>` and the `<p>` elements will be rendered through the MainPage component using the MyComponent component.
+
+## Named slots
+
+If you need to use several slots in the same component, just name them!
+
+:::code-group
+
+```javascript
+// MyComponent.js with 2 slots
+templateHtml() {
+  return (
+    <div class='container'>
+        <slot></slot>
+        <slot name='article'></slot>
     </div>
-  `;
+  );
+}
+
+// Using MyComponent in MainPage.js
+templateHtml() {
+  return (
+    <my-component>
+      <h1>My Title</h1>
+      <p>Hello there</p>
+      <div slot='article'>
+        My article content is good.
+      </div>
+    </my-component>
+  );
 }
 ```
-
-Usage:
-
-```html
-<card>
-  <h2 slot="header">My Title</h2>
-  <p>Main content goes here.</p>
-  <button slot="footer">Action</button>
-</card>
-```
-
-## Using `toTemplate()` with Slots
-
-The `toTemplate()` static method provides a convenient way to pass slotted content programmatically:
 
 ```typescript
-templateHtml(): DocumentFragment {
-  return html`
-    ${Card.toTemplate(
-      {},
-      html`
-        <h2 slot="header">My Title</h2>
-        <p>Main content.</p>
-      `
-    )}
-  `;
+
+// MyComponent.ts with 2 slots
+templateHtml(): Node {
+  return (
+    <div class='container'>
+      <slot></slot>
+      <slot name='article'></slot>
+    </div>
+  );
+}
+
+// Using MyComponent in MainPage.ts
+templateHtml(): Node {
+  return (
+    <my-component>
+      <h1>My Title</h1>
+      <p>Hello there</p>
+      <div slot='article'>
+        My article content is good.
+      </div>
+    </my-component>
+  );
+}
+
+```
+
+:::
+
+## Even easier With JSX children
+
+JSX makes slotting natural — children are passed directly:
+
+```typescript
+templateHtml(): Node {
+  return (
+    <my-component>
+      <h1>My Title</h1>
+      <p>Hello there</p>
+    </my-component>
+  );
 }
 ```
 
-## Fallback Content
+Named slots work via the `slot` attribute:
 
-Place fallback content inside the `<slot>` element. It displays when no corresponding slotted content is provided:
-
-```html
-<div class="card">
-  <slot>Default content when nothing is slotted</slot>
-</div>
+```typescript
+templateHtml(): Node {
+  return (
+    <my-component>
+      <h1>My Title</h1>
+      <p slot="article">My article content</p>
+    </my-component>
+  );
+}
 ```
 
-## Best Practices
+## Example with `toTemplate()`
 
-- Prefer named slots for complex layouts with multiple insertion points.
-- Use `toTemplate()` when constructing components programmatically.
-- Slot content retains its own event listeners and lifecycle — it is not cloned.
+See the [dedicated documentation](to-template.md) about the *Jadis* method `toTemplate()`.
 
-## See Also
+:::code-group
 
-- [toTemplate()](./to-template.md) — Programmatic component instantiation.
-- [Shadow DOM](../guides/shadow-dom.md) — Understanding light vs. shadow DOM boundaries.
+```javascript
+// Using MyComponent in MainPage.js
+class MainPage extends Jadis {
+  static selector = createSelector('main-page');
+
+  templateHtml() {
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(document.createElement('h1')).textContent = 'My Article Title';
+    const p = document.createElement('p');
+    p.slot = 'article';
+    p.textContent = 'My article content';
+    fragment.appendChild(p);
+
+    return <my-component>{MyComponent.toTemplate({}, fragment)}</my-component>;
+  }
+}
+
+MainPage.register();
+
+// MyComponent.js definition with slots
+export class MyComponent extends Jadis {
+  static selector = createSelector('my-component');
+
+  templateHtml() {
+    return <div class='container'><slot></slot><slot name='article'></slot></div>;
+  }
+}
+
+MyComponent.register();
+```
+
+```typescript
+// Using MyComponent in MainPage.ts
+class MainPage extends Jadis {
+  static readonly selector = 'main-page';
+
+  templateHtml(): Node {
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(document.createElement('h1')).textContent = 'My Article Title';
+    const p = document.createElement('p');
+    p.slot = 'article';
+    p.textContent = 'My article content';
+    fragment.appendChild(p);
+
+    return <my-component>{MyComponent.toTemplate({}, fragment)}</my-component>;
+  }
+}
+
+MainPage.register();
+
+// MyComponent.ts definition with slots
+export class MyComponent extends Jadis {
+  static readonly selector = 'my-component';
+
+  templateHtml(): Node {
+    return <div class='container'><slot></slot><slot name='article'></slot></div>;
+  }
+}
+
+MyComponent.register();
+```
+
+:::

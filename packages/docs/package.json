@@ -11,7 +11,7 @@
     "build": "vitepress build",
     "dev": "vitepress dev",
     "preview": "vitepress preview",
-    "test": "echo \"No tests for create package\" && exit 0"
+    "test": "echo \"No tests for docs package\" && exit 0"
   },
   "version": "1.0.0"
 }

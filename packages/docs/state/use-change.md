@@ -1,106 +1,138 @@
-# useChange()
+# React to a property change with `useChange`
 
-The `useChange()` helper provides a lightweight reactive state mechanism. It creates a value container with `get()` and `set()` methods, and invokes a callback whenever the value changes.
+The `useChange` helper provides a simple and reactive way to manage internal state inside *Jadis* components.
+It creates a value container with `get` and `set` methods, and automatically calls a provided callback whenever the value changes.
+
+This makes it ideal for updating the DOM, emitting events, or triggering logic whenever a piece of component state is modified.
 
 ## Signature
 
 ```typescript
-this.useChange<T>(
-  initialValue: T,
-  onChange: (newValue: T, oldValue: T) => void,
-  options?: ChangeOptions
-): Readonly<UseChangeHandler<T>>;
+this.useChange(<initialValue>, <onChange>, <options>): Readonly<ChangeHandler<T>>
 ```
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `initialValue` | `T` | The starting value |
-| `onChange` | `Function` | Callback invoked on every change with `(newValue, oldValue)` |
-| `options.immediate` | `boolean` | If `true`, triggers `onChange` once on connection using the initial value |
+- `initialValue`: the starting value
+- `onChange(newValue, oldValue)`: callback function fired whenever `set()` updates the value
+- `options.immediate?`: `<boolean>`. When `true`, the `onChange` callback is triggered once using the initial value.
+  Defines whether the callback should run once immediately once the component connects. If the component is:
+  - **already connected** → runs immediately
+  - **not yet connected** → queued and runs in onConnect
 
-### Return Value
+Useful for setting initial DOM state without duplicating logic.
 
-A readonly `UseChangeHandler<T>` object:
+### Return value
+
+- A `ChangeHandler<T>` object with 2 methods:
+  - `.get(): T`
+  - `.set(valueOrUpdater): void`
+
+The returned object is **readonly** so consumers cannot replace the handler, only update its value using `.set()`.
+
+## How It Works
+
+`useChange` wraps a value in a `ChangeHandler` object:
+
+- Calling `.set()` updates the value
+- `onChange` runs with (newValue, oldValue)
+- If `immediate: true`, the callback is also triggered once when the component becomes connected, using the initial value
+
+This gives you a reactive, lightweight state system without needing proxies, observers, or re-renders.
+
+## Example with an updater
+
+Here’s a minimal example of using `useChange` to keep text inside an element in sync with a component state variable:
 
 ```typescript
-interface UseChangeHandler<T> {
-  get(): T;
-  set(value: T | ((prev: T) => T)): void;
+class ToggleSwitch extends Jadis {
+  private readonly toggleValue = this.useChange(
+    false,
+    (value) => {
+      this.refs.label.textContent = value ? 'ON' : 'OFF';
+    },
+    { immediate: true }
+  );
+
+  private readonly refs = this.useRefs((ref) => ({
+    label: ref<HTMLSpanElement>('span'),
+    button: ref<HTMLButtonElement>('button'),
+  }));
+
+  templateHtml(): Node {
+    return (
+      <>
+        <span></span>
+        <button>Toggle</button>
+      </>
+    );
+  }
+
+  onConnect() {
+    this.on(this.refs.button, 'click', () => {
+      this.toggleValue.set((v) => !v);
+    });
+  }
 }
 ```
 
-## Basic Example
+## Example with a value
 
 ```typescript
-class Counter extends Jadis {
-  static readonly selector = 'counter';
+import { Jadis } from "@jadis/core";
 
-  private readonly count = this.useChange(0, (val) => {
-    this.refs.display.textContent = val.toString();
-  });
+export class Dice extends Jadis {
+  static readonly selector = 'toggle-value-component';
+  private readonly toggleValue = this.useChange(
+    0,
+    (value) => {
+      this.refs.label.textContent = value.toString();
+    },
+    { immediate: true }
+  );
 
-  readonly refs = this.useRefs((ref) => ({
-    display: ref('span'),
-    button: ref('button'),
+  private readonly refs = this.useRefs((ref) => ({
+    label: ref<HTMLSpanElement>('span'),
+    button: ref<HTMLButtonElement>('button')
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <span></span>
+        <button>Roll</button>
+      </>
+    );
   }
 
   onConnect(): void {
-    this.on(this.refs.button, 'click', () =>
-      this.count.set((v) => v + 1)
-    );
+    this.on(this.refs.button, 'click', () => {
+      const roll = Math.floor(Math.random() * 6) + 1;
+      this.toggleValue.set(roll);
+    })
   }
 }
+
+Dice.register();
 ```
 
-## Immediate Mode
+## Typing Notes
 
-When `immediate: true`, the `onChange` callback fires once when the component connects, using the initial value. This avoids duplicating initialization logic:
-
-```typescript
-private readonly count = this.useChange(0, (val) => {
-  this.refs.display.textContent = val.toString();
-}, { immediate: true });
-```
-
-## Updater Functions
-
-`set()` accepts either a direct value or an updater function:
+The returned handler is fully typed:
 
 ```typescript
-// Direct value
-this.count.set(42);
-
-// Updater function
-this.count.set((prev) => prev + 1);
-```
-
-## Type Inference
-
-TypeScript infers the type from `initialValue` automatically:
-
-```typescript
-const count = this.useChange(0, (newVal) => { ... });
+const count = this.useChange(0, (newVal: number) => { ... });
 count.get(); // number
-count.set(5); // OK
-count.set((v) => v + 1); // OK — "v" is inferred as number
+count.set(5); // ok
+count.set((v) => v + 1); // also ok. "v" is the current value
 ```
 
-## Best Practices
+No casts or generics are needed: TypeScript infers everything.
 
-- Use `useChange()` for internal component state that drives DOM updates.
-- Combine with `useRefs()` to sync state changes with DOM elements.
-- Avoid using it for global or cross-component state — use the [Bus](../api/bus-class.md) instead.
+## Integration With Other Helpers
 
-## See Also
+`useChange` works seamlessly with:
 
-- [Event Handling](./event-handling.md) — Managing DOM events.
-- [useEvents()](./use-events.md) — Custom event emission.
+- `useRefs` (to update DOM nodes), see the documentation about it [on its dedicated page](../dom/use-refs.md).
+- `useEvents` (to emit change events), see the documentation about it [on the child to parent communication page](../communication/child-to-parent.md).
+  

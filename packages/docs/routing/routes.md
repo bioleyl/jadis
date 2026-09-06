@@ -1,102 +1,100 @@
 # Declaring Routes
 
-Routes map URL paths to Jadis components. Use `defineRoutes()` to create a route configuration object that the router consumes.
+You can add routes individually or organize them into a route group when parts of your app share a common URL prefix.  
+[See the dedicated documentation](route-groups.md) about route groups.
 
-## Defining Routes
+## Add Individual Routes
 
-```typescript
-import { defineRoutes, Router } from '@jadis/core';
+Routes support dynamic parameters (e.g. `:name`), which are passed as attributes to the corresponding component.
 
-const routes = defineRoutes({
-  home:   { path: '/', page: HomePage },
-  about:  { path: '/about', page: AboutPage },
-  contact:{ path: '/contact', page: ContactPage },
-});
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
 
-const router = new Router(routes);
-router.mountOn(document.getElementById('app'));
-```
+import { Jadis, createSelector, Router, defineRoutes } from '@jadis/core';
 
-Each route is defined as an object with:
+class HelloPage extends Jadis {
+  static selector = createSelector('hello-page');
 
-| Property | Type | Required | Description |
-|---|---|---|---|
-| `path` | `string` | Yes | The URL path pattern |
-| `page` | `JadisConstructor` | Yes | The component to render for this route |
+  refs = this.useRefs((ref) => ({
+    name: ref('#name'),
+  }));
 
-## Dynamic Parameters
+  templateHtml() {
+    return <h1>Hello, <span id="name"></span>!</h1>;
+  }
 
-Use `:paramName` syntax for dynamic segments:
-
-```typescript
-const routes = defineRoutes({
-  user: { path: '/user/:id', page: UserPage },
-  post: { path: '/post/:slug', page: PostPage },
-});
-```
-
-Parameters are passed as attributes to the page component:
-
-```html
-<!-- Navigating to /user/42 -->
-<user-page id="42"></user-page>
-```
-
-Access them in your component:
-
-```typescript
-class UserPage extends Jadis {
-  onConnect(): void {
-    const userId = this.getAttribute('id');
-    console.log(`Loading user ${userId}`);
+  onConnect() {
+    const name = this.getAttribute('name');
+    this.refs.name.textContent = name || 'Guest';
   }
 }
+
+HelloPage.register();
+
+const routes = defineRoutes({
+  hello: { path: '/hello/:name', page: HelloPage },
+});
+
+const myRouter = new Router(routes);
+
+myRouter.mountOn(document.getElementById('app'));
+```
+
+Navigating to `/hello/john`, the router will render:
+
+```html
+<body>
+  <div id="app">
+    <hello-page name="john"></hello-page>
+  </div>
+</body>
 ```
 
 ## Navigation
 
-Use `router.goto()` to navigate programmatically:
+You can navigate to any defined route by using the name used as the key. If the route has parameters, you can pass them as the second argument of the `goto` method.
 
-```typescript
-// Navigate to a route by its key
-router.goto('home');
-
-// Navigate with parameters
-router.goto('user', { id: '42' });
-// → /user/42
-```
-
-The second argument is an object mapping parameter names to values.
-
-## Root Component per Route
-
-Wrap specific routes in a shared layout component:
-
-```typescript
+```javascript
 const routes = defineRoutes({
-  home: {
-    path: '/',
-    page: HomePage,
-    options: { rootComponentSelector: 'app-layout' },
-  },
-  about: {
-    path: '/about',
-    page: AboutPage,
-    options: { rootComponentSelector: 'app-layout' },
-  },
+  inv: { path: '/invoice/:id', page: InvoicePage },
 });
+
+const myRouter = new Router(routes);
+
+myRouter.mountOn(document.getElementById('app'));
+
+myRouter.goto('inv', { id: 'abcd' });
 ```
 
-Both routes will render inside `<app-layout>...</app-layout>`.
+This will navigate `/invoice/abcd`
 
-## Best Practices
+## Use a Root Component
 
-- Use descriptive route keys (e.g., `userProfile` instead of `up`).
-- Keep path segments short and readable.
-- Group related routes using [Route Groups](./route-groups.md).
-- Define the router as a module-level singleton to avoid recreation.
+You can specify a root component (for example, a layout or wrapper) into which the route component will be injected. This is useful for shared layouts, navigation bars, or page wrappers.
 
-## See Also
+```javascript
+const routes = defineRoutes({
+  hello: {
+    path: '/hello/:name',
+    page: HelloPage,
+    options: { rootComponentSelector: LayoutComponent.selector }
+  },
+})
 
-- [Route Groups](./route-groups.md) — Organizing routes with shared prefixes.
-- [Router API Reference](../api/router-class.md) — Complete method documentation.
+const myRouter = new Router(routes);
+
+myRouter.mountOn(document.getElementById('app'));
+```
+
+Navigating to `/hello/john`, the router will render:
+
+```html
+<body>
+  <div id="app">
+    <layout-component name="john">
+      <hello-page name="john"></hello-page>
+    </layout-component>
+  </div>
+</body>
+```

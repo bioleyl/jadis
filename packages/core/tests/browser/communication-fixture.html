@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <body>
+    <browser-parent></browser-parent>
+    <browser-bus-receiver></browser-bus-receiver>
+    <browser-bus-emitter></browser-bus-emitter>
+    <script type="module">
+      import { Bus, Jadis, jsx } from '/packages/core/dist/esm/index.mjs';
+
+      const messageBus = new Bus({ message: String });
+
+      class BrowserChild extends Jadis {
+        static selector = 'browser-child';
+
+        events = this.useEvents({ message: String });
+
+        templateHtml() {
+          return jsx('button', { attrs: { id: 'send', type: 'button' } }, 'Send message');
+        }
+
+        onConnect() {
+          this.on(this.getElement('#send'), 'click', () => {
+            this.events.emit('message', 'Hello from the child');
+          });
+        }
+      }
+
+      class BrowserParent extends Jadis {
+        static selector = 'browser-parent';
+
+        refs = this.useRefs((ref) => ({
+          child: ref('browser-child'),
+          message: ref('#message'),
+        }));
+
+        templateHtml() {
+          return jsx('div', {}, [
+            jsx('browser-child'),
+            jsx('output', { attrs: { id: 'message' } }),
+          ]);
+        }
+
+        onConnect() {
+          this.refs.child.events.register('message', (value) => {
+            this.refs.message.textContent = value;
+          });
+        }
+      }
+
+      class BrowserBusReceiver extends Jadis {
+        static selector = 'browser-bus-receiver';
+
+        refs = this.useRefs((ref) => ({ message: ref('#message') }));
+
+        templateHtml() {
+          return jsx('output', { attrs: { id: 'message' } });
+        }
+
+        onConnect() {
+          this.onBus(messageBus, 'message', (value) => {
+            this.refs.message.textContent = value;
+            window.__busMessages.push(value);
+          });
+        }
+      }
+
+      class BrowserBusEmitter extends Jadis {
+        static selector = 'browser-bus-emitter';
+
+        templateHtml() {
+          return jsx('button', { attrs: { id: 'send', type: 'button' } }, 'Send bus message');
+        }
+
+        onConnect() {
+          this.on(this.getElement('#send'), 'click', () => {
+            messageBus.emit('message', 'Hello from the bus');
+          });
+        }
+      }
+
+      BrowserChild.register();
+      BrowserParent.register();
+      BrowserBusReceiver.register();
+      BrowserBusEmitter.register();
+      window.__busMessages = [];
+      window.__communicationReady = true;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <body>
+    <browser-feature-test>
+      <span slot="footer">Footer content</span>
+    </browser-feature-test>
+    <script type="module">
+      import {
+        createComponentVNode,
+        css,
+        Fragment,
+        Jadis,
+        jsx,
+        mountVNodes,
+      } from '/packages/core/dist/esm/index.mjs';
+
+      class BrowserFeatureTest extends Jadis {
+        static selector = 'browser-feature-test';
+
+        refs = this.useRefs((ref) => ({
+          button: ref('#increment'),
+          count: ref('#count'),
+          event: ref('#event'),
+        }));
+
+        count = this.useChange(0, (value) => {
+          this.refs.count.textContent = String(value);
+        }, { immediate: true });
+
+        events = this.useEvents();
+
+        templateHtml() {
+          return jsx(Fragment, {
+            children: [
+              jsx('output', { attrs: { id: 'count' } }),
+              jsx('button', { attrs: { id: 'increment', type: 'button' } }, 'Increment'),
+              jsx('button', { attrs: { id: 'toggle', type: 'button' } }, 'Toggle'),
+              jsx('output', { attrs: { id: 'event' } }),
+              jsx('slot', { attrs: { name: 'footer' } }),
+            ],
+          });
+        }
+
+        templateCss() {
+          return css`:host { display: block; }`;
+        }
+
+        onConnect() {
+          this.events.register('clicked', (value) => {
+            this.refs.event.textContent = value ?? '';
+          });
+          this.on(this.refs.button, 'click', () => {
+            this.count.set((value) => value + 1);
+            this.events.emit('clicked', 'button clicked');
+          });
+          this.on(this.getElement('#toggle'), 'click', () => {
+            this.toggleClass('active', !this.classList.contains('active'));
+          });
+        }
+      }
+
+      class BrowserVNodeChild extends Jadis {
+        static selector = 'browser-vnode-child';
+
+        templateHtml() {
+          return document.createElement('slot');
+        }
+      }
+
+      BrowserFeatureTest.register();
+      BrowserVNodeChild.register();
+      window.createFeatureTemplate = () => {
+        const element = BrowserFeatureTest.toTemplate({ attrs: { 'data-template': 'true' } });
+        document.body.appendChild(element);
+      };
+      window.mountVNodeTree = () => {
+        const parent = document.createElement('div');
+        parent.id = 'vnode-mount';
+        const child = document.createElement('span');
+        child.textContent = 'Projected child';
+        const component = createComponentVNode(BrowserVNodeChild, { children: [child] });
+        mountVNodes(parent, [component]);
+        document.body.appendChild(parent);
+      };
+      window.__jadisFeaturesReady = true;
+    </script>
+  </body>
+</html>

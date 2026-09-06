@@ -1,95 +1,77 @@
-# Route Groups
+# Using Route Groups
 
-Route groups organize related routes under a shared URL prefix, reducing repetition and improving maintainability.
+If many of your routes share a common prefix or a common layout and you don’t want to repeat yourself, you can group them together.
 
-## Defining a Route Group
+## Add Routes by Group
 
-Use `defineRouteGroup()` to group routes under a common prefix:
+Grouping routes under a shared prefix makes organization easier and keeps URLs clean. Use `RouteGroup` to create and register grouped routes:
 
-```typescript
+```javascript
 import { defineRouteGroup, defineRoutes, Router } from '@jadis/core';
 
 const routes = defineRoutes({
-  admin: defineRouteGroup('/admin', {
-    dashboard: { path: '/dashboard', page: AdminDashboard },
-    users:     { path: '/users', page: UserList },
-    settings:  { path: '/settings', page: AdminSettings },
+  group: defineRouteGroup('/common-prefix', {
+    routeA: { path: '/route-a', page: RouteAPage },
+    routeB: { path: '/route-b', page: RouteBPage },
+    routeC: { path: '/route-c', page: RouteCPage },
+  })
+})
+
+const myRouter = new Router(routes);
+
+myRouter.mountOn(document.body);
+```
+
+This setup will result in routes like:
+
+- `/common-prefix/route-a` → name `groupRouteA`
+- `/common-prefix/route-b` → name `groupRouteB`
+- `/common-prefix/route-c` → name `groupRouteC`
+
+## Note on Nested Route Groups
+
+You can also nest a route group inside another route group, which helps when organizing modules or features with deeply structured paths. This is ideal for applications with layered routing logic.
+
+```javascript
+import { defineRouteGroup, defineRoutes, Router } from "@jadis/core";
+
+const routes = defineRoutes({
+  mainSection: defineRouteGroup('/main-section', {
+    subSection: defineRouteGroup('/sub-section', {
+      itemA: { path: '/item-a', page: ItemAPage },
+      itemB: { path: '/item-b', page: ItemBPage },
+    }),
+    overview: { path: '/overview', page: OverviewPage },
   }),
-});
+})
 
 const router = new Router(routes);
-router.mountOn(document.getElementById('app'));
+
+router.mountOn(document.body);
 ```
 
-This creates the following routes:
+This would result in:
 
-| Route Key | Path | Component |
-|---|---|---|
-| `adminDashboard` | `/admin/dashboard` | `AdminDashboard` |
-| `adminUsers` | `/admin/users` | `UserList` |
-| `adminSettings` | `/admin/settings` | `AdminSettings` |
+- `/main-section/sub-section/item-a` → `mainSectionSubSectionItemA`
+- `/main-section/sub-section/item-b` → `mainSectionSubSectionItemB`
+- `/main-section/overview` → `mainSectionOverview`
 
-Route keys are formed by camelCase-concatenating the group name with the route key.
+## Using a Root Component in a Group
 
-## Shared Options
+When you define a root component at the group level, all routes in that group will be wrapped with the specified component. This is useful for applying a shared layout across multiple pages.
 
-Apply common options to all routes in a group:
-
-```typescript
+```javascript
 const routes = defineRoutes({
-  protected: defineRouteGroup('/protected', {
-    profile: { path: '/profile', page: ProfilePage },
-    edit:    { path: '/edit', page: EditPage },
-  }, { rootComponentSelector: 'auth-layout' }),
+  mainSection: defineRouteGroup('/main-section', {
+    overview: { path: '/overview', page: OverviewPage },
+  }, { rootComponentSelector: 'main-component' }),
 });
 ```
 
-All routes in the group will be wrapped in `<auth-layout>`.
+Going to `/main-section/overview` will render:
 
-## Nested Groups
-
-Groups can be nested for deeply structured routing:
-
-```typescript
-const routes = define.defineRoutes({
-  api: defineRouteGroup('/api', {
-    v1: defineRouteGroup('/v1', {
-      users:  { path: '/users', page: ApiUsers },
-      posts:  { path: '/posts', page: ApiPosts },
-    }),
-    v2: defineRouteGroup('/v2', {
-      users:  { path: '/users', page: ApiV2Users },
-      posts:  { path: '/posts', page: ApiV2Posts },
-    }),
-  }),
-});
+```html
+<main-component>
+  <overview-page></overview-page>
+</main-component>
 ```
-
-Resulting routes:
-
-| Route Key | Path |
-|---|---|
-| `apiV1Users` | `/api/v1/users` |
-| `apiV1Posts` | `/api/v1/posts` |
-| `apiV2Users` | `/api/v2/users` |
-| `apiV2Posts` | `/api/v2/posts` |
-
-## Navigation with Groups
-
-Navigate using the generated route key:
-
-```typescript
-router.goto('adminDashboard');
-router.goto('apiV1Users');
-```
-
-## Best Practices
-
-- Use route groups for feature modules (e.g., `/admin`, `/api`, `/dashboard`).
-- Keep group nesting to 2–3 levels deep for readability.
-- Combine with shared `rootComponentSelector` for consistent layouts per module.
-
-## See Also
-
-- [Declaring Routes](./routes.md) — Individual route definitions.
-- [Router API Reference](../api/router-class.md) — Router methods and options.

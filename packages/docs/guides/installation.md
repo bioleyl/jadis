@@ -1,60 +1,67 @@
 # Installation
 
-Jadis is flexible and easy to get started with. You can use it via npm, with a boilerplate, or directly from a CDN. It provides **full type support** for both TypeScript and JSDoc-enabled JavaScript projects.
+*Jadis* is flexible and easy to get started with, whether you prefer a boilerplate setup, manual installation via npm, or embedding via CDN. It provides **full type support for both TypeScript and JSDoc**, allowing you to describe component behavior with precision and confidence. Even in plain JavaScript, *Jadis* offers **partial typing** through primitive constructors, giving you a lightweight way to improve clarity and reduce bugs.
 
-## Quick Start
+## Using a boilerplate
 
-The fastest way to begin is with one of the official boilerplates:
+The easiest way to start a project is with a pre-made boilerplate.
+
+- **JS Boilerplate**
+- **TS Boilerplate**
+
+Create a new project using:
 
 ::: code-group
 
-```bash [JavaScript]
+```bash [JS Boilerplate]
 npx @jadis/create js my-project
 ```
 
-```bash [TypeScript]
+```bash [TS Boilerplate]
 npx @jadis/create ts my-project
 ```
 
 :::
 
-## NPM Installation
+## Installing from NPM
 
-To install Jadis manually in an existing project:
+You can also start from scratch using the official *Jadis* package:
 
 ```bash
 npm install @jadis/core
+npm install --save-dev typescript vite
 ```
 
-Then create a component file:
+For a JSX project, create a file named `src/main.tsx` (or `src/main.jsx` for JavaScript) with the following content:
 
-```typescript
-import { Jadis, createSelector, html } from '@jadis/core';
+```tsx
+import { Jadis } from '@jadis/core';
 
 class HelloWorld extends Jadis {
   static readonly selector = 'hello-world';
 
-  templateHtml(): DocumentFragment {
-    return html`<p>Hello, <span id="name"></span></p>`;
+  templateHtml(): Node {
+    return <p>Hello, <span id="name"></span></p>;
   }
 
-  onConnect(): void {
+  onConnect() {
     this.getElement('#name').textContent = 'Jadis developers';
   }
 }
-
 HelloWorld.register();
 ```
 
-And use it in your HTML:
+JSX must be transformed by TypeScript or a JavaScript bundler before the browser can run it. The boilerplate templates include the required Vite and JSX configuration.
+
+Then in your HTML:
 
 ```html
 <hello-world></hello-world>
 ```
 
-## CDN Usage
+## Using a CDN
 
-You can also use Jadis directly from a CDN like [esm.sh](https://esm.sh/@jadis/core@0.12.2):
+You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@1.0.0). This example uses DOM APIs directly so it can run without a JSX transform:
 
 ```html
 <!DOCTYPE html>
@@ -69,22 +76,20 @@ You can also use Jadis directly from a CDN like [esm.sh](https://esm.sh/@jadis/c
     <script type="importmap">
       {
         "imports": {
-          "jadis": "https://esm.sh/@jadis/core@0.12.2"
+          "jadis": "https://esm.sh/@jadis/core@1.0.0"
         }
       }
     </script>
     <script type="module">
-      import { Jadis, createSelector, html } from 'jadis';
+      import { createElement, Jadis } from 'jadis';
 
       class HelloWorld extends Jadis {
-        static selector = createSelector('hello-world');
+        static selector = 'hello-world';
 
         templateHtml() {
-          return html`<p>Hello, <span id="name"></span></p>`;
-        }
-
-        onConnect() {
-          this.getElement('#name').textContent = 'Jadis developers';
+          const paragraph = createElement('p');
+          paragraph.textContent = 'Hello, Jadis developers';
+          return paragraph;
         }
       }
 
@@ -93,13 +98,3 @@ You can also use Jadis directly from a CDN like [esm.sh](https://esm.sh/@jadis/c
   </body>
 </html>
 ```
-
-## Requirements
-
-- A modern browser that supports [Custom Elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) and [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)
-- Node.js 18+ (for npm-based projects)
-- No build tools required
-
-:::tip Tip
-Jadis works best with a module bundler like Vite, Rollup, or esbuild — but it is not required. The CDN approach above works for quick prototypes and simple projects.
-:::

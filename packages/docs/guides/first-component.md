@@ -1,36 +1,90 @@
-# Your First Component
+# First Component
 
-A Jadis component is a class that extends `Jadis` and registers itself as a [Custom Element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements). This guide walks you through creating your first component from scratch.
+## The Essentials of a *Jadis* Component
 
-## Anatomy of a Component
+- A component in **@jadis/core** is a class that extends from *Jadis*
+  
+  ```javascript
+    class MyComponent extends Jadis {}
+  ```
 
-Every Jadis component requires three things:
+- The component needs a selector property in order to be used in the DOM
+  
+  :::code-group
+  
+  ```javascript
+    export class MyComponent extends Jadis {
+      static selector = createSelector('my-component');
+    }
+    // use createSelector() to safely check the selector is of type 
+    // ${string}-${string} 
+  ```
 
-1. **Extend `Jadis`** — Your class must inherit from the `Jadis` base class.
-2. **Define a selector** — A unique tag name (e.g., `my-counter`) used to identify the custom element in the DOM.
-3. **Call `register()`** — Registers the component with the browser's `customElements` registry.
+  ```typescript
+    export class MyComponent extends Jadis {
+      static readonly selector = createSelector('my-component');
+    }
+    // selector property needs to be readonly
+  ```
+
+- The component needs to be registered by calling the `register()` method
+
+  ```javascript
+    export class MyComponent extends Jadis {
+      ...
+    }
+
+    MyComponent.register();
+  ```
+
+Now, let’s build a real component using **@jadis/core**!
+
+## Define a CounterButton Component
+
+We’ll create a reusable button that shows a label and keeps track of how many times it's clicked.
+
+::: code-group
+
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
+
+class CounterButton extends Jadis {
+  static selector = createSelector('counter-component');
+
+  count = this.useChange(0, (val) => {
+    this.refs.count.textContent = val.toString();
+  }, { immediate: true });
+
+  refs = this.useRefs((ref) => ({
+    count: ref('span'),
+    incrementButton: ref('button'),
+  }));
+
+  templateHtml() {
+    return (
+      <>
+        <p>Count: <span></span></p>
+        <button>Increment</button>
+      </>
+    );
+  }
+
+  onConnect() {
+    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
+  }
+}
+
+CounterButton.register();
+```
 
 ```typescript
 import { Jadis } from '@jadis/core';
 
-class MyComponent extends Jadis {
-  static readonly selector = 'my-component';
-}
-
-MyComponent.register();
-```
-
-## Building a Counter Component
-
-Let's build a reusable button that tracks and displays a click count. This example demonstrates several core Jadis concepts: templating, state management, event handling, and element references.
-
-::: code-group
-
-```typescript [TypeScript]
-import { Jadis, html } from '@jadis/core';
-
 class CounterButton extends Jadis {
-  static readonly selector = 'counter-button';
+  static readonly selector = 'counter-component';
 
   private readonly count = this.useChange(0, (val) => {
     this.refs.count.textContent = val.toString();
@@ -41,85 +95,17 @@ class CounterButton extends Jadis {
     incrementButton: ref('button'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
+  templateHtml(): Node {
+    return (
+      <>
+        <p>Count: <span></span></p>
+        <button>Increment</button>
+      </>
+    );
   }
 
   onConnect(): void {
-    this.on(this.refs.incrementButton, 'click', () =>
-      this.count.set((v) => v + 1)
-    );
-  }
-}
-
-CounterButton.register();
-```
-
-```javascript [JavaScript]
-import { Jadis, html, createSelector } from '@jadis/core';
-
-class CounterButton extends Jadis {
-  static selector = createSelector('counter-button');
-
-  count = this.useChange(0, (val) => {
-    this.refs.count.textContent = val.toString();
-  }, { immediate: true });
-
-  refs = this.useRefs((ref) => ({
-    count: ref('span'),
-    incrementButton: ref('button'),
-  }));
-
-  templateHtml() {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
-  }
-
-  onConnect() {
-    this.on(this.refs.incrementButton, 'click', () =>
-      this.count.set((v) => v + 1)
-    );
-  }
-}
-
-CounterButton.register();
-```
-
-```javascript [JSDoc]
-// @ts-check
-import { Jadis, html, createSelector } from '@jadis/core';
-
-class CounterButton extends Jadis {
-  static selector = createSelector('counter-button');
-
-  /** @type {import('@jadis/core').UseChangeHandler<number>} */
-  count = this.useChange(0, (val) => {
-    this.refs.count.textContent = val.toString();
-  }, { immediate: true });
-
-  refs = this.useRefs((ref) => ({
-    /** @type {HTMLSpanElement} */
-    count: ref('span'),
-    /** @type {HTMLButtonElement} */
-    incrementButton: ref('button'),
-  }));
-
-  templateHtml() {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
-  }
-
-  onConnect() {
-    this.on(this.refs.incrementButton, 'click', () =>
-      this.count.set((v) => v + 1)
-    );
+    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
   }
 }
 
@@ -128,27 +114,14 @@ CounterButton.register();
 
 :::
 
-## Using the Component
-
-After registration, use your component like any standard HTML element:
+Then in your HTML, you can use it simply by using its tag name:
 
 ```html
 <counter-button></counter-button>
 ```
 
-## What's Happening?
+Or you can use it with `toTemplate()`, see [dedicated page](../templating/to-template.md) on the documentation.
 
-| Concept | Method / Property | Purpose |
-|---|---|---|
-| **Selector** | `static selector` | Defines the custom element tag name |
-| **Template** | `templateHtml()` | Returns the component's HTML structure |
-| **State** | `useChange()` | Manages reactive state with change callbacks |
-| **Refs** | `useRefs()` | Creates typed references to DOM elements |
-| **Events** | `this.on()` | Registers auto-cleaned-up event listeners |
-| **Lifecycle** | `onConnect()` | Called when the component is added to the DOM |
+## Adding style with CSS
 
-## Next Steps
-
-- Learn about [lifecycle hooks](./lifecycle.md) for managing component behavior over time.
-- Explore [templating](../templating/css.md) to add styles and structure.
-- Read the [API reference](../api/jadis-class.md) for a complete list of available methods.
+See [documentation about adding style](../templating/css.md).

@@ -7,8 +7,13 @@ import type {
   RouteTree,
 } from '../types/router.type';
 
-export function isRouteDef(obj: any): obj is RouteDefinition {
-  return obj && typeof obj.path === 'string' && typeof obj.page === 'function';
+export function isRouteDef(obj: unknown): obj is RouteDefinition {
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+
+  const candidate = obj as { page?: unknown; path?: unknown };
+  return typeof candidate.path === 'string' && typeof candidate.page === 'function';
 }
 
 /**

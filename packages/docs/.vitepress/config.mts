@@ -154,7 +154,7 @@ export default defineConfig({
             },
             {
               link: '/api/html-css-helpers',
-              text: 'html() / css()',
+              text: 'JSX / css()',
             },
             {
               link: '/api/create-element',

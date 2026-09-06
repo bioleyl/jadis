@@ -1,24 +1,28 @@
-# Extending Jadis
+# Extending Jadis for Your Own Purpose
 
-Jadis is designed to be extended. Since it is provided as an abstract class, you can create your own base class with custom helpers that match your project's patterns and conventions.
+Jadis is provided as an abstract class. You can easily extend it to provide your own custom features.
 
-## Creating a Custom Base Class
+Here is an example of how you could add a `useLoading` helper to manage a DOM loading indicator.
 
-Extend `Jadis` to add reusable helpers:
+## Creating Your Own Jadis Class
+
+We will create a helper that takes an asynchronous function and executes a callback when the waiting is done.
+
+This way, you can interact with the DOM easily using that callback.
 
 ```typescript
-import { Jadis } from '@jadis/core';
+import { Jadis } from "@jadis/core";
 
 type AsyncFn<T> = () => Promise<T>;
 
 export abstract class CustomJadis extends Jadis {
   protected useLoading<T>(
-    asyncFn: AsyncFn<T>,
+    asyncFns: AsyncFn<T>,
     onLoadingChange: (loading: boolean) => void
   ): Promise<T> {
     this.executeCallback(() => onLoadingChange(true));
 
-    const promise = asyncFn();
+    const promise = asyncFns();
     promise.finally(this.executeCallback.bind(this, () => onLoadingChange(false)));
     return promise;
   }
@@ -33,93 +37,55 @@ export abstract class CustomJadis extends Jadis {
 }
 ```
 
-## Using the Custom Base Class
+## Creating a Component with Your Custom Jadis
 
-Components that extend `CustomJadis` inherit all of Jadis's functionality plus your custom helpers:
+As soon as the component starts to load, `loadData` is called to avoid losing time. When the promise is resolved, the content is placed in the right location and the DOM used for loading is removed.
 
 ```typescript
-import { html } from '@jadis/core';
-import { CustomJadis } from './custom-jadis';
+import { CustomJadis } from "./custom-jadis";
 
-class DataComponent extends CustomJadis {
-  static readonly selector = 'data-component';
+export class CustomComponent extends CustomJadis {
+  static readonly selector = 'custom-component';
 
-  private readonly data = this.useLoading(
+  private _data = this.useLoading(
     this.loadData.bind(this),
     (loading) => {
-      this.refs.loading.style.display = loading ? 'block' : 'none';
-      this.refs.content.style.display = loading ? 'none' : 'block';
+      this._refs.loading.style.display = loading ? 'block' : 'none';
+      this._refs.content.style.display = loading ? 'none' : 'block';
     }
   );
 
-  private readonly refs = this.useRefs((ref) => ({
+  private _refs = this.useRefs((ref) => ({
     loading: ref('.loading'),
     content: ref('.content'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <div class="loading">Loading...</div>
-      <div class="content"></div>
-    `;
+  async onConnect() {
+    this._refs.content.textContent = await this._data;
   }
 
-  async onConnect(): void {
-    this.refs.content.textContent = await this.data;
+  templateHtml(): Node {
+    return (
+      <>
+        <div class="loading">Loading ...</div>
+        <div class="content"></div>
+      </>
+    );
   }
 
   private async loadData(): Promise<string> {
-    const response = await fetch('/api/data');
-    return response.text();
+    // Simulate an async data fetch
+    return new Promise((resolve) => {
+      setTimeout(() => resolve("Data loaded"), 2000);
+    });
   }
 }
 
-DataComponent.register();
+CustomComponent.register();
 ```
 
-## Common Extensions
+## Conclusion
 
-Here are patterns you might want to add to your custom base class:
+With your custom `useLoading` helper in place, managing loading states becomes simpler, more consistent, and far less repetitive across your components. This small addition already brings cleaner UI logic and a smoother development experience.
 
-### Authentication Check
-
-```typescript
-protected requireAuth(): void {
-  if (!this.isAuthenticated()) {
-    this.router?.goto('login');
-  }
-}
-```
-
-### Data Fetching with Caching
-
-```typescript
-protected async fetchData<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
-  const cached = localStorage.getItem(key);
-  if (cached) return JSON.parse(cached) as T;
-
-  const data = await fetcher();
-  localStorage.setItem(key, JSON.stringify(data));
-  return data;
-}
-```
-
-### Form Validation
-
-```typescript
-protected validateField(name: string, value: string, rules: Array<(v: string) => boolean>): boolean {
-  return rules.every((rule) => rule(value));
-}
-```
-
-## Best Practices
-
-- Keep your custom base class focused on your project's specific needs.
-- Use `protected` methods to expose helpers to subclasses while keeping internals private.
-- Leverage `this.onConnectActions` for deferred execution when the component is not yet connected.
-- Document your custom helpers so team members understand how to use them.
-
-## See Also
-
-- [Jadis Class](../api/jadis-class.md) — The base class API reference.
-- [Lifecycle](./lifecycle.md) — Understanding when `onConnectActions` are executed.
+Jadis is designed to be extended, so don’t hesitate to build more helpers that match the way you like to work. Each utility you add helps shape a component architecture that feels more expressive, more maintainable, and uniquely tailored to your project’s needs.

@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
@@ -11,7 +11,7 @@ const root = join(__dirname, '..');
 // --- Fetch latest version via npm view ---
 function getLatest(pkgName) {
   try {
-    return execSync(`npm view ${pkgName} version`, { encoding: 'utf8' }).trim();
+    return execFileSync('npm', ['view', pkgName, 'version'], { encoding: 'utf8' }).trim();
   } catch {
     console.warn(`  ⚠ Could not fetch latest for ${pkgName}`);
     return null;

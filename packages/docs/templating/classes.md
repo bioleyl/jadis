@@ -1,77 +1,113 @@
-# Toggle Classes
+# Toggle classes based on a condition with `toggleClass()`
 
-The `toggleClass()` method conditionally adds or removes a CSS class on the component element itself. Combined with the `:host()` pseudo-class selector, this enables dynamic styling based on component state.
+The `toggleClass()` method can add a class to the component or remove it based on a condition. You can then use the `:host` selector in your css to customize the styling.
 
 ## Signature
 
 ```typescript
-this.toggleClass(className: string, condition: boolean): void;
+this.toggleClass(<className>, <condition>): void
 ```
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `className` | `string` | The CSS class to add or remove |
-| `condition` | `boolean` | If `true`, the class is added. If `false`, it is removed. |
+- `className`: a `string` that representsthe name of the class to toggle
+- `condition`:  a `boolean` the binary condition used to toggle between classes. If `true`, class is added, if `false`, class is removed.
 
-### Return Value
+### Return value
 
-`void`
+- no return value
 
-## Basic Example
+## Examples
 
-```typescript
-import { Jadis, css, html, createSelector } from '@jadis/core';
+:::code-group
 
-class StatusBadge extends Jadis {
-  static selector = createSelector('status-badge');
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
 
-  private isError = false;
+import { css, createSelector, Jadis } from '@jadis/core';
 
-  templateCss(): string {
+export default class MyButton extends Jadis {
+  static selector = createSelector('my-button');
+  isError = false;
+
+  refs = this.useRefs((ref) => ({
+    button: ref('button')
+  }));
+
+  templateHtml() {
+    return (
+      <>
+        <button>Toggle The Class</button>
+        <p>My Paragraph</p>
+      </>
+    )
+  }
+
+  templateCss() {
     return css`
-      :host {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
+      p {
+        color: white;
+      }  
+
+      :host(.error) p {
+        color: red;
       }
-      :host(.error) {
-        background: #fee2e2;
-        color: #dc2626;
-      }
-      :host(.success) {
-        background: #dcfce7;
-        color: #16a34a;
-      }
-    `;
+    `
   }
 
-  templateHtml(): DocumentFragment {
-    return html`<span>Active</span>`;
-  }
-
-  onConnect(): void {
-    this.on(this.getElement('span'), 'click', () => {
+  onConnect() {
+    this.on(this.refs.button, 'click', () => {
       this.isError = !this.isError;
-      this.toggleClass('error', this.isError);
-      this.toggleClass('success', !this.isError);
+      this.toggleClass('error', this.isError)
     });
   }
 }
+
+MyButton.register();
 ```
 
-## Usage Pattern
+```typescript
+import { css, Jadis } from '@jadis/core';
 
-The typical pattern is:
+export default class MyButton extends Jadis {
+  static readonly selector = 'my-button';
+  private isError = false;
 
-1. Maintain a boolean state property (e.g., `private isError = false`).
-2. Update the state in an event handler.
-3. Call `toggleClass()` with the class name and the condition.
-4. Style the component using `:host(.className)` in `templateCss()`.
+  private readonly refs = this.useRefs((ref) => ({
+    button: ref<HTMLButtonElement>('button')
+  }));
 
-## See Also
+  templateHtml(): Node {
+    return (
+      <>
+        <button>Toggle The Class</button>
+        <p>My Paragraph</p>
+      </>
+    )
+  }
 
-- [Styles](./css.md) — Adding CSS to components.
-- [useChange()](../state/use-change.md) — Managing boolean state reactively.
+  templateCss(): string {
+    return css`
+      p {
+        color: white;
+      }  
+
+      :host(.error) p {
+        color: red;
+      }
+    `
+  }
+
+  onConnect(): void {
+    this.on(this.refs.button, 'click', () => {
+      this.isError = !this.isError;
+      this.toggleClass('error', this.isError)
+    });
+  }
+}
+
+MyButton.register();
+```
+
+:::

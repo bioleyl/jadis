@@ -1,87 +1,35 @@
-# Event Handling
+# Event Handling in *Jadis* with `this.on`
 
-Jadis provides the `this.on()` method for registering DOM event listeners with automatic cleanup. When the component disconnects, all listeners registered via `this.on()` are automatically removed.
+For typical DOM event listeners, *Jadis* offers a built-in `on` method that simplifies events handling. It automatically registers the event and cleans it up when the component unmounts, so you don't need to worry about the signal manually.
 
 ## Signature
 
 ```typescript
-this.on<Element extends HTMLElement, EventName extends keyof HTMLElementEventMap>(
-  element: Element,
-  eventName: EventName,
-  callback: (event: HTMLElementEventMap[EventName]) => void
-): void;
+this.on(<element>, <eventName>, <callback>)
 ```
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `element` | `HTMLElement` | The element to attach the listener to |
-| `eventName` | `string` | The event name (e.g., `'click'`, `'input'`, `'submit'`) |
-| `callback` | `Function` | The handler function, typed with the appropriate event type |
+- `element`: an `<HTMLElement>` on which a listener is added
+- `eventName`: a string corresponding to the event name to listen to
+- `callback`: a callback function invoked as the event is emitted
 
-### Return Value
+### Return value
 
-`void`
-
-## Basic Example
+- none
+  
+## Example
 
 ```typescript
-class MyComponent extends Jadis {
-  static readonly selector = 'my-component';
-
-  templateHtml(): DocumentFragment {
-    return html`<button>Click me</button>`;
+class ButtonComponent extends Jadis {
+  templateHtml(): Node {
+    return <button>Click me</button>;
   }
 
-  onConnect(): void {
-    this.on(this.getElement('button'), 'click', (event) => {
-      console.log('Button clicked!', event);
+  onConnect() {
+    this.on(this.getElement('button'), 'click', () => {
+      console.log('Button clicked!');
     });
   }
 }
 ```
-
-## Multiple Events
-
-Register listeners for different elements and events independently:
-
-```typescript
-onConnect(): void {
-  this.on(this.refs.input, 'input', (e) => {
-    console.log('Input value:', (e.target as HTMLInputElement).value);
-  });
-
-  this.on(this.refs.form, 'submit', (e) => {
-    e.preventDefault();
-    console.log('Form submitted');
-  });
-}
-```
-
-## How Cleanup Works
-
-`this.on()` uses the [killSignal](../dom/kill-signal.md) internally. When the component disconnects, the `AbortController` signals all registered listeners to stop, and the browser removes them automatically.
-
-## Direct addEventListener Alternative
-
-For cases where `this.on()` is not suitable (e.g., non-HTMLElement targets), you can use `addEventListener` directly with the `killSignal`:
-
-```typescript
-onConnect(): void {
-  window.addEventListener('resize', () => {
-    console.log('Window resized');
-  }, { signal: this.killSignal });
-}
-```
-
-## Best Practices
-
-- Prefer `this.on()` for HTMLElement events — it is simpler and auto-cleans.
-- Use `this.killSignal` with direct `addEventListener` calls for non-element targets (e.g., `window`, `document`).
-- Always register listeners in `onConnect()`, never in the constructor.
-
-## See Also
-
-- [killSignal](../dom/kill-signal.md) — The built-in cleanup signal.
-- [useEvents()](./use-events.md) — Custom event emission.

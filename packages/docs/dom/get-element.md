@@ -1,85 +1,125 @@
-# getElement()
+# Get Elements from template with `getElement` Helper
 
-The `getElement()` method retrieves an element from the component's template using a CSS selector. It is the fundamental way to access DOM nodes within your component.
+The `getElement` helper parses the DOM inside a *Jadis* component using a **standard CSS selector**. It’s the recommended way to access elements within your component’s template.
+
+If you need to access an element inside another component (which is typically discouraged), you can use the special `>>>` operator. This tells `getElement` to traverse into a **shadow DOM boundary** before applying the next selector segment.
 
 ## Signature
 
 ```typescript
-this.getElement<T extends HTMLElement = HTMLElement>(query: string): T;
+this.getElement<T>(<query>): <HTMLElement>
 ```
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `query` | `string` | A CSS selector string |
+- `T`: A generic type to specify the element type if it can't be infered
+- `query`: The css query string to fetch the element in the component's dom. Automatically inferred if a tag name is provided (f.e. 'div' -> HTMLDivElement).
+  Supports chained selectors using the format `parent-selector >>> child-selector >>> nested-selector`
+  Each segment is resolved step-by-step, optionally entering shadow roots when present.
 
-### Return Value
+### Return value
 
-The matching `HTMLElement`, cast to the specified generic type.
+- An `HTMLElement`. You can cast it to a more specific element type as needed, for example, `HTMLButtonElement`, `HTMLInputElement`, or a custom class.
 
-### Throws
+## Example
 
-Throws an error if no element matches the selector.
+::: code-group
 
-## Basic Usage
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
 
-```typescript
-class MyComponent extends Jadis {
-  static readonly selector = 'my-component';
+import { Jadis, createSelector } from '@jadis/core';
 
-  templateHtml(): DocumentFragment {
-    return html`<button>Click me</button>`;
+class ButtonComponent extends Jadis {
+  static selector = createSelector('button-component');
+
+  templateHtml() {
+    return <button>Click me</button>;
   }
 
-  onConnect(): void {
-    const button = this.getElement('button');
-    button.addEventListener('click', () => {
-      console.log('Clicked!');
-    });
+  get buttonElement() {
+    return this.getElement('button');
+  }
+}
+
+class ParentComponent extends Jadis {
+  static selector = createSelector('parent-component');
+
+  templateHtml() {
+    return <button-component></button-component>;
+  }
+
+  get childButtonComponent() {
+    return this.getElement('button-component >>> button');
   }
 }
 ```
 
-## Type Inference
-
-When you pass an HTML tag name as the selector, the return type is automatically inferred:
-
 ```typescript
-const button = this.getElement('button');   // HTMLButtonElement
-const input = this.getElement('input');     // HTMLInputElement
-const div = this.getElement('div');         // HTMLDivElement
+import { Jadis } from '@jadis/core';
+
+class ButtonComponent extends Jadis {
+  static readonly selector = 'button-component';
+
+  templateHtml(): Node {
+    return <button>Click me</button>;
+  }
+
+  get buttonElement(): HTMLButtonElement {
+    return this.getElement('button');
+  }
+}
+
+class ParentComponent extends Jadis {
+  static readonly selector = 'parent-component';
+
+  templateHtml(): Node {
+    return <button-component></button-component>;
+  }
+
+  get childButtonComponent(): HTMLButtonElement {
+    return this.getElement('button-component >>> button');
+  }
+}
 ```
 
-For custom selectors, specify the type explicitly:
+```javascript [js-doc]
+// @ts-check
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
 
-```typescript
-const myDiv = this.getElement<HTMLDivElement>('.my-class');
+import { Jadis, createSelector } from '@jadis/core';
+
+class ButtonComponent extends Jadis {
+  static selector = createSelector('button-component');
+
+  templateHtml() {
+    return <button>Click me</button>;
+  }
+
+  /** @returns {HTMLButtonElement} */
+  get buttonElement() {
+    return this.getElement('button');
+  }
+}
+
+class ParentComponent extends Jadis {
+  static selector = createSelector('parent-component');
+
+  templateHtml() {
+    return <button-component></button-component>;
+  }
+
+  /** @returns {HTMLButtonElement} */
+  get childButtonComponent() {
+    return this.getElement('button-component >>> button');
+  }
+}
 ```
 
-## Crossing Shadow Boundaries
+:::
 
-Use the `>>>` combinator to access elements inside a child component's shadow DOM:
-
-```typescript
-// Access a button inside child-component's shadow root
-const innerButton = this.getElement('child-component >>> button');
-```
-
-Chaining is supported:
-
-```typescript
-// Deep traversal through multiple shadow boundaries
-const target = this.getElement('parent >>> child >>> .deep-element');
-```
-
-## Best Practices
-
-- Prefer `useRefs()` when you need multiple element references — it is more concise.
-- Use `>>>` sparingly; direct access to a child's internals breaks encapsulation.
-- Always call `getElement()` after the template has been rendered (i.e., in or after `onConnect()`).
-
-## See Also
-
-- [useRefs()](./use-refs.md) — Batch element reference creation.
-- [Shadow DOM](../guides/shadow-dom.md) — Understanding shadow boundaries.
+:::tip
+Check out the related helper [`useRefs()`](./use-refs.md): Create multiple typed element references using a single mapping function.
+:::

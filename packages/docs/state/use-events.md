@@ -10,22 +10,17 @@ this.useEvents<TEvents extends Record<string, unknown>>(): Readonly<UseEventsHan
 
 ### Parameters
 
-None (TypeScript) or an optional schema object (JavaScript).
+None in TypeScript, or an optional schema object in JavaScript.
 
-### Return Value
+### Return value
 
-A frozen object with two methods:
+A frozen object with `register(eventName, callback)` and `emit(eventName, detail?)` methods.
 
-| Method | Description |
-|---|---|
-| `register(eventName, callback)` | Attach a listener for the named event |
-| `emit(eventName, detail?)` | Dispatch a custom event with optional detail |
+## TypeScript usage
 
-## TypeScript Usage
+```tsx
+import { Jadis } from '@jadis/core';
 
-Define event types inline using a type parameter:
-
-```typescript
 class MyComponent extends Jadis {
   static readonly selector = 'my-component';
 
@@ -34,12 +29,11 @@ class MyComponent extends Jadis {
     clicked: { x: number; y: number };
   }>();
 
-  templateHtml(): DocumentFragment {
-    return html`<button>Click</button>`;
+  templateHtml(): Node {
+    return <button type="button">Click</button>;
   }
 
   onConnect(): void {
-    // Register a listener (can be on self or another component)
     this.events.register('changed', (value) => {
       console.log('Changed to:', value);
     });
@@ -52,12 +46,12 @@ class MyComponent extends Jadis {
 }
 ```
 
-## JavaScript Usage (JSDoc)
+## JavaScript usage
 
-In plain JavaScript, pass a schema object to define event types:
-
-```javascript
+```js
 // @ts-check
+import { createSelector, Jadis } from '@jadis/core';
+
 class MyComponent extends Jadis {
   static selector = createSelector('my-component');
 
@@ -74,35 +68,32 @@ class MyComponent extends Jadis {
     this.events.emit('changed', 'hello');
   }
 }
+
+MyComponent.register();
 ```
 
 ## Emission
 
-Events are dispatched as `CustomEvent` objects. The `detail` property contains the data you pass to `emit()`:
+Events are dispatched as `CustomEvent` objects. The `detail` property contains the data passed to `emit()`:
 
 ```typescript
 this.events.emit('dataLoaded', { items: [1, 2, 3] });
-```
-
-Listeners receive the detail:
-
-```typescript
 this.events.register('dataLoaded', (detail) => {
-  console.log(detail.items); // [1, 2, 3]
+  console.log(detail.items);
 });
 ```
 
-## Automatic Cleanup
+## Automatic cleanup
 
-Like all Jadis event mechanisms, `useEvents()` listeners are bound to the component's `killSignal` and are automatically removed when the component disconnects.
+`useEvents()` listeners are bound to the component's `killSignal` and are automatically removed when the component disconnects.
 
-## Best Practices
+## Best practices
 
 - Use `useEvents()` for component-specific custom events.
 - Use the [Bus](../api/bus-class.md) for cross-component or global event communication.
 - Define event types explicitly for full type safety.
 
-## See Also
+## See also
 
 - [Event Handling](./event-handling.md) — DOM event listeners with `this.on()`.
 - [Cross-Component Communication](../communication/cross-components.md) — Using the Bus.

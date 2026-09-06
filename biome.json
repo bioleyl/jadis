@@ -48,7 +48,10 @@
       "!**/dist",
       "!**/build",
       "!**/coverage",
-      "!**/core/package.json"
+      "!**/test-results",
+      "!**/.vitepress/cache",
+      "!**/core/package.json",
+      "!**/*.tsx"
     ]
   },
   "formatter": {
@@ -83,6 +86,7 @@
       "trailingCommas": "none"
     }
   },
+
   "linter": {
     "enabled": true,
     "rules": {

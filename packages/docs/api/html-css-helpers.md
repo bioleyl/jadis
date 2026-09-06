@@ -1,43 +1,37 @@
-# html() / css()
+# JSX and `css()`
 
-Tagged template literal helpers for creating HTML and CSS content in Jadis components.
+Jadis 1.0 uses JSX for component templates and keeps `css()` as the helper for interpolated component styles. The legacy `html()` tagged template helper is no longer part of the public API.
 
-## html()
+## JSX
 
-Creates a `DocumentFragment` from a template literal with interpolation support.
+Configure TypeScript or JavaScript with the automatic JSX runtime:
 
-### Signature
-
-```typescript
-html(strings: TemplateStringsArray, ...values: unknown[]): DocumentFragment;
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jadis/core"
+  }
+}
 ```
 
-### Interpolation Types
+Then return a real `Node` from `templateHtml()`:
 
-| Value Type | Behavior |
-|---|---|
-| `string`, `number`, `boolean` | Rendered as text content |
-| `Node` | Inserted as a child node |
-| `Node[]` | All nodes inserted sequentially |
-| `undefined`, `null` | Rendered as empty string |
+```tsx
+import { Jadis } from '@jadis/core';
 
-### Example
+class HelloCard extends Jadis {
+  static readonly selector = 'hello-card';
 
-```typescript
-import { html } from '@jadis/core';
-
-const name = 'World';
-const items = [1, 2, 3].map(i => document.createElement('li'));
-
-const fragment = html`
-  <div>
-    <p>Hello, ${name}!</p>
-    <ul>${items}</ul>
-  </div>
-`;
+  templateHtml(): Node {
+    return <p>Hello from JSX</p>;
+  }
+}
 ```
 
-## css()
+For projects without a JSX transform, use [`createElement()`](./create-element.md).
+
+## `css()`
 
 Concatenates template literal parts with interpolated values into a CSS string.
 
@@ -50,33 +44,21 @@ css(strings: TemplateStringsArray, ...args: (string | number | boolean)[]): stri
 ### Example
 
 ```typescript
-import { css } from '@jadis/core';
+import { css, Jadis } from '@jadis/core';
 
-const primaryColor = '#3b82f6';
+class StyledCard extends Jadis {
+  static readonly selector = 'styled-card';
 
-const styles = css`
-  :host { display: block; }
-  button {
-    background: ${primaryColor};
-    padding: 0.5rem;
-  }
-`;
-```
-
-### Usage in Components
-
-```typescript
-class MyComponent extends Jadis {
   templateCss(): string {
     return css`
       :host { display: block; }
-      .title { color: #333; }
+      :host { color: #3b82f6; }
     `;
   }
 }
 ```
 
-## See Also
+## See also
 
-- [Templates](../guides/templates.md) — Template literals in Jadis.
-- [Styles](../templating/css.md) — Adding CSS to components.
+- [Templates](../guides/templates.md)
+- [Styles](../templating/css.md)

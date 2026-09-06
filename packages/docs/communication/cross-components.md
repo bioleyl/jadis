@@ -1,114 +1,195 @@
 # Cross-Component Communication
 
-For components that are not directly related (siblings, distant ancestors/descendants), Jadis provides the `Bus` class — a type-safe event bus built on top of the native `EventTarget`.
+While not the trendiest tool in modern frontend circles, the **EventBus** remains one of the most underrated solutions for cross-component communication. *Jadis* embraces this pattern with intention, offering a built-in Bus system that’s not only easy to use, but also memory-safe and fully typed for **TypeScript** and **JSDoc** users.
 
-## The Bus Class
+*Jadis* brings you a bus helper for handling events in a type-safe manner. Even in **plain JavaScript**, *Jadis* allows for **partial typing** by defining event payloads using primitive constructors like `String`, `Number` or other constructors. This gives you lightweight type hints without switching languages, making event wiring safer and more expressive, even in a pure JS project.
 
-The `Bus` is a generic class that enforces event types at compile time:
+You don’t need to reinvent global coordination. With *Jadis*, you get all the power of a scalable event system, minus the complexity.
 
-```typescript
-import { Bus } from '@jadis/core';
+## Bus creation
 
-// Define your event schema
-type AppEvents = {
-  userLoggedIn: { id: string; name: string };
-  themeChanged: 'light' | 'dark';
-  notification: string;
-};
+Here's how to create a new event bus:
 
-const appBus = new Bus<AppEvents>();
-```
+::: code-group
 
-## Registering Listeners
-
-Inside a Jadis component, use `this.onBus()` to register listeners. It automatically handles registration and cleanup using the component's `killSignal`, so you don't need to pass it manually.
-
-```typescript
-this.onBus(appBus, 'userLoggedIn', (detail) => {
-  console.log(`User ${detail.name} logged in with ID ${detail.id}`);
+```javascript
+const myBus = new Bus({
+  someEvent: String,
+  anotherEvent: Number,
+  noPayloadEvent: undefined,
 });
 ```
 
-## Emitting Events
-
 ```typescript
-appBus.emit('userLoggedIn', { id: 'abc123', name: 'Alice' });
-appBus.emit('themeChanged', 'dark');
+const myBus = new Bus<{
+  someEvent: string;
+  anotherEvent: number;
+  noPayloadEvent: undefined;
+}>();
 ```
 
-## Full Example
-
-### EventBus Setup
-
-```typescript
-import { Bus } from '@jadis/core';
-
-export type AppEvents = {
-  dataUpdated: string[];
-  errorOccurred: Error;
-};
-
-export const appBus = new Bus<AppEvents>();
+```javascript [js-doc]
+/** @type {Bus<{ someEvent: string, anotherEvent: number, noPayloadEvent: undefined }>} */
+const myBus = new Bus();
 ```
 
-### Listener Component
+:::
 
-```typescript
-class LogPanel extends Jadis {
-  static readonly selector = 'log-panel';
+When using plain JavaScript, event types are declared using primitive constructors like `Number`, `String`, `Boolean`, `BigInt`, `Symbol`, `Function`, `Array` or `Object`
 
-  onConnect(): void {
-    this.onBus(appBus, 'dataUpdated', (items) => {
-      console.log(`Data updated: ${items.length} items`);
-    });
+## Bus Usage
 
-    this.onBus(appBus, 'errorOccurred', (err) => {
-      console.error('Error:', err.message);
+Once the bus is defined, you can **register listeners** or **emit events** freely between components.
+
+::: code-group
+
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Bus, Jadis, createSelector } from '@jadis/core';
+
+const myBus = new Bus({
+  someEvent: String,
+  anotherEvent: Number,
+  noPayloadEvent: undefined,
+});
+
+class ReceiverComponent extends Jadis {
+  static selector = createSelector('receiver-component');
+
+  templateHtml() {
+    return <p></p>;
+  }
+
+  onConnect() {
+    this.onBus(myBus, 'someEvent', (value) => {
+      this.getElement('p').textContent = `Received: ${value}`;
     });
   }
 }
-```
 
-### Emitter Component
+class EmitterComponent extends Jadis {
+  static selector = createSelector('emitter-component');
 
-```typescript
-class DataFetcher extends Jadis {
-  static readonly selector = 'data-fetcher';
+  templateHtml() {
+    return <button>ClickMe</button>;
+  }
 
-  onConnect(): void {
-    // Fetch data and emit when done
-    fetchData().then((items) => {
-      appBus.emit('dataUpdated', items);
-    }).catch((err) => {
-      appBus.emit('errorOccurred', err);
+  onConnect() {
+    this.getElement('button').addEventListener('click', () => {
+      myBus.emit('someEvent', 'Hello from EmitterComponent!');
     });
   }
 }
+
+ReceiverComponent.register();
+EmitterComponent.register();
 ```
-
-## Using the Bus Outside Jadis Components
-
-When using the bus outside of Jadis components, `this.onBus()` is not available. Register listeners directly on the bus and manage cleanup manually:
 
 ```typescript
-const controller = new AbortController();
+import { Bus, Jadis } from '@jadis/core';
 
-appBus.register('dataUpdated', (items) => {
-  console.log(items);
-}, controller.signal);
+const myBus = new Bus<{
+  someEvent: string;
+  anotherEvent: number;
+  noPayloadEvent: undefined;
+}>();
 
-// Later, clean up:
-controller.abort();
+class ReceiverComponent extends Jadis {
+  static readonly selector = 'receiver-component';
+
+  templateHtml(): Node {
+    return <p></p>;
+  }
+
+  onConnect(): void {
+    this.onBus(myBus, 'someEvent', (value) => {
+      this.getElement('p').textContent = `Received: ${value}`;
+    });
+  }
+}
+
+class EmitterComponent extends Jadis {
+  static readonly selector = 'emitter-component';
+
+  templateHtml(): Node {
+    return <button>ClickMe</button>;
+  }
+
+  onConnect(): void {
+    this.getElement('button').addEventListener('click', () => {
+      myBus.emit('someEvent', 'Hello from EmitterComponent!');
+    });
+  }
+}
+
+ReceiverComponent.register();
+EmitterComponent.register();
 ```
 
-## Best Practices
+```javascript [js-doc]
+// @ts-check
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
 
-- Define a single event schema per application domain.
-- Use `this.onBus()` inside Jadis components for automatic cleanup.
-- Keep the bus lightweight — it is not a state management solution.
-- For complex state sharing, combine the Bus with direct property access or a dedicated store pattern.
+import { Bus, Jadis, createSelector } from '@jadis/core';
 
-## See Also
+/** @type {Bus<{ someEvent: string, anotherEvent: number, noPayloadEvent: undefined }>} */
+const myBus = new Bus();
 
-- [Bus API Reference](../api/bus-class.md) — Complete method documentation.
-- [Child to Parent](./child-to-parent.md) — Simpler event dispatching for parent/child relationships.
+class ReceiverComponent extends Jadis {
+  static selector = createSelector('receiver-component');
+
+  templateHtml() {
+    return <p></p>;
+  }
+
+  onConnect() {
+    this.onBus(myBus, 'someEvent', (value) => {
+      this.getElement('p').textContent = `Received: ${value}`;
+    });
+  }
+}
+
+class EmitterComponent extends Jadis {
+  static selector = createSelector('emitter-component');
+
+  templateHtml() {
+    return <button>ClickMe</button>;
+  }
+
+  onConnect() {
+    this.getElement('button').addEventListener('click', () => {
+      myBus.emit('someEvent', 'Hello from EmitterComponent!');
+    });
+  }
+}
+
+ReceiverComponent.register();
+EmitterComponent.register();
+```
+
+:::
+
+## Usage Outside of *Jadis* Components
+
+You can also use the bus outside of *Jadis* components. For example, in services or utilities. If you're registering listeners directly (without Jadis), it's important to provide an `AbortSignal` to ensure proper cleanup and avoid memory leaks.
+
+```javascript
+// Create an AbortController to manage cleanup
+const abortController = new AbortController();
+
+// Register to an event
+myBus.register(
+  'someEvent',
+  (value) => console.log(`Bus received someEvent with value: ${value}`),
+  abortController.signal
+);
+
+// Emit an event
+myBus.emit('someEvent', 'Initial value');
+
+// Clean up when done
+abortController.abort();
+```

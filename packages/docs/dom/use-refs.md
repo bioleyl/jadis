@@ -1,94 +1,152 @@
-# useRefs()
+# Point to an element in the DOM with `useRefs` Helper
 
-The `useRefs()` method creates typed, lazy references to multiple elements within your component's template. It is a convenient alternative to calling `getElement()` repeatedly.
+The `useRefs` helper creates **typed, lazy references** to elements within your component’s template using a **standard CSS selector**.  
+It’s a convenient alternative to manually calling [`getElement()`](./get-element.md) for each element.
+
+Instead of writing multiple getters, `useRefs` lets you define all your element references in one place, using a simple mapping function.
+
+`useRefs()` uses [`getElement()`](get-element.md) behind the hood, [providing an `>>>` operator](#advanced-example-nested-components) that gets elements through a child's shadow DOM.
 
 ## Signature
 
 ```typescript
-this.useRefs<T extends Record<string, HTMLElement>>(
-  mapFn: (ref: (query: string) => HTMLElement) => T
-): Readonly<T>;
+this.useRefs<ElementMap>(
+  (ref: <Element extends HTMLElement = HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+    query: Tag
+  ) => SelectorToElementWithFallback<Tag, Element>) => ElementMap
+): Readonly<ElementMap>
+```
+
+`ref()` supports both tag-name inference and an explicit element type:
+
+```typescript
+const refs = this.useRefs((ref) => ({
+  input: ref<HTMLInputElement>('input'),
+  button: ref('button'), // inferred as HTMLButtonElement
+}));
 ```
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `mapFn` | `Function` | A function that receives a `ref()` helper and returns an object mapping names to selectors |
+- `mapFn`: callback function that receives a special `ref()` function.  
+You call `ref(selector)` for each element you want to reference, and `useRefs` returns an object with **lazy getters** for those elements.
 
-### Return Value
+Each getter internally calls [`getElement()`](./get-element.md), ensuring the element exists and automatically traversing shadow DOM boundaries if needed.
 
-A frozen object where each key is a lazy getter returning the corresponding `HTMLElement`.
+### Return value
 
-## Basic Example
+- An object `ElementMap` where each key corresponds to an element reference, and each property is a **getter** that returns the corresponding `HTMLElement` (or subtype).
 
-```typescript
-import { Jadis, html, createSelector } from '@jadis/core';
+## Example
+
+::: code-group
+
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
 
 class FormComponent extends Jadis {
   static selector = createSelector('form-component');
 
-  readonly refs = this.useRefs((ref) => ({
-    input: ref<HTMLInputElement>('input'),
-    submitButton: ref<HTMLButtonElement>('button'),
-  }));
-
-  templateHtml(): DocumentFragment {
-    return html`
-      <input type="text" />
-      <button>Submit</button>
-    `;
+  templateHtml() {
+    return (
+      <>
+        <input class="my-input" />
+        <button>Submit</button>
+      </>
+    );
   }
 
-  onConnect(): void {
-    this.refs.input.focus();
+  refs = this.useRefs((ref) => ({
+    input: ref('input.my-input'),
+    button: ref('button'),
+  }));
+
+  onConnect() {
+    this.refs.button.addEventListener('click', () => {
+      console.log('Input value:', this.refs.input.value);
+    }, { signal: this.killSignal });
   }
 }
 ```
 
-## How It Works
-
-`useRefs()` captures the selector strings at definition time via a dummy call, then creates lazy getters that call `getElement()` when each reference is first accessed. The result is frozen for safety.
-
-## Cross-Shadow References
-
-The `ref()` helper supports the `>>>` combinator for accessing elements inside child components:
-
 ```typescript
-readonly refs = this.useRefs((ref) => ({
+import { Jadis } from '@jadis/core';
+
+class FormComponent extends Jadis {
+  static readonly selector = 'form-component';
+
+  templateHtml(): Node {
+    return (
+      <>
+        <input class="my-input" />
+        <button>Submit</button>
+      </>
+    );
+  }
+
+  readonly refs = this.useRefs((ref) => ({
+    input: ref<HTMLInputElement>('input.my-input'),
+    button: ref('button'),
+  }));
+
+  onConnect() {
+    this.refs.button.addEventListener('click', () => {
+      console.log('Input value:', this.refs.input.value);
+    }, { signal: this.killSignal });
+  }
+}
+```
+
+```javascript [js-doc]
+// @ts-check
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
+
+class FormComponent extends Jadis {
+  static selector = createSelector('form-component');
+
+  templateHtml() {
+    return (
+      <>
+        <input class="my-input" />
+        <button>Submit</button>
+      </>
+    );
+  }
+
+  refs = this.useRefs((ref) => ({
+    /** @type {HTMLInputElement} */
+    input: ref('input.my-input'),
+    button: ref('button'),
+  }));
+
+  onConnect() {
+    this.refs.button.addEventListener('click', () => {
+      console.log('Input value:', this.refs.input.value);
+    }, { signal: this.killSignal });
+  }
+}
+```
+
+:::
+
+## Advanced Example: Nested Components
+
+You can also traverse into a child component’s shadow DOM using the `>>>` operator (same as [`getElement()`](./get-element.md)).
+
+```javascript
+this.useRefs((ref) => ({
   childButton: ref('child-component >>> button'),
 }));
 ```
 
-## TypeScript Usage
+This retrieves the `<button>` inside the `child-component`’s shadow root.
 
-Specify generic types on `ref()` for precise typing:
-
-```typescript
-readonly refs = this.useRefs((ref) => ({
-  input: ref<HTMLInputElement>('input.my-input'),
-  button: ref<HTMLButtonElement>('button'),
-}));
-```
-
-## JSDoc Usage
-
-For JavaScript projects, use JSDoc comments:
-
-```javascript
-/** @type {HTMLInputElement} */
-const refs = this.useRefs((ref) => ({
-  input: ref('input.my-input'),
-  button: ref('button'),
-}));
-```
-
-## Best Practices
-
-- Define all refs in a single `useRefs()` call for clarity.
-- Use descriptive names (`submitButton` instead of `btn`).
-- Refs are lazy — the element is not queried until first access.
-
-## See Also
-
-- [getElement()](./get-element.md) — The underlying element lookup method.
+:::tip
+Check out the related helper [`getElement()`](./get-element.md) used internally by `useRefs` to perform element lookups.
+:::

@@ -81,8 +81,7 @@ for (const { path: relPath, update } of updates) {
 // --- Update CDN references in installation.md ---
 const installPath = join(root, 'packages/docs/guides/installation.md');
 let content = readFileSync(installPath, 'utf8');
-const oldPattern = new RegExp(`@jadis/core@${coreVersion}`, 'g');
-content = content.replace(oldPattern, `@jadis/core@${newCoreVersion}`);
+content = content.replaceAll(`@jadis/core@${coreVersion}`, `@jadis/core@${newCoreVersion}`);
 writeFileSync(installPath, content, 'utf8');
 console.log(`✓ packages/docs/guides/installation.md`);
 

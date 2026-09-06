@@ -1,19 +1,59 @@
-# Parent to Child
+# From parent to child
 
-Communication from a parent component to its child is direct: the parent accesses the child instance and calls its public methods or setters. This follows the standard Web Components pattern of explicit, imperative control.
+Communication from a parent to its child component isn’t event-based. Instead, it follows a **direct control model**: the parent typically knows what the child needs in order to function properly and interacts with it accordingly.
 
-## Method Calls and Setters
+## Method Calls
 
-The recommended approach is to expose setters or public methods on the child component:
+The most straightforward way for a parent to interact with a child is by calling its **public methods** or **setters**.
+
+::: code-group
+
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
+
+class ChildComponent extends Jadis {
+  static selector = createSelector('child-component');
+
+  templateHtml() {
+    return <p></p>;
+  }
+
+  set textValue(value) {
+    this.getElement('p').textContent = value;
+  }
+}
+
+class ParentComponent extends Jadis {
+  static selector = createSelector('parent-component');
+
+  refs = this.useRefs((ref) => ({
+    childComponent: ref('child-component'),
+  }));
+
+  templateHtml() {
+    return <child-component></child-component>;
+  }
+
+  onConnect() {
+    this.refs.childComponent.textValue = 'Hello from Parent Component!';
+  }
+}
+
+ChildComponent.register();
+ParentComponent.register();
+```
 
 ```typescript
-import { Jadis, html } from '@jadis/core';
+import { Jadis } from '@jadis/core';
 
 class ChildComponent extends Jadis {
   static readonly selector = 'child-component';
 
-  templateHtml(): DocumentFragment {
-    return html`<p></p>`;
+  templateHtml(): Node {
+    return <p></p>;
   }
 
   set textValue(value: string): void {
@@ -25,15 +65,15 @@ class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
 
   readonly refs = this.useRefs((ref) => ({
-    child: ref<ChildComponent>('child-component'),
+    childComponent: ref<ChildComponent>('child-component'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`<child-component></child-component>`;
+  templateHtml(): Node {
+    return <child-component></child-component>;
   }
 
   onConnect(): void {
-    this.refs.child.textValue = 'Hello from Parent!';
+    this.refs.childComponent.textValue = 'Hello from Parent Component!';
   }
 }
 
@@ -41,28 +81,45 @@ ChildComponent.register();
 ParentComponent.register();
 ```
 
-## Using `toTemplate()` with Props
+```javascript [js-doc]
+// @ts-check
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
 
-When creating a child via `toTemplate()`, pass data through the `props` option:
+import { Jadis, createSelector } from '@jadis/core';
 
-```typescript
-templateHtml(): DocumentFragment {
-  return html`
-    ${ChildComponent.toTemplate({
-      props: { textValue: 'Hello from Parent!' }
-    })}
-  `;
+class ChildComponent extends Jadis {
+  static selector = createSelector('child-component');
+
+  templateHtml() {
+    return <p></p>;
+  }
+
+  /** @param {string} value */
+  set textValue(value) {
+    this.getElement('p').textContent = value;
+  }
 }
+
+class ParentComponent extends Jadis {
+  static selector = createSelector('parent-component');
+
+  refs = this.useRefs((ref) => ({
+    /** @type {ChildComponent} */
+    childComponent: ref('child-component'),
+  }));
+
+  templateHtml() {
+    return <child-component></child-component>;
+  }
+
+  onConnect() {
+    this.refs.childComponent.textValue = 'Hello from Parent Component!';
+  }
+}
+
+ChildComponent.register();
+ParentComponent.register();
 ```
 
-## Best Practices
-
-- Expose setters for simple value updates.
-- Expose public methods for complex operations.
-- Use `useRefs()` to get typed references to child components.
-- Avoid direct DOM manipulation of child internals — use the child's public API.
-
-## See Also
-
-- [Child to Parent](./child-to-parent.md) — The reverse direction.
-- [Cross-Component](./cross-components.md) — Communication between unrelated components.
+:::

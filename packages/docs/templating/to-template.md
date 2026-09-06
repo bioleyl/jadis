@@ -1,82 +1,91 @@
-# toTemplate()
+# Add *Jadis* components to the template
 
-The static `toTemplate()` method creates a component instance with optional props, attributes, and slotted content. It is the programmatic equivalent of writing the component tag in HTML.
+*Jadis* components can be used directly as JSX elements in `templateHtml()`. This is the recommended approach for embedding components.
 
-## Signature
+## Using JSX (recommended)
 
-```typescript
-static toTemplate<T extends Jadis>(
-  this: JadisConstructor<T>,
-  options?: OptionsWithProps<ElementValues<T>>,
-  slotted?: DocumentFragment
-): T;
-```
-
-### Parameters
-
-| Parameter | Type | Description |
-|---|---|---|
-| `options` | `OptionsWithProps` | An object with `props` and `attrs` sub-objects |
-| `slotted` | `DocumentFragment` | Content to project into the component's slots |
-
-### Return Value
-
-An instance of the component, ready to be appended to the DOM.
-
-## Basic Usage
+Simply reference the component class as a JSX tag:
 
 ```typescript
-templateHtml(): DocumentFragment {
-  return html`
-    ${UserProfile.toTemplate()}
-  `;
+templateHtml(): Node {
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <user-profile user={this.userData} />
+      <counter-component />
+    </div>
+  );
 }
 ```
 
-## With Props and Attributes
+### Passing props
+
+Props are passed as JSX attributes. Jadis components automatically map attributes to their properties:
 
 ```typescript
-templateHtml(): DocumentFragment {
-  return html`
-    ${UserProfile.toTemplate({
-      props: { username: 'alice' },
-      attrs: { theme: 'dark' }
-    })}
-  `;
+templateHtml(): Node {
+  return (
+    <name-input
+      label="Your name"
+      placeholder="Enter your name"
+      class="my-input"
+    />
+  );
 }
 ```
 
-This renders:
+### Passing slotted content (children)
 
-```html
-<user-profile theme="dark" username="alice"></user-profile>
-```
-
-## With Slotted Content
+JSX naturally handles children through children nodes:
 
 ```typescript
-templateHtml(): DocumentFragment {
-  return html`
-    ${Card.toTemplate(
-      {},
-      html`
-        <h2 slot="header">Welcome</h2>
-        <p>This is slotted content.</p>
-      `
-    )}
-  `;
+templateHtml(): Node {
+  return (
+    <collapsible-panel>
+      <h1 class="title">My Title</h1>
+      <p class="content">My content</p>
+    </collapsible-panel>
+  );
 }
 ```
 
-## Props vs Attributes
+### With class and className
 
-| | `props` | `attrs` |
-|---|---|---|
-| **Target** | JavaScript properties on the element | HTML attributes |
-| **Conversion** | Used as-is | Automatically converted to kebab-case |
-| **Use for** | Direct property assignment | HTML attribute setting |
+Both `class` and `className` work:
 
-## See Also
+```typescript
+templateHtml(): Node {
+  return (
+    <user-card className="profile-card" title="John" />
+  );
+}
+```
 
-- [Slots](./slots.md) — Content projection in Web Components.
-- [createElement()](../api/create-element.md) — A lower-level alternative for creating any element.
+## Using `toTemplate()` (legacy)
+
+The `toTemplate()` static method is still available for creating component instances programmatically:
+
+```typescript
+templateHtml(): Node {
+  return (
+    <div>
+      {MyComponent.toTemplate(
+        { props: { label: 'Your name' } },
+        document.createDocumentFragment()
+      )}
+    </div>
+  );
+}
+```
+
+### With slotted content
+
+```typescript
+const fragment = document.createDocumentFragment();
+fragment.appendChild(document.createTextNode('Hello'));
+
+const component = MyComponent.toTemplate(
+  { attrs: { class: 'container' }, props: { title: 'My Title' } },
+  fragment
+);
+```

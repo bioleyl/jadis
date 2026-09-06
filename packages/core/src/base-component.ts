@@ -13,10 +13,14 @@ import type {
   KeysWithoutUndefined,
   KeysWithUndefined,
   OptionsWithProps,
+  SafeElementValues,
   SchemaToEvents,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
 import type { ChangeOptions, UseChangeHandler, UseEventsHandler } from './types/jadis.type';
+
+type AttributeCallback = (value: string | null, oldValue: string | null) => void;
+type AttributeCallbacks<Attribute extends string> = Record<Attribute, AttributeCallback>;
 
 export interface JadisConstructor<T extends Jadis = Jadis> {
   new (): T;
@@ -24,6 +28,7 @@ export interface JadisConstructor<T extends Jadis = Jadis> {
   readonly template: string;
   readonly observedAttributes: Array<string>;
   readonly useShadowDom: boolean;
+  readonly __jadisProps: SafeElementValues<T>;
 }
 
 /**
@@ -37,14 +42,23 @@ export abstract class Jadis extends HTMLElement {
   static readonly observedAttributes: Array<string> = [];
   /** Whether to use Shadow DOM for this component */
   static readonly useShadowDom: boolean = true;
+  /** Marker for JSX attribute type inference — static version for JadisConstructor compat */
+  static readonly __jadisProps: Record<string, unknown> = {};
+  /** Instance-level access for JSX attribute type inference — resolves per-subclass */
+  get __jadisProps(): SafeElementValues<this> {
+    const props = (this.constructor as unknown as Record<string, unknown>).__jadisProps;
+    return (props ?? {}) as SafeElementValues<this>;
+  }
 
   readonly shadowRoot: ShadowRoot | null = null;
-  protected readonly attributesCallback: Partial<Record<string, (value: string, oldValue: string) => void>> = {};
+  protected readonly attributesCallback: Partial<Record<string, AttributeCallback>> = {};
 
   /** Actions to perform when the component is connected to the DOM. */
   protected onConnectActions: Array<() => void> = [];
 
   private _abortController = new AbortController();
+  private _attributeObserver: MutationObserver | null = null;
+  private _attributesInitialized = false;
   private _isConnected = false;
   private _hasRendered = false;
 
@@ -72,7 +86,7 @@ export abstract class Jadis extends HTMLElement {
    * }
    * ```
    */
-  templateHtml?(): DocumentFragment;
+  templateHtml?(): Node;
 
   /**
    * The CSS styles for the component.
@@ -137,8 +151,13 @@ export abstract class Jadis extends HTMLElement {
   }
 
   connectedCallback(): void {
+    if (this._abortController.signal.aborted) {
+      this._abortController = new AbortController();
+    }
+
     this.renderTemplate();
     this._isConnected = true;
+    this.observeAttributes();
 
     setTimeout(() => {
       this.onConnectActions.forEach((fn) => {
@@ -151,12 +170,48 @@ export abstract class Jadis extends HTMLElement {
 
   disconnectedCallback(): void {
     this._isConnected = false;
+    this._attributeObserver?.disconnect();
+    this._attributeObserver = null;
+    this._attributesInitialized = false;
     this._abortController.abort();
     this.onDisconnect?.();
   }
 
-  attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     this.attributesCallback[name]?.(newValue, oldValue);
+  }
+
+  private observeAttributes(): void {
+    if (this._attributeObserver || Object.keys(this.attributesCallback).length === 0) {
+      return;
+    }
+
+    this._attributeObserver = new MutationObserver((records) => {
+      const changedAttributes = new Map<string, string | null>();
+
+      for (const record of records) {
+        if (record.attributeName && !changedAttributes.has(record.attributeName)) {
+          changedAttributes.set(record.attributeName, record.oldValue);
+        }
+      }
+
+      for (const [name, oldValue] of changedAttributes) {
+        this.attributeChangedCallback(name, oldValue, this.getAttribute(name));
+      }
+    });
+    this._attributeObserver.observe(this, { attributeOldValue: true, attributes: true });
+
+    if (this._attributesInitialized) {
+      return;
+    }
+
+    this._attributesInitialized = true;
+    for (const name of Object.keys(this.attributesCallback)) {
+      const value = this.getAttribute(name);
+      if (value !== null) {
+        this.attributeChangedCallback(name, null, value);
+      }
+    }
   }
 
   /**
@@ -228,14 +283,19 @@ export abstract class Jadis extends HTMLElement {
   }
 
   /**
-   * Creates getters for the specified attributes on the component.
-   * This method allows you to define a list of attribute names and automatically
-   * creates corresponding getters that retrieve the attribute values.
-   * @param attributes The list of attribute names to create getters for
-   * @returns An object with getters for the specified attributes
+   * Creates attribute getters and registers their change callbacks.
+   * Changes are observed automatically while the component is connected.
+   * @param callbacks A callback for each attribute to observe.
+   * @returns An object with getters that retrieve the current attribute values.
    */
-  protected useAttributes<Attr extends string>(...attributes: Attr[]): Record<Attr, string | null> {
-    return attributes.reduce(
+  protected useAttributes<Attr extends string>(callbacks: AttributeCallbacks<Attr>): Record<Attr, string | null> {
+    const attributeNames = Object.keys(callbacks) as Attr[];
+    Object.assign(this.attributesCallback, callbacks);
+    if (this._isConnected) {
+      this.observeAttributes();
+    }
+
+    return attributeNames.reduce(
       (acc, name) => {
         Object.defineProperty(acc, name, {
           enumerable: true,

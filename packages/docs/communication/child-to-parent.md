@@ -1,79 +1,250 @@
-# Child to Parent
+# From child to parent
 
-A child component communicates upward to its parent using `useEvents()`. The child exposes its events publicly, and the parent registers listeners via `.register()` — which automatically handles cleanup when either component disconnects.
+Communication between a child component and its parent is based on custom events.
 
-## Pattern
+The **parent registers** an event listener on the child. The child **emits** the event, which triggers the callbacks defined in the parent.
 
-1. **Child** — Use `useEvents()` to emit an event with relevant data.
-2. **Parent** — Listen for the event on the child element and handle the detail.
+You can implement your own event system if you prefer, but *Jadis* **includes a built-in method** `useEvents` that ensures memory safety and supports **strong typing with both TypeScript and JSDoc**, making event handling clean, scalable, and type-safe.
 
-## Child Component
+## Signature
 
-```typescript
-import { Jadis, html } from '@jadis/core';
+The main idea is to pass an interface to the function's generic in TypeScript and in JSDoc. In JavaScript, we need to use an oject that represents the interface as close as possible.
 
-class Counter extends Jadis {
-  static readonly selector = 'counter';
+In JavaScript an object or an array can not be described more precisely than **Object** and **Array**.
 
-  private readonly count = this.useChange(0, (newValue) => {
-    this.countEvents.emit('change', newValue);
-  });
+You can read more about [typing events](#typing-the-event-system)!
 
-  readonly countEvents = this.useEvents<{ change: number }>();
+:::code-group
 
-  templateHtml(): DocumentFragment {
-    return html`<button>Increment</button>`;
-  }
-
-  onConnect(): void {
-    this.on(this.getElement('button'), 'click', () =>
-      this.count.set((v) => v + 1)
-    );
-  }
-}
-
-Counter.register();
+```javascript
+useEvents({eventName: PrimitiveConstructor});
+// PrimitiveConstructor can be any primitive constructor: 
+// String, Number, Boolean, etc.
 ```
 
-## Parent Component
-
 ```typescript
-import { Jadis, html } from '@jadis/core';
+useEvents<{eventName: Type}>();
+```
 
-class Dashboard extends Jadis {
-  static readonly selector = 'dashboard';
+```javascript[js-doc]
+/** @type {import('@jadis/core').UseEventsHandler<{eventName: Type}>} */
+useEvents();
+```
 
-  private counterValue = 0;
+:::
 
-  readonly refs = this.useRefs((ref) => ({
-    counter: ref('counter'),
-  }));
+### Parameter
 
-  templateHtml(): DocumentFragment {
-    return html`
-      <counter></counter>
-      <p>Value: <span id="display"></span></p>
-    `;
+- An `object` used only for typing in JavaScript, unused in TypeScript and JSDoc, `{someEvent: PrimitiveConstructor}`
+
+:::code-group
+
+```javascript
+const events = this.useEvents({someEvent: String});
+```
+
+```javascript[js-doc]
+/** @type {import('@jadis/core').UseEventsHandler<{someEvent: string}>} */
+  events = this.useEvents();
+```
+
+:::
+
+### Return value
+
+- An object with 2 methods: **register** and **emit**.
+  - `register` is  used to subscribe to an event
+  - `emit` is used to emit an event.
+
+## UseEvents Usage
+
+::: code-group
+
+```javascript
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
+
+class ChildComponent extends Jadis {
+  static selector = createSelector('child-component');
+
+  events = this.useEvents({ someEvent: String });
+
+  templateHtml() {
+    return <button id="btn">Click me</button>;
   }
 
-  onConnect(): void {
-    this.refs.counter.countEvents.register('change', (detail) => {
-      this.counterValue = detail;
-      this.getElement('#display').textContent = this.counterValue.toString();
+  onConnect() {
+    this.getElement('#btn').addEventListener('click', () => {
+      this.events.emit('someEvent', 'Button clicked!');
     });
   }
 }
 
-Dashboard.register();
+class ParentComponent extends Jadis {
+  static selector = createSelector('parent-component');
+
+  refs = this.useRefs((ref) => ({
+    message: ref('#message'),
+    childComponent: ref('child-component'),
+  }));
+
+  templateHtml() {
+    return (
+      <>
+        <child-component></child-component>
+        <p id="message"></p>
+      </>
+    );
+  }
+
+  onConnect() {
+    this.refs.childComponent.events.register('someEvent', (data) => {
+      this.refs.message.textContent = data;
+    });
+  }
+}
+
+ChildComponent.register();
+ParentComponent.register();
 ```
 
-## Best Practices
+```typescript
+import { Jadis } from '@jadis/core';
 
-- Use descriptive event names (e.g., `'change'`, `'submit'`, `'select'`).
-- Expose events as `readonly` on the child so parents can call `.register()` for automatic cleanup.
-- For more complex scenarios, consider the [Bus](../api/bus-class.md) for decoupled communication.
+class ChildComponent extends Jadis {
+  static readonly selector = 'child-component';
 
-## See Also
+  events = this.useEvents<{
+    someEvent: string;
+  }>();
 
-- [Parent to Child](./parent-to-child.md) — The reverse direction.
-- [useEvents()](../state/use-events.md) — A type-safe event emitter alternative.
+  templateHtml(): Node {
+    return <button id="btn">Click me</button>;
+  }
+
+  onConnect(): void {
+    this.getElement('#btn').addEventListener('click', () => {
+      this.events.emit('someEvent', 'Button clicked!');
+    });
+  }
+}
+
+class ParentComponent extends Jadis {
+  static readonly selector = 'parent-component';
+
+  refs = this.useRefs((ref) => ({
+    message: ref<HTMLParagraphElement>('#message'),
+    childComponent: ref<ChildComponent>('child-component'),
+  }));
+
+  templateHtml(): Node {
+    return (
+      <>
+        <child-component></child-component>
+        <p id="message"></p>
+      </>
+    );
+  }
+
+  onConnect(): void {
+    this.refs.childComponent.events.register('someEvent', (data) => {
+      this.refs.message.textContent = data;
+    });
+  }
+}
+
+ChildComponent.register();
+ParentComponent.register();
+```
+
+```javascript [js-doc]
+// @ts-check
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { Jadis, createSelector } from '@jadis/core';
+
+class ChildComponent extends Jadis {
+  static selector = createSelector('child-component');
+
+  /** @type {import('@jadis/core').UseEventsHandler<{someEvent: string}>} */
+  events = this.useEvents();
+
+  templateHtml() {
+    return <button id="btn">Click me</button>;
+  }
+
+  onConnect() {
+    this.getElement('#btn').addEventListener('click', () => {
+      this.events.emit('someEvent', 'Button clicked!');
+    });
+  }
+}
+
+class ParentComponent extends Jadis {
+  static selector = createSelector('parent-component');
+
+  refs = this.useRefs((ref) => ({
+    /** @type {HTMLParagraphElement} */
+    message: ref('#message'),
+    /** @type {ChildComponent} */
+    childComponent: ref('child-component'),
+  }));
+
+  templateHtml() {
+    return (
+      <>
+        <child-component></child-component>
+        <p id="message"></p>
+      </>
+    );
+  }
+
+  onConnect() {
+    this.refs.childComponent.events.register('someEvent', (data) => {
+      this.refs.message.textContent = data;
+    });
+  }
+}
+
+ChildComponent.register();
+ParentComponent.register();
+```
+
+:::
+
+## Typing the Event System
+
+The best way to type the event system is with **TypeScript** or **JSDoc**. With either, you can pass an interface that clearly describes what each event’s payload should be.
+
+## Note
+
+If you don’t want to send a payload, you can define the event as `undefined`, like so:
+
+```typescript
+{
+  someEvent: undefined;
+}
+```
+
+Even when using plain JavaScript, you can still provide **partial typing** by passing an object that defines each event name as a key and its type as the corresponding value.
+
+Just use **primitive constructors** like:
+
+- Number
+- String
+- Boolean
+- BigInt
+- Symbol
+- Function
+- Array
+- Object
+
+```javascript
+{
+  someEvent: String,
+  someOther: Object,
+}
+```

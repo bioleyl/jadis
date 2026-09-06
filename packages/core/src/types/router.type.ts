@@ -15,7 +15,7 @@ export type RouteDefinition = {
   /** The path for the route. */
   readonly path: Path;
   /** The page component constructor for the route. */
-  readonly page: JadisConstructor<any>;
+  readonly page: JadisConstructor;
   /** Optional route options. */
   readonly options?: RouteOptions;
 };

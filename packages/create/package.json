@@ -31,7 +31,7 @@
     "url": "git+https://github.com/bioleyl/jadis.git"
   },
   "scripts": {
-    "test": "echo \"No tests for create package\" && exit 0"
+    "test": "node --test test/index.test.js"
   },
-  "version": "1.7.0"
+  "version": "1.8.0"
 }

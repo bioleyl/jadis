@@ -1,120 +1,86 @@
-# Styles
+# Add Style with `templateCss()`
 
-The `templateCss()` method defines CSS styles scoped to a Jadis component. These styles are injected into the component's shadow DOM, ensuring complete encapsulation from global stylesheets.
+The `templateCss()` method defines the CSS styles applied to the component. It is meant to be overridden by subclasses that want to customize or extend the styling of their component.
+The returned `string` should contain valid CSS rules. These styles are injected into the component’s shadow DOM,
+ensuring proper encapsulation and preventing leakage into the global stylesheet.
 
 ## Signature
 
 ```typescript
-templateCss?(): string;
+  templateCss(): string;
 ```
 
-### Return Value
+### Parameters
 
-A CSS string containing rules that will be wrapped in a `<style>` element and inserted into the shadow root.
+- none
 
-## Basic Example
+### Return values
 
-```typescript
+- A `string` containing the CSS rules for the component.
+
+## Examples
+
+```javascript
 import { Jadis, css, createSelector } from '@jadis/core';
+
+...
 
 class ClickButton extends Jadis {
   static selector = createSelector('click-button');
 
-  templateCss(): string {
-    return css`
-      :host {
-        display: inline-block;
-      }
-      button {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-        border: none;
-        border-radius: 4px;
-        background: #3b82f6;
-        color: white;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #2563eb;
-      }
-    `;
+  templateCss() { // [!code focus]
+    return css`button { padding: 0.5rem; font-size: 1rem; }`; // [!code focus]
+  } // [!code focus]
+
+  templateHtml() {
+    ...
   }
 
-  templateHtml(): DocumentFragment {
-    return html`<button>Click me</button>`;
-  }
+  ...
 }
 ```
 
-## Using the `css()` Helper
+## Isolate CSS in a separate file
 
-The `css()` tagged template literal allows interpolation of CSS values:
+A more convenient way to style a component is to isolate CSS in a separate file that you import with the special
+`?inline` query if you are using Vite.
 
-```typescript
-templateCss(): string {
-  const primaryColor = '#3b82f6';
-  return css`
-    button {
-      background: ${primaryColor};
-      padding: 0.5rem;
-    }
-  `;
-}
-```
-
-## External Stylesheets (Vite)
-
-When using Vite, you can import CSS files as raw strings using the `?inline` query parameter:
-
-```typescript
-import style from './button.css?inline';
+```javascript
+import { Jadis, createSelector } from '@jadis/core';
+import style from './your-css-file.css?inline'; 
 
 class ClickButton extends Jadis {
-  templateCss(): string {
+  static selector = createSelector('click-button');
+
+  templateCss() {
     return style;
   }
+
+  templateHtml() {
+    ...
+  }
+
+  ...
 }
+
 ```
 
-This is the recommended approach for larger style blocks, keeping styles in dedicated `.css` files.
+See [documentation about toggling classes in components](./classes.md).
 
-## The `:host` Selector
+:::info
+**?inline** is Vite specific in order to load css as plain text in a variable.
+:::
 
-The `:host` selector targets the component element itself. Use it to control the component's display behavior and dimensions:
+::: tip
+CSS variables can traverse the shadow DOM
+You might want to use them for font-styles, sizes and such
+on the `:root` element.
+:::
 
-```css
-:host {
-  display: block;       /* Fills the full width */
-  display: inline-block; /* Flows with text */
-}
-```
+::: tip
+The universal CSS selector `*` allows style to be applied through shadow DOM.
+:::
 
-### Conditional Styling with `:host()`
-
-You can combine `:host` with class selectors for conditional styling. Use `toggleClass()` to toggle classes based on state:
-
-```typescript
-templateCss(): string {
-  return css`
-    :host(.error) p {
-      color: red;
-    }
-    :host(.disabled) {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-  `;
-}
-```
-
-## Best Practices
-
-- Use `:host` to control the component's own layout.
-- Prefer CSS variables for theming — they traverse shadow boundaries.
-- Keep styles scoped to the component; avoid targeting external elements.
-- Use `*` selector when you need styles to apply through shadow DOM boundaries (e.g., resetting form element defaults).
-
-## See Also
-
-- [Toggle Classes](./classes.md) — Conditionally apply CSS classes.
-- [Shadow DOM](../guides/shadow-dom.md) — Understanding encapsulation.
+::: tip
+Check out [documentation about shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) and the [`:host()` pseudo-class](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/:host_function).
+:::

@@ -1,4 +1,7 @@
-import { createSelector, html, Jadis } from '@jadis/core';
+/// <reference types="@jadis/core/jsx-runtime" />
+/** @jsxImportSource @jadis/core */
+
+import { createSelector, Jadis } from '@jadis/core';
 
 export default class Counter extends Jadis {
   static selector = createSelector('counter-component');
@@ -21,10 +24,16 @@ export default class Counter extends Jadis {
   }));
 
   templateHtml() {
-    return html`
-      <p>Count: <span></span></p>
-      <button>Increment</button>
-    `;
+    return (
+      <>
+        <p>
+          Count: <span />
+        </p>
+        <slot />
+        <button type="button">Increment</button>
+        <slot name="footer" />
+      </>
+    );
   }
 
   onConnect() {

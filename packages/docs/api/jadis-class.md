@@ -5,19 +5,20 @@ The `Jadis` class is the abstract base class for all components. Extend it to cr
 ## Import
 
 ```typescript
-import { Jadis } from '@jadis/core';
+import { Jadis, css } from '@jadis/core';
 ```
 
-## Static Properties
+## Static properties
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `selector` | `string` | _(required)_ | The custom element tag name. Must contain a hyphen. |
+| `selector` | `string` | _(required)_ | The custom element tag name. It must contain a hyphen. |
 | `template` | `string` | `''` | Reserved for future use. |
-| `observedAttributes` | `string[]` | `[]` | Attribute names to observe via `attributeChangedCallback`. |
-| `useShadowDom` | `boolean` | `true` | Whether to attach a shadow root. Set to `false` for light DOM rendering. |
+| `useShadowDom` | `boolean` | `true` | Whether to attach a shadow root. Set to `false` for light-DOM rendering. |
 
-## Static Methods
+Attributes are observed through `useAttributes({ ...callbacks })`; do not declare `observedAttributes` for that API.
+
+## Static methods
 
 ### `register()`
 
@@ -27,29 +28,29 @@ Registers the component as a custom element.
 MyComponent.register();
 ```
 
-Throws if `selector` is not defined.
-
 ### `toTemplate(options?, slotted?)`
 
-Creates and returns a component instance with optional props, attributes, and slotted content.
+Creates and returns a component instance with optional properties, attributes, and slotted content.
 
 ```typescript
+const slotted = document.createDocumentFragment();
+slotted.append(document.createElement('slot-content'));
 const instance = MyComponent.toTemplate(
   { props: { title: 'Hello' }, attrs: { theme: 'dark' } },
-  html`<slot-content></slot-content>`
+  slotted
 );
 ```
 
 See [toTemplate()](../templating/to-template.md) for details.
 
-## Instance Properties
+## Instance properties
 
 | Property | Type | Description |
 |---|---|---|
 | `isConnected` | `boolean` | Whether the component is currently in the DOM. |
 | `shadowRoot` | `ShadowRoot \| null` | The shadow root, or `null` if `useShadowDom` is `false`. |
 
-## Lifecycle Methods
+## Lifecycle methods
 
 Override these methods to respond to lifecycle events:
 
@@ -60,64 +61,52 @@ Override these methods to respond to lifecycle events:
 
 See [Lifecycle](../guides/lifecycle.md) for details.
 
-## Template Methods
+## Template methods
 
-| Method | Return Type | Description |
+| Method | Return type | Description |
 |---|---|---|
-| `templateHtml()` | `DocumentFragment` | Returns the HTML structure of the component. |
+| `templateHtml()` | `Node` | Returns the component's DOM structure. |
 | `templateCss()` | `string` | Returns CSS rules for the component. |
 
 See [Templates](../guides/templates.md) and [Styles](../templating/css.md).
 
-## DOM Helpers
+## DOM helpers
 
 | Method | Description |
 |---|---|
 | `getElement<T>(query)` | Find an element by CSS selector. Supports `>>>` for shadow traversal. |
 | `useRefs(mapFn)` | Create typed references to multiple elements. |
 | `toggleClass(className, condition)` | Add or remove a class based on a boolean. |
-| `useAttributes(...names)` | Create reactive attribute getters. |
+| `useAttributes(callbacks)` | Create attribute getters and change callbacks. |
 
-See [DOM Helpers](../dom/get-element.md) and [Templates](../templating/classes.md).
-
-## State & Events
+## State and events
 
 | Method | Description |
 |---|---|
-| `useChange(initial, onChange, options?)` | Reactive state with getter/setter and change callback. |
+| `useChange(initial, onChange, options?)` | State with getter/setter and change callback. |
 | `useEvents<T>()` | Type-safe event emitter with `register()` and `emit()`. |
 | `onBus(bus, eventName, callback)` | Listen to events on a shared Bus. |
 | `this.on(element, event, callback)` | Auto-cleaned DOM event listener. |
 
-See [State & Events](../state/use-change.md).
-
-## Internal Helpers
-
-| Property/Method | Description |
-|---|---|
-| `killSignal` | An `AbortSignal` aborted on disconnect. Used for automatic cleanup. |
-| `attributesCallback` | Internal map of attribute change handlers. |
-| `onConnectActions` | Queue of actions deferred until connection. |
-
 ## Example
 
-```typescript
-import { Jadis, html, createSelector } from '@jadis/core';
+```tsx
+import { Jadis, css } from '@jadis/core';
 
 class MyComponent extends Jadis {
-  static readonly selector = createSelector('my-component');
+  static readonly selector = 'my-component';
 
-  private readonly count = this.useChange(0, (val) => {
-    this.refs.display.textContent = val.toString();
-  }, { immediate: true });
-
-  readonly refs = this.useRefs((ref) => ({
-    display: ref('span'),
-    button: ref('button'),
+  private readonly refs = this.useRefs((ref) => ({
+    display: ref<HTMLSpanElement>('span'),
+    button: ref<HTMLButtonElement>('button'),
   }));
 
-  templateHtml(): DocumentFragment {
-    return html`<p>Count: <span></span> <button>+</button>`;
+  private readonly count = this.useChange(0, (value) => {
+    this.refs.display.textContent = value.toString();
+  }, { immediate: true });
+
+  templateHtml(): Node {
+    return <p>Count: <span></span> <button type="button">+</button></p>;
   }
 
   templateCss(): string {
@@ -125,16 +114,14 @@ class MyComponent extends Jadis {
   }
 
   onConnect(): void {
-    this.on(this.refs.button, 'click', () =>
-      this.count.set((v) => v + 1)
-    );
+    this.on(this.refs.button, 'click', () => this.count.set((value) => value + 1));
   }
 }
 
 MyComponent.register();
 ```
 
-## See Also
+## See also
 
-- [Your First Component](../guides/first-component.md) — Getting started guide.
-- [Lifecycle](../guides/lifecycle.md) — Lifecycle hooks deep dive.
+- [Your First Component](../guides/first-component.md)
+- [Lifecycle](../guides/lifecycle.md)

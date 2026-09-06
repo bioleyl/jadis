@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "@biomejs/biome": "2.2.0"
+    "@biomejs/biome": "2.2.0",
+    "husky": "9.1.7"
   },
   "engineStrict": true,
   "engines": {
@@ -15,13 +16,16 @@
     "docs:preview": "npm run preview --workspace=@jadis/docs",
     "publish:core": "npm publish --workspace=packages/core --access public",
     "publish:create": "npm publish --workspace=packages/create --access public",
-    "test": "npm run test --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "verify:packages": "node scripts/verify-packages.mjs",
     "check": "biome check",
+    "prepare": "husky",
     "set-version": "node scripts/set-version.mjs",
     "deps": "node scripts/update-deps.mjs"
   },
   "version": "1.0.0",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/create/templates/*"
   ]
 }
