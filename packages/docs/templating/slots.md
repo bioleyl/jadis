@@ -10,7 +10,7 @@ closing tags of your external component will be rendered inside the `<slot></slo
 
 :::code-group
 
-```javascript
+```jsx
 // MyComponent.js with a slot
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
@@ -36,7 +36,7 @@ MyComponent.register();
 
 ```
 
-```typescript
+```tsx
 // MyComponent.ts with a slot
 export class MyComponent extends Jadis {
   static readonly selector = 'my-component';
@@ -64,7 +64,7 @@ Populate the slot
 
 :::code-group
 
-```javascript
+```jsx
 // MainPage.js using MyComponent
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
@@ -85,7 +85,7 @@ class MainPage extends Jadis {
 MainPage.register();
 ```
 
-```typescript
+```tsx
 // MainPage.ts using MyComponent
 class MainPage extends Jadis {
   static readonly selector = 'main-page';
@@ -113,7 +113,7 @@ If you need to use several slots in the same component, just name them!
 
 :::code-group
 
-```javascript
+```jsx
 // MyComponent.js with 2 slots
 templateHtml() {
   return (
@@ -138,7 +138,7 @@ templateHtml() {
 }
 ```
 
-```typescript
+```tsx
 
 // MyComponent.ts with 2 slots
 templateHtml(): Node {
@@ -171,7 +171,7 @@ templateHtml(): Node {
 
 JSX makes slotting natural — children are passed directly:
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <my-component>
@@ -184,7 +184,7 @@ templateHtml(): Node {
 
 Named slots work via the `slot` attribute:
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <my-component>
@@ -201,7 +201,7 @@ See the [dedicated documentation](to-template.md) about the *Jadis* method `toTe
 
 :::code-group
 
-```javascript
+```jsx
 // Using MyComponent in MainPage.js
 class MainPage extends Jadis {
   static selector = createSelector('main-page');
@@ -232,7 +232,7 @@ export class MyComponent extends Jadis {
 MyComponent.register();
 ```
 
-```typescript
+```tsx
 // Using MyComponent in MainPage.ts
 class MainPage extends Jadis {
   static readonly selector = 'main-page';

@@ -25,7 +25,7 @@ new Router(routes: RouteDefinitions, options?: RouterOptions);
 
 ```typescript
 interface RouterOptions {
-  mode?: 'hash' | 'history';   // Navigation mode (default: 'hash')
+  mode?: 'hash' | 'history';   // Navigation mode (default: 'history')
   baseUrl?: string;             // Base URL for subdirectory deployments
 }
 ```
@@ -34,7 +34,7 @@ interface RouterOptions {
 
 | Property | Type | Description |
 |---|---|---|
-| `currentRoute` | `string \| null` | The key of the currently active route |
+| `currentRoute` | `Route` | The currently matched route (`name`, `path`, and `componentSelector`). Throws if no route has been matched yet. |
 
 ## Methods
 

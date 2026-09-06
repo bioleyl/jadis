@@ -6,7 +6,7 @@
 
 Simply reference the component class as a JSX tag:
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <div>
@@ -38,7 +38,7 @@ templateHtml(): Node {
 
 JSX naturally handles children through children nodes:
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <collapsible-panel>
@@ -61,7 +61,7 @@ templateHtml(): Node {
 }
 ```
 
-## Using `toTemplate()` (legacy)
+## Using `toTemplate()` programmatically
 
 The `toTemplate()` static method is still available for creating component instances programmatically:
 

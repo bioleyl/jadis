@@ -7,13 +7,15 @@ If you need to access an element inside another component (which is typically di
 ## Signature
 
 ```typescript
-this.getElement<T>(<query>): <HTMLElement>
+this.getElement<Element extends HTMLElement = HTMLElement>(query: string): Element
 ```
+
+When `query` is a known HTML tag name, TypeScript infers its element type. Pass a generic for a CSS selector or custom element:
 
 ### Parameters
 
-- `T`: A generic type to specify the element type if it can't be infered
-- `query`: The css query string to fetch the element in the component's dom. Automatically inferred if a tag name is provided (f.e. 'div' -> HTMLDivElement).
+- `Element`: An optional element type for selectors whose type cannot be inferred.
+- `query`: The CSS selector to find in the component's DOM. A tag name is inferred automatically (for example, `'div'` becomes `HTMLDivElement`).
   Supports chained selectors using the format `parent-selector >>> child-selector >>> nested-selector`
   Each segment is resolved step-by-step, optionally entering shadow roots when present.
 
@@ -25,7 +27,7 @@ this.getElement<T>(<query>): <HTMLElement>
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -56,7 +58,7 @@ class ParentComponent extends Jadis {
 }
 ```
 
-```typescript
+```tsx
 import { Jadis } from '@jadis/core';
 
 class ButtonComponent extends Jadis {
@@ -84,7 +86,7 @@ class ParentComponent extends Jadis {
 }
 ```
 
-```javascript [js-doc]
+```jsx [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */

@@ -32,7 +32,18 @@ npm install @jadis/core
 npm install --save-dev typescript vite
 ```
 
-For a JSX project, create a file named `src/main.tsx` (or `src/main.jsx` for JavaScript) with the following content:
+For a JSX project, create a file named `src/main.tsx` (or `src/main.jsx` for JavaScript) and configure the automatic JSX runtime:
+
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jadis/core"
+  }
+}
+```
+
+Then add the component:
 
 ```tsx
 import { Jadis } from '@jadis/core';
@@ -76,12 +87,12 @@ You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/co
     <script type="importmap">
       {
         "imports": {
-          "jadis": "https://esm.sh/@jadis/core@1.0.0"
+          "@jadis/core": "https://esm.sh/@jadis/core@1.0.0"
         }
       }
     </script>
     <script type="module">
-      import { createElement, Jadis } from 'jadis';
+      import { createElement, Jadis } from '@jadis/core';
 
       class HelloWorld extends Jadis {
         static selector = 'hello-world';

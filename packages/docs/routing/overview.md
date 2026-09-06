@@ -31,8 +31,8 @@ The router supports two modes:
 
 | Mode | URL Format | Use Case |
 |---|---|---|
-| **`hash`** (default) | `/#/about` | Simple deployments, no server config needed |
-| **`history`** | `/about` | Clean URLs, requires server-side fallback |
+| **`history`** (default) | `/about` | Clean URLs; requires server-side fallback |
+| **`hash`** | `/#/about` | Simple deployments, no server config needed |
 
 ```typescript
 const router = new Router(routes, { mode: 'history' });

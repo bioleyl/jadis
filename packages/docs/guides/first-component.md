@@ -45,7 +45,7 @@ We’ll create a reusable button that shows a label and keeps track of how many 
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -80,7 +80,7 @@ class CounterButton extends Jadis {
 CounterButton.register();
 ```
 
-```typescript
+```tsx
 import { Jadis } from '@jadis/core';
 
 class CounterButton extends Jadis {
@@ -117,7 +117,7 @@ CounterButton.register();
 Then in your HTML, you can use it simply by using its tag name:
 
 ```html
-<counter-button></counter-button>
+<counter-component></counter-component>
 ```
 
 Or you can use it with `toTemplate()`, see [dedicated page](../templating/to-template.md) on the documentation.

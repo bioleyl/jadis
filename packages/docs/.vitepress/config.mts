@@ -153,7 +153,7 @@ export default defineConfig({
               text: 'Jadis Class',
             },
             {
-              link: '/api/html-css-helpers',
+              link: '/api/jsx-css-helpers',
               text: 'JSX / css()',
             },
             {

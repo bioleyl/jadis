@@ -34,7 +34,7 @@ Override this method in your component to provide a custom HTML template using J
 
 :::code-group
 
-```javascript
+```jsx
 // Add these JSDoc pragmas at the top of your file:
 // /// <reference types="@jadis/core/jsx-runtime" />
 // /** @jsxImportSource @jadis/core */
@@ -48,7 +48,7 @@ templateHtml() {
 }
 ```
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <div class="container">
@@ -95,7 +95,7 @@ HelloWorld.register();
 
 When your template has multiple root elements, wrap them in a fragment:
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <>
@@ -111,7 +111,7 @@ templateHtml(): Node {
 
 You can embed other Jadis components directly in JSX:
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <div>
@@ -154,7 +154,7 @@ Disabling the Shadow DOM is recommended in the following scenarios:
 
 ### Example without a Shadow DOM
 
-```typescript
+```tsx
 export class TestComponentNoShadow extends Jadis {
   static readonly selector = 'test-no-shadow';
   static readonly useShadowDom = false;

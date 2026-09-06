@@ -43,7 +43,7 @@ Once the bus is defined, you can **register listeners** or **emit events** freel
 
 ::: code-group
 
-```javascript
+```jsx
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
 
@@ -87,7 +87,7 @@ ReceiverComponent.register();
 EmitterComponent.register();
 ```
 
-```typescript
+```tsx
 import { Bus, Jadis } from '@jadis/core';
 
 const myBus = new Bus<{
@@ -128,7 +128,7 @@ ReceiverComponent.register();
 EmitterComponent.register();
 ```
 
-```javascript [js-doc]
+```jsx [js-doc]
 // @ts-check
 /// <reference types="@jadis/core/jsx-runtime" />
 /** @jsxImportSource @jadis/core */
