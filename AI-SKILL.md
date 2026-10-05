@@ -13,7 +13,7 @@ Official documentation: <https://bioleyl.github.io/jadis/>
 
 Verified against `base-component.ts`:
 
-1. **Constructor** — the shadow root is attached. Nothing is rendered yet. Field initializers (`useRefs`, `useChange`, `useEvents`) run here.
+1. **Constructor** — the shadow root is attached. Nothing is rendered yet. Field initializers (`useRefs`, `useChange`, `useEvents`, `useAttributes`) run here; reading a ref now throws, as the template does not exist yet.
 2. **First connection** — `templateHtml()` and `templateCss()` run **once** and are appended to the shadow root. The `useChange` values set before the connection and the attribute callbacks are applied right away, during `appendChild`. Then `onConnect()` runs **asynchronously**, on the next task — not synchronously during `appendChild`.
 3. **Disconnection** — the internal kill signal aborts. Every listener registered with `on()`, `useEvents().register()`, or `onBus()` is removed automatically. The rendered DOM is **kept**.
 4. **Reconnection** — `onConnect()` runs **again**, attribute callbacks re-fire for currently set attributes, and the **same DOM** is reused. The template is never re-rendered.
@@ -21,7 +21,8 @@ Verified against `base-component.ts`:
 Consequences:
 
 - Wire **all** listeners inside `onConnect()`. Cleanup is automatic; manual `removeEventListener` is a smell.
-- Never assume a single connection. Don't cache "connected once" state on the instance.
+- Never assume a single connection: `onConnect()` runs again on the same DOM after every reconnection (moving an element counts). Make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds rather than a "connected once" flag.
+- Stop what outlives the component: pass `this.killSignal` to `fetch` and to listeners on `window` or `document` (`addEventListener(type, listener, { signal: this.killSignal })`; `this.on()` only takes elements), clear timers in `onDisconnect()`. After an `await` in `onConnect()`, check `this.isConnected` before touching the DOM.
 - In tests, what `useChange` and attribute callbacks render is there right after `appendChild`; what `onConnect()` does needs a task (Playwright's auto-waiting or `waitForFunction` handles this).
 - `useChange` updates made before connection are applied **synchronously** while the component connects, once per handler with the latest value, before attribute callbacks and before the browser paints. `onConnect()` still runs a task later.
 
@@ -169,7 +170,9 @@ Conventions:
 - `static readonly selector` must be a valid custom-element name containing a hyphen. `createSelector('my-card')` validates it at startup.
 - `templateHtml()` must return a real `Node` (element or `DocumentFragment`), not an HTML string.
 - `templateCss()` returns a CSS string injected as one `<style>` into the shadow root. Use the `css` tagged-template helper when interpolating values.
-- Register each component once; `register()` is idempotent but importing the module once is cleaner.
+- Register each component once; `register()` is idempotent but importing the module once is cleaner. A **second class with a selector already taken is silently ignored**: keep selectors unique.
+- Register child components before a parent renders them (importing the child's module is enough). A property set on an element that is not upgraded yet is shadowed by the class field once it upgrades.
+- Custom elements are `display: inline` by default: give the host a display (`:host { display: block; }`) almost always.
 
 ### Shadow DOM
 
@@ -183,7 +186,7 @@ Shadow DOM is **on by default**. This means:
 
 Three tools, in order of preference:
 
-**Refs** — stable getters for your own template:
+**Refs** — getters for your own template. Each access queries again (nothing is cached); a query that finds nothing throws, so use `this.shadowRoot?.querySelector(...)` for optional nodes. Light-DOM children passed through a `<slot>` are not in the shadow root: read them with `this.querySelector` or `slot.assignedElements()`.
 
 ```ts
 private readonly _refs = this.useRefs((ref) => ({
@@ -210,6 +213,9 @@ private readonly _count = this.useChange(0, (value) => {
 ```
 
 `{ immediate: true }` runs the callback for the initial value (deferred until connection, then applied during `appendChild`, before the first paint). Update only the nodes that changed — never rebuild the whole template for a local change.
+
+- Once connected, every `set()` calls the callback, even with an equal value.
+- `set()` copies the previous value with `structuredClone`: keep **plain data** in a `useChange` (no functions, DOM nodes or class instances). A function or a node works once, then the next `set()` throws a `DataCloneError`. Hold those in a private field with a setter instead.
 
 **Attributes** — the callback-object API:
 
@@ -243,12 +249,13 @@ templateHtml(): Node {
 - Use `class` or `className`; `data-*` and `aria-*` are supported.
 - Event props work: `onClick={(event) => ...}`.
 - Children can be nested JSX, arrays, strings, or numbers; `null`/`boolean` render nothing.
-- Components compose as JSX: `<user-card name="Jadis" />` (registered) or `<UserCard />` (class reference).
+- Components compose as JSX: `<user-card name="Jadis" />` (registered) or `<UserCard name="Jadis" />` (class reference, whose public fields type the props).
+- **A JSX prop sets a property, not an attribute**: `name="Jadis"` assigns `element.name` (calling `.set()` when that field is a `useChange`), so a `useAttributes` callback for `name` does not fire. Attributes come from `attrs={{ name: 'Jadis' }}` and from hyphenated names (`data-*`, `aria-*`, `my-attr`). On standard elements, use DOM property names: `htmlFor`, `tabIndex`.
 - Fragments: `<>...</>`.
 
 ## Communication
 
-**Parent → child**: direct calls on public methods/properties, or attributes. The parent owns the relationship.
+**Parent → child**: direct calls on public methods/properties, `useChange` fields set as JSX props, or attributes (`attrs={{ ... }}` in JSX). The parent owns the relationship.
 
 ```ts
 this._refs.child.updateTitle('Hello'); // child exposes updateTitle
@@ -271,7 +278,7 @@ class SearchBox extends Jadis {
 this._refs.search.events.register('submit', (query) => { ... });
 ```
 
-`useEvents` listeners are bound to the kill signal — registered in `onConnect`, removed on disconnect.
+`emit` dispatches a `CustomEvent` on the child itself that neither bubbles nor crosses shadow roots: only listeners registered on that element hear it, and they receive the payload (the event's `detail`) directly. `register` binds the listener to the **child's** kill signal, so the parent registers again in its own `onConnect`.
 
 **Cross-component / services**: `Bus`. Unrelated components share a bus instance:
 
@@ -310,6 +317,10 @@ router.goto('profile', { id: '42' });
 ```
 
 - `mountOn` takes an `HTMLElement`; use `getElementById`, not `querySelector` (which returns `Element`).
+- **The first route that matches wins**, and a `:param` matches across `/` (`/user/:id` also matches `/user/1/edit`): list specific routes first.
+- **A URL no route matches throws.** End the routes with a catch-all such as `notFound: { page: NotFoundPage, path: '/:rest' }`.
+- **Links are not intercepted.** In history mode, `<a href="/profile/42">` reloads the page: call `router.goto(...)` from a click handler, or use hash mode with `href="#/profile/42"`.
+- Every navigation creates the page component (and its group's root component) again: their state is lost. A root component shows the page through a `<slot>`.
 - Params become attributes on the page component: read `id` with `useAttributes` or `getAttribute('id')`.
 - Group routes with `defineRouteGroup('/group', { ... }, { rootComponentSelector: 'group-root' })`; names concatenate (`groupHome`).
 - `goto` throws on unknown routes and missing params — handle both deliberately.
