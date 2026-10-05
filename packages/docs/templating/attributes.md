@@ -16,7 +16,21 @@ useAttributes(<callbacksObject>): <attributesObject>
 
 - `callbacksObject`: An object mapping attribute names to callbacks receiving `(value, oldValue)`.
 
-Attribute changes are observed automatically when the component is connected.
+Attribute changes are observed automatically when the component is connected:
+
+- When the component connects, each callback runs **synchronously** for its attribute if the attribute is set (with `oldValue` `null`). There is no need to apply the value again in `onConnect()`.
+- Later changes are delivered **asynchronously**, batched by a `MutationObserver`.
+- The callbacks run again on each reconnection, for the attributes currently set.
+
+Do not declare `static observedAttributes`: the callbacks object is the list of observed attributes.
+
+:::warning JSX props are not attributes
+`<hello-page name="Ada" />` sets the `name` **property**, so the `name` callback does not run. Pass attributes through the `attrs` prop, call `setAttribute`, or let the router set them (route parameters are attributes):
+
+```tsx
+<hello-page attrs={{ name: 'Ada' }} />
+```
+:::
 
 ### Return value
 
@@ -64,12 +78,6 @@ export default class HelloPage extends Jadis {
   templateHtml() {
     return <h1>Hello, <span></span>!</h1>;
   }
-
-  onConnect() {
-    const { name } = this.refs;
-
-    name.textContent = this.attrs.name;
-  }
 }
 
 HelloPage.register();
@@ -93,12 +101,6 @@ export default class HelloPage extends Jadis {
 
   templateHtml(): Node {
     return <h1>Hello, <span></span>!</h1>;
-  }
-
-  onConnect(): void {
-    const { name } = this.refs;
-
-    name.textContent = this.attrs.name ?? '';
   }
 }
 

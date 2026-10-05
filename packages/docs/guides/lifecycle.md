@@ -6,7 +6,7 @@ Every Jadis component follows the [Custom Elements lifecycle](https://developer.
 
 ### `onConnect()`
 
-Called after the component is connected and its template has been rendered. This is the place to set up event listeners, fetch data, or perform connection-specific setup. It runs again if the component reconnects.
+Called on the task after the component is connected, once its template has been rendered. This is the place to set up event listeners, fetch data, or perform connection-specific setup. It runs again each time the component reconnects (moving it in the DOM counts), on the same DOM: make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds.
 
 ```typescript
 class MyComponent extends Jadis {
@@ -26,7 +26,7 @@ class MyComponent extends Jadis {
   private _intervalId?: number;
 
   onConnect(): void {
-    this._intervalId = setInterval(() => {
+    this._intervalId = window.setInterval(() => {
       console.log('ticking...');
     }, 1000);
   }
@@ -40,14 +40,23 @@ class MyComponent extends Jadis {
 
 ## Connection State
 
-You can check whether a component is currently connected to the DOM using the `isConnected` getter:
+You can check whether a component is currently connected to the DOM using the `isConnected` getter. It matters after an `await`: the component may have been removed meanwhile. Pass `killSignal` to `fetch`, so a removed component stops waiting:
 
-```typescript
-class MyComponent extends Jadis {
-  onConnect(): void {
-    if (this.isConnected) {
-      // Safe to interact with the DOM
+```tsx
+class ItemList extends Jadis {
+  static readonly selector = 'item-list';
+
+  templateHtml(): Node {
+    return <ul></ul>;
+  }
+
+  async onConnect(): Promise<void> {
+    const response = await fetch('/api/items', { signal: this.killSignal });
+    const items: string[] = await response.json();
+    if (!this.isConnected) {
+      return;
     }
+    this.getElement('ul').replaceChildren(...items.map((item) => <li>{item}</li>));
   }
 }
 ```

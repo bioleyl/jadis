@@ -214,7 +214,7 @@ class MainPage extends Jadis {
     p.textContent = 'My article content';
     fragment.appendChild(p);
 
-    return <my-component>{MyComponent.toTemplate({}, fragment)}</my-component>;
+    return MyComponent.toTemplate({}, fragment);
   }
 }
 
@@ -245,7 +245,7 @@ class MainPage extends Jadis {
     p.textContent = 'My article content';
     fragment.appendChild(p);
 
-    return <my-component>{MyComponent.toTemplate({}, fragment)}</my-component>;
+    return MyComponent.toTemplate({}, fragment);
   }
 }
 

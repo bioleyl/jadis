@@ -56,6 +56,8 @@ const events = this.useEvents({someEvent: String});
   - `register` is used to subscribe to an event
   - `emit` is used to emit an event.
 
+`emit` dispatches a `CustomEvent` on the child itself. It does not bubble or cross shadow roots, so only listeners registered on that element receive it; the callback receives the payload directly. `register` binds the listener to the **child's** `killSignal`: register it in the parent's `onConnect()`, which runs again after each reconnection.
+
 ## UseEvents Usage
 
 ::: code-group
@@ -76,7 +78,7 @@ class ChildComponent extends Jadis {
   }
 
   onConnect() {
-    this.getElement('#btn').addEventListener('click', () => {
+    this.on(this.getElement('#btn'), 'click', () => {
       this.events.emit('someEvent', 'Button clicked!');
     });
   }
@@ -125,7 +127,7 @@ class ChildComponent extends Jadis {
   }
 
   onConnect(): void {
-    this.getElement('#btn').addEventListener('click', () => {
+    this.on(this.getElement('#btn'), 'click', () => {
       this.events.emit('someEvent', 'Button clicked!');
     });
   }
@@ -177,7 +179,7 @@ class ChildComponent extends Jadis {
   }
 
   onConnect() {
-    this.getElement('#btn').addEventListener('click', () => {
+    this.on(this.getElement('#btn'), 'click', () => {
       this.events.emit('someEvent', 'Button clicked!');
     });
   }

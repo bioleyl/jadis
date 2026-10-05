@@ -43,7 +43,7 @@ interface RouterOptions {
 Mounts the router to a DOM element. Route components are rendered inside this element.
 
 ```typescript
-router.mountOn(document.getElementById('app'));
+router.mountOn(document.getElementById('app') ?? document.body);
 ```
 
 | Parameter | Type | Description |
@@ -120,7 +120,7 @@ const routes = defineRoutes({
 });
 
 const router = new Router(routes, { mode: 'history' });
-router.mountOn(document.getElementById('app'));
+router.mountOn(document.getElementById('app') ?? document.body);
 
 // Navigate programmatically
 router.goto('home');

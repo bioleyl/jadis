@@ -31,7 +31,7 @@ const refs = this.useRefs((ref) => ({
 - `mapFn`: callback function that receives a special `ref()` function.  
 You call `ref(selector)` for each element you want to reference, and `useRefs` returns an object with **lazy getters** for those elements.
 
-Each getter internally calls [`getElement()`](./get-element.md), ensuring the element exists and automatically traversing shadow DOM boundaries if needed.
+Each getter calls [`getElement()`](./get-element.md) every time it is read: nothing is cached, and a selector that matches nothing throws. It enters a child's shadow root only where the selector says so, with `>>>`. Refs exist once the template is rendered: reading one in the constructor or a field initializer throws.
 
 ### Return value
 

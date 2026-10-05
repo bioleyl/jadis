@@ -56,7 +56,7 @@ class ChildComponent extends Jadis {
     return <p></p>;
   }
 
-  set textValue(value: string): void {
+  set textValue(value: string) {
     this.getElement('p').textContent = value;
   }
 }

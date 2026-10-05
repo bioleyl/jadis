@@ -26,7 +26,9 @@ A known tag name is inferred automatically; pass an element type for a CSS selec
 
 ### Return value
 
-- The inferred element type for a known tag name, or the explicit generic type for a CSS selector. The method throws if the selector cannot be found.
+- The inferred element type for a known tag name, or the explicit generic type for a CSS selector. The method throws if the selector cannot be found: for an element that may be absent, use `this.shadowRoot?.querySelector(...)`.
+
+`getElement` searches the component's shadow root (or the component itself without a shadow DOM). Light-DOM children shown through a `<slot>` are not in the shadow root: read them with `this.querySelector(...)` or `slot.assignedElements()`.
 
 ## Example
 

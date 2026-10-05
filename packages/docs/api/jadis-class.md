@@ -22,7 +22,7 @@ Attributes are observed through `useAttributes({ ...callbacks })`; do not declar
 
 ### `register()`
 
-Registers the component as a custom element.
+Registers the component as a custom element. Calling it again does nothing; a **different** class whose selector is already registered is ignored too, without an error, so keep selectors unique.
 
 ```typescript
 MyComponent.register();
@@ -49,6 +49,7 @@ See [toTemplate()](../templating/to-template.md) for details.
 |---|---|---|
 | `isConnected` | `boolean` | Whether the component is currently in the DOM. |
 | `shadowRoot` | `ShadowRoot \| null` | The shadow root, or `null` if `useShadowDom` is `false`. |
+| `killSignal` | `AbortSignal` | Aborted when the component disconnects; a new one is created on reconnection. See [killSignal](../dom/kill-signal.md). |
 
 ## Lifecycle methods
 
@@ -56,7 +57,7 @@ Override these methods to respond to lifecycle events:
 
 | Method | Timing |
 |---|---|
-| `onConnect()` | After the component is connected and its template is rendered. |
+| `onConnect()` | On the task after the component is connected and its template is rendered; again after each reconnection. |
 | `onDisconnect()` | When the component is removed from the DOM. |
 
 See [Lifecycle](../guides/lifecycle.md) for details.

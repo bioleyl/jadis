@@ -4,7 +4,7 @@
 
 ## Using JSX (recommended)
 
-Simply reference the component class as a JSX tag:
+Use the component's tag name, or its class (`<UserProfile />`), whose public fields then type the props:
 
 ```tsx
 templateHtml(): Node {
@@ -20,9 +20,9 @@ templateHtml(): Node {
 
 ### Passing props
 
-Props are passed as JSX attributes. Jadis components automatically map attributes to their properties:
+A JSX prop on a component sets a **property** of the element, not an HTML attribute. When the property is a `useChange` field, its `.set()` is called:
 
-```typescript
+```tsx
 templateHtml(): Node {
   return (
     <name-input
@@ -33,6 +33,18 @@ templateHtml(): Node {
   );
 }
 ```
+
+Here `label` and `placeholder` are assigned as `element.label` and `element.placeholder`; only `class` becomes an attribute. A `useAttributes` callback for `label` therefore does **not** run. To set attributes, use `attrs` or a hyphenated name (`data-*`, `aria-*`, `my-attr`):
+
+```tsx
+<name-input attrs={{ label: 'Your name' }} data-size="large" />
+```
+
+On standard elements, use the DOM property names: `htmlFor`, `tabIndex`.
+
+:::warning Register components before rendering them
+Import (and so register) a component's module before a template renders it. A property set on an element that is not upgraded yet is shadowed by the class field once the element upgrades.
+:::
 
 ### Passing slotted content (children)
 
