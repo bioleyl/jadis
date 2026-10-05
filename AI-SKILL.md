@@ -14,7 +14,7 @@ Official documentation: <https://bioleyl.github.io/jadis/>
 Verified against `base-component.ts`:
 
 1. **Constructor** — the shadow root is attached. Nothing is rendered yet. Field initializers (`useRefs`, `useChange`, `useEvents`) run here.
-2. **First connection** — `templateHtml()` and `templateCss()` run **once** and are appended to the shadow root. Then `onConnect()` runs **asynchronously**, on the next task — not synchronously during `appendChild`.
+2. **First connection** — `templateHtml()` and `templateCss()` run **once** and are appended to the shadow root. The `useChange` values set before the connection and the attribute callbacks are applied right away, during `appendChild`. Then `onConnect()` runs **asynchronously**, on the next task — not synchronously during `appendChild`.
 3. **Disconnection** — the internal kill signal aborts. Every listener registered with `on()`, `useEvents().register()`, or `onBus()` is removed automatically. The rendered DOM is **kept**.
 4. **Reconnection** — `onConnect()` runs **again**, attribute callbacks re-fire for currently set attributes, and the **same DOM** is reused. The template is never re-rendered.
 
@@ -22,8 +22,8 @@ Consequences:
 
 - Wire **all** listeners inside `onConnect()`. Cleanup is automatic; manual `removeEventListener` is a smell.
 - Never assume a single connection. Don't cache "connected once" state on the instance.
-- In tests, don't assert DOM right after `appendChild`; wait for the task (Playwright's auto-waiting or `waitForFunction` handles this).
-- `useChange` updates made before connection are queued and applied when the component connects.
+- In tests, what `useChange` and attribute callbacks render is there right after `appendChild`; what `onConnect()` does needs a task (Playwright's auto-waiting or `waitForFunction` handles this).
+- `useChange` updates made before connection are applied **synchronously** while the component connects, once per handler with the latest value, before attribute callbacks and before the browser paints. `onConnect()` still runs a task later.
 
 ## Setup
 
@@ -209,7 +209,7 @@ private readonly _count = this.useChange(0, (value) => {
 // write: this._count.set(5) or this._count.set((v) => v + 1)
 ```
 
-`{ immediate: true }` runs the callback for the initial value (deferred until connection). Update only the nodes that changed — never rebuild the whole template for a local change.
+`{ immediate: true }` runs the callback for the initial value (deferred until connection, then applied during `appendChild`, before the first paint). Update only the nodes that changed — never rebuild the whole template for a local change.
 
 **Attributes** — the callback-object API:
 

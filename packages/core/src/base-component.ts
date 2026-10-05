@@ -53,7 +53,10 @@ export abstract class Jadis extends HTMLElement {
   readonly shadowRoot: ShadowRoot | null = null;
   protected readonly attributesCallback: Partial<Record<string, AttributeCallback>> = {};
 
-  /** Actions to perform when the component is connected to the DOM. */
+  /**
+   * Actions waiting for the component to connect. They run during the
+   * connection, once the template exists and before the browser paints.
+   */
   protected onConnectActions: Array<() => void> = [];
 
   private _abortController = new AbortController();
@@ -157,15 +160,23 @@ export abstract class Jadis extends HTMLElement {
 
     this.renderTemplate();
     this._isConnected = true;
+    // Changes made before the connection apply now, before the browser
+    // paints; attributes come after them, so an attribute set on the element
+    // wins over a property set before it was connected.
+    this.runConnectActions();
     this.observeAttributes();
 
     setTimeout(() => {
-      this.onConnectActions.forEach((fn) => {
-        fn();
-      });
-      this.onConnectActions = [];
       this.onConnect?.();
     });
+  }
+
+  private runConnectActions(): void {
+    const actions = this.onConnectActions;
+    this.onConnectActions = [];
+    for (const action of actions) {
+      action();
+    }
   }
 
   disconnectedCallback(): void {
@@ -419,17 +430,35 @@ export abstract class Jadis extends HTMLElement {
     onChange: (newValue: T, oldValue: T) => void,
     { immediate = false }: ChangeOptions = {}
   ): Readonly<UseChangeHandler<T>> {
-    const updateFunc = (newValue: T, oldValue: T) => {
-      this._isConnected
-        ? onChange(newValue, oldValue)
-        : this.onConnectActions.push(() => onChange(newValue, oldValue));
+    // Changes made while disconnected wait for the connection, then call
+    // onChange once: with the value current then, and the value before the
+    // first of them.
+    const pending = { oldValue: initialValue, queued: false };
+    const queue = (oldValue: T): void => {
+      if (pending.queued) {
+        return;
+      }
+      pending.queued = true;
+      pending.oldValue = oldValue;
+      this.onConnectActions.push(() => {
+        pending.queued = false;
+        onChange(handler.get(), pending.oldValue);
+      });
     };
+    const update = (newValue: T, oldValue: T): void => {
+      if (this._isConnected) {
+        onChange(newValue, oldValue);
+        return;
+      }
+      queue(oldValue);
+    };
+    const handler = new ChangeHandler<T>(initialValue, update);
 
     if (immediate) {
-      updateFunc(initialValue, initialValue);
+      update(initialValue, initialValue);
     }
 
-    return new ChangeHandler<T>(initialValue, updateFunc);
+    return handler;
   }
 
   private renderTemplate(): void {

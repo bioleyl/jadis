@@ -59,7 +59,7 @@ Constructor → connectedCallback (render template) → onConnect → ... → di
 ```
 
 1. **Constructor** — Runs when the class is instantiated. Shadow DOM is attached here if `useShadowDom` is `true`.
-2. **`connectedCallback()`** — Runs when the component is connected. On the first connection it renders `templateHtml()` and `templateCss()` before scheduling `onConnect()`; the rendered DOM is reused on reconnection.
+2. **`connectedCallback()`** — Runs when the component is connected. On the first connection it renders `templateHtml()` and `templateCss()`; the rendered DOM is reused on reconnection. It then applies the `useChange` values set before the connection, then the attribute callbacks, all synchronously, before scheduling `onConnect()`.
 3. **`onConnect()`** — Runs asynchronously after the component is connected. It runs again after each reconnection.
 4. **Active** — The component is in the DOM and responding to user interaction.
 5. **`disconnectedCallback()` / `onDisconnect()`** — The callback aborts `killSignal` and then calls `onDisconnect()` when the component is removed.
@@ -67,7 +67,7 @@ Constructor → connectedCallback (render template) → onConnect → ... → di
 ## Important Notes
 
 - Templates render only on the first connection; reconnection reuses the existing DOM.
-- `onConnect()` runs on a later task, not synchronously inside `appendChild()`.
+- `onConnect()` runs on a later task, not synchronously inside `appendChild()`. The template and the values set before the connection are already in place when `appendChild()` returns.
 - The `killSignal` is automatically aborted on disconnect, canceling listeners registered via `this.on()`, `useEvents()`, and `onBus()`.
 - Avoid heavy work in the constructor. Defer connection-specific work to `onConnect()`.
 
