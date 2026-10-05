@@ -97,7 +97,7 @@ Browsers execute neither JSX nor TypeScript. Two options:
 <script type="importmap">
   {
     "imports": {
-      "@jadis/core": "https://esm.sh/@jadis/core@1.0.0"
+      "@jadis/core": "https://esm.sh/@jadis/core@1.1.0"
     }
   }
 </script>
@@ -130,8 +130,8 @@ The emitted code imports `@jadis/core/jsx-runtime`, so the import map needs both
 ```json
 {
   "imports": {
-    "@jadis/core": "https://esm.sh/@jadis/core@1.0.0",
-    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.0.0/jsx-runtime"
+    "@jadis/core": "https://esm.sh/@jadis/core@1.1.0",
+    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.1.0/jsx-runtime"
   }
 }
 ```
