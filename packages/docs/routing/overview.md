@@ -22,7 +22,7 @@ const routes = defineRoutes({
 });
 
 const router = new Router(routes);
-router.mountOn(document.getElementById('app'));
+router.mountOn(document.getElementById('app') ?? document.body);
 ```
 
 ## Navigation Modes
@@ -73,7 +73,15 @@ const routes = defineRoutes({
 });
 ```
 
-This wraps the page component inside the specified layout component.
+This wraps the page component inside the specified layout component, which shows it through a `<slot>`.
+
+## Good to Know
+
+- **The first matching route wins**, and a `:param` matches across `/`: `/user/:id` also matches `/user/42/edit`. List specific routes before general ones.
+- **A URL that no route matches throws.** End your routes with a catch-all, such as `notFound: { path: '/:rest', page: NotFoundPage }`.
+- **Links are not intercepted.** In history mode, `<a href="/about">` reloads the whole page. Call `router.goto()` from a click handler, or use hash mode with `href="#/about"`.
+- **Every navigation creates the page component again**, and its root component too: state kept in them is lost. Keep what must outlive a page in a service or a [Bus](../api/bus-class.md).
+- Register the page and root components before navigating to them.
 
 ## See Also
 

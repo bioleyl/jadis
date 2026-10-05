@@ -1,6 +1,6 @@
 # createSelector()
 
-Validates and creates a component selector string for use in `static selector`. Ensures the name follows the Custom Elements naming convention (contains a hyphen, no leading/trailing hyphens).
+Validates and creates a component selector string for use in `static selector`. Ensures the name is a valid custom element name: lowercase, starting with a letter, with at least one hyphen (`my-card`, `my-big-card`).
 
 ## Import
 
@@ -28,7 +28,7 @@ The validated selector string.
 
 ### Throws
 
-Throws if the name does not contain a hyphen or has invalid formatting.
+Throws if the name is not a valid custom element name: no hyphen, an uppercase letter, a leading, trailing or doubled hyphen, or a name the HTML specification reserves (`font-face`, `annotation-xml`, …).
 
 ### Example
 
@@ -48,15 +48,18 @@ class MyComponent extends Jadis {
 isComponentSelector(key: string): key is ComponentSelector;
 ```
 
-Returns `true` if the string matches the pattern `^[^-]+-[^-]+$` (at least one character before and after the hyphen, no leading or trailing hyphens).
+Returns `true` for a valid custom element name: it starts with a lowercase letter, holds lowercase letters, digits, `.` and `_`, and joins its parts with single hyphens (`^[a-z][a-z0-9._]*(-[a-z0-9._]+)+$`). The names the HTML specification reserves for SVG and MathML are refused.
 
 ### Example
 
 ```typescript
-isComponentSelector('my-component');  // true
-isComponentSelector('invalid');       // false (no hyphen)
-isComponentSelector('-bad');          // false (leading hyphen)
-isComponentSelector('bad-');          // false (trailing hyphen)
+isComponentSelector('my-component');      // true
+isComponentSelector('my-big-component');  // true
+isComponentSelector('invalid');           // false (no hyphen)
+isComponentSelector('-bad');              // false (leading hyphen)
+isComponentSelector('bad-');              // false (trailing hyphen)
+isComponentSelector('My-Card');           // false (uppercase)
+isComponentSelector('font-face');         // false (reserved)
 ```
 
 ## Best Practices

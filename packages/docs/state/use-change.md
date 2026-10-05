@@ -22,7 +22,7 @@ this.useChange<T>(
 - `options.immediate?`: `<boolean>`. When `true`, the `onChange` callback is triggered once using the initial value.
   Defines whether the callback should run once immediately once the component connects. If the component is:
   - **already connected** → runs immediately
-  - **not yet connected** → queued and runs in onConnect
+  - **not yet connected** → queued and runs while the component connects, right after its template is rendered and before the browser paints (before `onConnect()`)
 
 Useful for setting initial DOM state without duplicating logic.
 
@@ -41,6 +41,13 @@ The returned object is **readonly** so consumers cannot replace the handler, onl
 - Calling `.set()` updates the value
 - `onChange` runs with (newValue, oldValue)
 - If `immediate: true`, the callback is also triggered once when the component becomes connected, using the initial value
+- While the component is not connected, `.set()` stores the value and the callback waits. When the component connects, it runs **once**, with the current value and the value before the first change. Setting a value several times before connecting therefore costs one update, and the template is filled in before its first paint.
+- Attributes are applied after those waiting changes, so an attribute set on the element wins over a property set before it was connected.
+- Once the component is connected, every `.set()` calls the callback, even when the value does not change.
+
+:::warning Keep plain data in `useChange`
+`.set()` copies the previous value with [`structuredClone`](https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone) to pass it as `oldValue`. Functions, DOM nodes and class instances that need their prototype cannot be cloned: storing one works once, then the next `.set()` throws a `DataCloneError`. Keep those in a private field with a setter instead.
+:::
 
 This gives you a reactive, lightweight state system without needing proxies, observers, or re-renders.
 
@@ -86,8 +93,8 @@ class ToggleSwitch extends Jadis {
 import { Jadis } from "@jadis/core";
 
 export class Dice extends Jadis {
-  static readonly selector = 'toggle-value-component';
-  private readonly toggleValue = this.useChange(
+  static readonly selector = 'dice-roller';
+  private readonly rolled = this.useChange(
     0,
     (value) => {
       this.refs.label.textContent = value.toString();
@@ -112,7 +119,7 @@ export class Dice extends Jadis {
   onConnect(): void {
     this.on(this.refs.button, 'click', () => {
       const roll = Math.floor(Math.random() * 6) + 1;
-      this.toggleValue.set(roll);
+      this.rolled.set(roll);
     })
   }
 }

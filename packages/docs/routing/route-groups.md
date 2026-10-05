@@ -4,7 +4,7 @@ If many of your routes share a common prefix or a common layout and you don’t 
 
 ## Add Routes by Group
 
-Grouping routes under a shared prefix makes organization easier and keeps URLs clean. Use `RouteGroup` to create and register grouped routes:
+Grouping routes under a shared prefix makes organization easier and keeps URLs clean. Use `defineRouteGroup` to create grouped routes:
 
 ```javascript
 import { defineRouteGroup, defineRoutes, Router } from '@jadis/core';

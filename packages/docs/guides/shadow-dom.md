@@ -26,7 +26,11 @@ class MyComponent extends Jadis {
 }
 ```
 
-When `useShadowDom` is `false`, the template is appended directly to the component element itself.
+When `useShadowDom` is `false`, the template is appended directly to the component element itself. Then:
+
+- the styles from `templateCss()` apply to the whole document, as any global stylesheet;
+- `<slot>` elements do nothing, as slots only exist in a shadow root;
+- `getElement()` and refs search the component's own children.
 
 ## When to Disable Shadow DOM
 

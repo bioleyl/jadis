@@ -72,7 +72,7 @@ Then in your HTML:
 
 ## Using a CDN
 
-You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@1.0.0). This example uses DOM APIs directly so it can run without a JSX transform:
+You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@1.1.0). This example uses DOM APIs directly so it can run without a JSX transform:
 
 ```html
 <!DOCTYPE html>
@@ -87,7 +87,7 @@ You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/co
     <script type="importmap">
       {
         "imports": {
-          "@jadis/core": "https://esm.sh/@jadis/core@1.0.0"
+          "@jadis/core": "https://esm.sh/@jadis/core@1.1.0"
         }
       }
     </script>

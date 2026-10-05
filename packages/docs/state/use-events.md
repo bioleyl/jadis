@@ -74,7 +74,7 @@ MyComponent.register();
 
 ## Emission
 
-Events are dispatched as `CustomEvent` objects. The `detail` property contains the data passed to `emit()`:
+Events are dispatched as `CustomEvent` objects on the component itself. They do not bubble and do not cross shadow roots: only listeners registered on that component receive them. The callback receives the `detail` (the data passed to `emit()`) directly:
 
 ```typescript
 this.events.emit('dataLoaded', { items: [1, 2, 3] });
@@ -85,7 +85,7 @@ this.events.register('dataLoaded', (detail) => {
 
 ## Automatic cleanup
 
-`useEvents()` listeners are bound to the component's `killSignal` and are automatically removed when the component disconnects.
+`useEvents()` listeners are bound to the `killSignal` of the component that emits the events, and are removed when it disconnects. A parent listening to a child registers in its own `onConnect()`, so the listener is added again after each reconnection.
 
 ## Best practices
 
