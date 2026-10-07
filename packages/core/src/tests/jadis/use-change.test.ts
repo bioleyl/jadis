@@ -139,4 +139,15 @@ describe('Jadis — useChange', () => {
 
     expect(shownLabel(el)).toBe('while away');
   });
+
+  it('keeps the previous value as oldValue, without copying it', () => {
+    const el = createElement(TestComponent, {}, document.body);
+    const spy = vi.fn();
+    const first = { node: document.createElement('p'), render: () => 'first' };
+    const handler = el['useChange'](first, spy);
+
+    handler.set({ node: document.createElement('p'), render: () => 'second' });
+
+    expect(spy.mock.calls[0][1]).toBe(first);
+  });
 });

@@ -45,8 +45,10 @@ The returned object is **readonly** so consumers cannot replace the handler, onl
 - Attributes are applied after those waiting changes, so an attribute set on the element wins over a property set before it was connected.
 - Once the component is connected, every `.set()` calls the callback, even when the value does not change.
 
-:::warning Keep plain data in `useChange`
-`.set()` copies the previous value with [`structuredClone`](https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone) to pass it as `oldValue`. Functions, DOM nodes and class instances that need their prototype cannot be cloned: storing one works once, then the next `.set()` throws a `DataCloneError`. Keep those in a private field with a setter instead.
+:::warning Replace values, do not change them in place
+`oldValue` is the previous value itself, not a copy, so any value can be stored: arrays, objects holding functions, DOM nodes. An updater that changes the value in place and returns it (`set((list) => { list.push(item); return list; })`) gets the same object as `oldValue` and `newValue`: return a new value instead (`set((list) => [...list, item])`).
+
+A function passed to `.set()` is called as an updater. To store a function, wrap it: `set(() => callback)`.
 :::
 
 This gives you a reactive, lightweight state system without needing proxies, observers, or re-renders.

@@ -215,7 +215,7 @@ private readonly _count = this.useChange(0, (value) => {
 `{ immediate: true }` runs the callback for the initial value (deferred until connection, then applied during `appendChild`, before the first paint). Update only the nodes that changed — never rebuild the whole template for a local change.
 
 - Once connected, every `set()` calls the callback, even with an equal value.
-- `set()` copies the previous value with `structuredClone`: keep **plain data** in a `useChange` (no functions, DOM nodes or class instances). A function or a node works once, then the next `set()` throws a `DataCloneError`. Hold those in a private field with a setter instead.
+- `oldValue` is the previous value itself, not a copy: replace values (`set((list) => [...list, item])`), do not change them in place. Any value can be stored; a function goes through an updater, `set(() => callback)`.
 
 **Attributes** — the callback-object API:
 
