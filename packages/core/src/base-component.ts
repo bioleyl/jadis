@@ -161,11 +161,13 @@ export abstract class Jadis extends HTMLElement {
 
     this.renderTemplate();
     this._isConnected = true;
-    // Changes made before the connection apply now, before the browser
-    // paints; attributes come after them, so an attribute set on the element
-    // wins over a property set before it was connected.
-    this.runConnectActions();
+    // Attributes apply first, then the changes made before the connection,
+    // all before the browser paints. A waiting change calls back with the
+    // value current then, so an attribute set on the element still wins over
+    // a property set before it was connected, and a callback writing an
+    // attribute on the element cannot overwrite one it was written with.
     this.observeAttributes();
+    this.runConnectActions();
 
     setTimeout(() => {
       this.onConnect?.();

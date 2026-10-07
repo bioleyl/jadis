@@ -247,6 +247,15 @@ describe('Jadis — useChange bound to an attribute', () => {
     expect(el.tone.get()).toBe('neutral');
   });
 
+  it('keeps the attribute an element was written with when a waiting change writes it back', () => {
+    const el = createElement(BoundComponent, { attrs: { tone: 'ok' } });
+
+    document.body.appendChild(el);
+
+    expect(el.getAttribute('tone')).toBe('ok');
+    expect(el.tone.get()).toBe('ok');
+  });
+
   it('asks for a parser when the initial value has no default one', () => {
     const el = createElement(TestComponent);
 

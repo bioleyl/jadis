@@ -24,7 +24,7 @@ Consequences:
 - Never assume a single connection: `onConnect()` runs again on the same DOM after every reconnection (moving an element counts). Make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds rather than a "connected once" flag.
 - Stop what outlives the component: pass `this.killSignal` to `fetch` and to listeners on `window` or `document` (`this.on(window, 'resize', …)` and `this.on(document, …)` do it for you), clear timers in `onDisconnect()`. After an `await` in `onConnect()`, check `this.isConnected` before touching the DOM.
 - In tests, what `useChange` and attribute callbacks render is there right after `appendChild`; what `onConnect()` does needs a task (Playwright's auto-waiting or `waitForFunction` handles this).
-- `useChange` updates made before connection are applied **synchronously** while the component connects, once per handler with the latest value, before attribute callbacks and before the browser paints. `onConnect()` still runs a task later.
+- `useChange` updates made before connection are applied **synchronously** while the component connects, once per handler with the latest value, after attribute callbacks and before the browser paints. `onConnect()` still runs a task later.
 
 ## Setup
 
@@ -217,6 +217,7 @@ private readonly _count = this.useChange(0, (value) => {
 - Once connected, every `set()` calls the callback, even with an equal value.
 - `oldValue` is the previous value itself, not a copy: replace values (`set((list) => [...list, item])`), do not change them in place. Any value can be stored; a function goes through an updater, `set(() => callback)`.
 - `{ attribute: 'label' }` also sets the field from that attribute (and turns `immediate` on). Strings, numbers and booleans (present = true) have a default parser; other types pass `parse: (value: string | null) => T`. Prefer it to a `useAttributes` entry that only calls `.set()`.
+- Attributes apply before the changes queued while disconnected. A callback that writes an attribute on the host must skip a value it already has, or the observer calls it back without end.
 
 **Attributes** — the callback-object API:
 

@@ -44,7 +44,7 @@ The returned object is **readonly** so consumers cannot replace the handler, onl
 - `onChange` runs with (newValue, oldValue)
 - If `immediate: true`, the callback is also triggered once when the component becomes connected, using the initial value
 - While the component is not connected, `.set()` stores the value and the callback waits. When the component connects, it runs **once**, with the current value and the value before the first change. Setting a value several times before connecting therefore costs one update, and the template is filled in before its first paint.
-- Attributes are applied after those waiting changes, so an attribute set on the element wins over a property set before it was connected.
+- Attributes are applied before those waiting changes, and a waiting change calls back with the value current then: an attribute set on the element wins over a property set before it was connected, and a callback that writes an attribute on the element cannot overwrite the one it was written with.
 - Once the component is connected, every `.set()` calls the callback, even when the value does not change.
 
 :::warning Replace values, do not change them in place
