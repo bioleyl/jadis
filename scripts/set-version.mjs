@@ -78,12 +78,28 @@ for (const { path: relPath, update } of updates) {
   console.log(`✓ ${relPath}`);
 }
 
-// --- Update CDN references in installation.md ---
-const installPath = join(root, 'packages/docs/guides/installation.md');
-let content = readFileSync(installPath, 'utf8');
-content = content.replaceAll(`@jadis/core@${coreVersion}`, `@jadis/core@${newCoreVersion}`);
-writeFileSync(installPath, content, 'utf8');
-console.log(`✓ packages/docs/guides/installation.md`);
+// --- Update version references in text files ---
+// The create test matches the templates' dependency with a regex: there, the dots are escaped.
+const escapeDots = (version) => version.replaceAll('.', '\\.');
+const cdnReference = (version) => `@jadis/core@${version}`;
+const testedDependency = (version) => `\\^${escapeDots(version)}`;
+
+const textUpdates = [
+  { path: 'packages/docs/guides/installation.md', reference: cdnReference },
+  { path: 'AI-SKILL.md', reference: cdnReference },
+  { path: 'packages/create/test/index.test.js', reference: testedDependency },
+];
+
+for (const { path: relPath, reference } of textUpdates) {
+  const fullPath = join(root, relPath);
+  const content = readFileSync(fullPath, 'utf8');
+  if (!content.includes(reference(coreVersion))) {
+    console.warn(`⚠ ${relPath}: no reference to ${coreVersion}, left unchanged`);
+    continue;
+  }
+  writeFileSync(fullPath, content.replaceAll(reference(coreVersion), reference(newCoreVersion)), 'utf8');
+  console.log(`✓ ${relPath}`);
+}
 
 rl.close();
 console.log(`\nDone! Version ${coreVersion} → ${newCoreVersion}\n`);
