@@ -1,6 +1,7 @@
 /** biome-ignore-all lint/complexity/noThisInStatic: I explicitly need to refer to "this" and not Jadis for code hint when creating components */
 
 import { assert } from './helpers/assert.helper';
+import { defaultAttributeParser } from './helpers/attribute.helper';
 import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
 
@@ -17,7 +18,7 @@ import type {
   SchemaToEvents,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
-import type { ChangeOptions, UseChangeHandler, UseEventsHandler } from './types/jadis.type';
+import type { AttributeParser, ChangeOptions, UseChangeHandler, UseEventsHandler } from './types/jadis.type';
 
 type AttributeCallback = (value: string | null, oldValue: string | null) => void;
 type AttributeCallbacks<Attribute extends string> = Record<Attribute, AttributeCallback>;
@@ -434,14 +435,22 @@ export abstract class Jadis extends HTMLElement {
    * Creates a change handler variable.
    * @param initialValue The initial value of the change handler variable
    * @param onChange A callback function that is called when the change handler variable changes
-   * @param options Optional configuration for the change handler
+   * @param options Optional configuration for the change handler:
+   * `immediate` calls onChange once with the initial value;
+   * `attribute` sets the variable from that attribute, through `parse`
+   * (by default from the initial value's type: text, a number, or present for true),
+   * and turns `immediate` on unless it is given
    * @returns An object with `get` and `set` methods for the change handler variable
+   * @example
+   * readonly label = this.useChange('', (value) => { this.refs.label.textContent = value; }, { attribute: 'label' });
    */
   protected useChange<T>(
     initialValue: T,
     onChange: (newValue: T, oldValue: T) => void,
-    { immediate = false }: ChangeOptions = {}
+    options: ChangeOptions<T> = {}
   ): Readonly<UseChangeHandler<T>> {
+    const { attribute, parse } = options;
+    const immediate = options.immediate ?? attribute !== undefined;
     // Changes made while disconnected wait for the connection, then call
     // onChange once: with the value current then, and the value before the
     // first of them.
@@ -469,8 +478,15 @@ export abstract class Jadis extends HTMLElement {
     if (immediate) {
       update(initialValue, initialValue);
     }
+    if (attribute !== undefined) {
+      this.bindAttribute(attribute, handler, parse ?? defaultAttributeParser(initialValue));
+    }
 
     return handler;
+  }
+
+  private bindAttribute<T>(attribute: string, handler: ChangeHandler<T>, parse: AttributeParser<T>): void {
+    this.useAttributes({ [attribute]: (value: string | null) => handler.set(parse(value)) });
   }
 
   private renderTemplate(): void {

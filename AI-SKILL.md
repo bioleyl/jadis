@@ -216,6 +216,7 @@ private readonly _count = this.useChange(0, (value) => {
 
 - Once connected, every `set()` calls the callback, even with an equal value.
 - `oldValue` is the previous value itself, not a copy: replace values (`set((list) => [...list, item])`), do not change them in place. Any value can be stored; a function goes through an updater, `set(() => callback)`.
+- `{ attribute: 'label' }` also sets the field from that attribute (and turns `immediate` on). Strings, numbers and booleans (present = true) have a default parser; other types pass `parse: (value: string | null) => T`. Prefer it to a `useAttributes` entry that only calls `.set()`.
 
 **Attributes** — the callback-object API:
 

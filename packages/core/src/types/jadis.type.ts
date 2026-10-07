@@ -35,6 +35,23 @@ export type UseChangeHandler<StateType> = Readonly<{
   set(setter: StateType | ((prevState: StateType) => StateType)): void;
 }>;
 
-export interface ChangeOptions {
+/** Turns an attribute's value, null when the attribute is absent, into the value of a `useChange` field. */
+export type AttributeParser<T> = (value: string | null) => T;
+
+type IsExactly<T, U> = [T, U] extends [U, T] ? true : false;
+
+/** Strings, numbers and booleans come with a parser; any other type brings its own. */
+type HasDefaultParser<T> = true extends IsExactly<T, string> | IsExactly<T, number> | IsExactly<T, boolean>
+  ? true
+  : false;
+
+type AttributeBinding<T> = HasDefaultParser<T> extends true
+  ? { attribute: string; parse?: AttributeParser<T> }
+  : { attribute: string; parse: AttributeParser<T> };
+
+type NoAttributeBinding = { attribute?: undefined; parse?: undefined };
+
+export type ChangeOptions<T = unknown> = {
+  /** Calls onChange once with the initial value; on by default for a field bound to an attribute. */
   immediate?: boolean;
-}
+} & (NoAttributeBinding | AttributeBinding<T>);

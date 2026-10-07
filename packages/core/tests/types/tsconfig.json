@@ -9,5 +9,5 @@
     "strict": true,
     "target": "ES2020"
   },
-  "include": ["jsx.tsx", "on.ts"]
+  "include": ["jsx.tsx", "on.ts", "use-change.ts"]
 }

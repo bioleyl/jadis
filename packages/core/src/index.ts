@@ -19,5 +19,10 @@ export { defineRouteGroup, defineRoutes } from './helpers/router.helper';
 export { css } from './helpers/template.helper';
 export { Router } from './router/router';
 
-export type { ChangeOptions, UseChangeHandler as ChangeStateHandler, UseEventsHandler } from './types/jadis.type';
+export type {
+  AttributeParser,
+  ChangeOptions,
+  UseChangeHandler as ChangeStateHandler,
+  UseEventsHandler,
+} from './types/jadis.type';
 export type { Route, RouterMode, RouterOptions } from './types/router.type';
