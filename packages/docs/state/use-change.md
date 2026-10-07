@@ -11,7 +11,7 @@ This makes it ideal for updating the DOM, emitting events, or triggering logic w
 this.useChange<T>(
   initialValue: T,
   onChange: (newValue: T, oldValue: T) => void,
-  options?: { immediate?: boolean }
+  options?: { immediate?: boolean; attribute?: string; parse?: (value: string | null) => T }
 ): Readonly<ChangeStateHandler<T>>
 ```
 
@@ -25,6 +25,8 @@ this.useChange<T>(
   - **not yet connected** → queued and runs while the component connects, right after its template is rendered and before the browser paints (before `onConnect()`)
 
 Useful for setting initial DOM state without duplicating logic.
+- `options.attribute?`: `<string>`. Sets the value from this attribute, too; see [Bound to an attribute](#bound-to-an-attribute). It turns `immediate` on unless `immediate` is given.
+- `options.parse?`: `(value: string | null) => T`. Turns the attribute's value, `null` when it is absent, into the field's value. Strings, numbers and booleans have a default one; any other type needs its own.
 
 ### Return value
 
@@ -42,11 +44,13 @@ The returned object is **readonly** so consumers cannot replace the handler, onl
 - `onChange` runs with (newValue, oldValue)
 - If `immediate: true`, the callback is also triggered once when the component becomes connected, using the initial value
 - While the component is not connected, `.set()` stores the value and the callback waits. When the component connects, it runs **once**, with the current value and the value before the first change. Setting a value several times before connecting therefore costs one update, and the template is filled in before its first paint.
-- Attributes are applied after those waiting changes, so an attribute set on the element wins over a property set before it was connected.
+- Attributes are applied before those waiting changes, and a waiting change calls back with the value current then: an attribute set on the element wins over a property set before it was connected, and a callback that writes an attribute on the element cannot overwrite the one it was written with.
 - Once the component is connected, every `.set()` calls the callback, even when the value does not change.
 
-:::warning Keep plain data in `useChange`
-`.set()` copies the previous value with [`structuredClone`](https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone) to pass it as `oldValue`. Functions, DOM nodes and class instances that need their prototype cannot be cloned: storing one works once, then the next `.set()` throws a `DataCloneError`. Keep those in a private field with a setter instead.
+:::warning Replace values, do not change them in place
+`oldValue` is the previous value itself, not a copy, so any value can be stored: arrays, objects holding functions, DOM nodes. An updater that changes the value in place and returns it (`set((list) => { list.push(item); return list; })`) gets the same object as `oldValue` and `newValue`: return a new value instead (`set((list) => [...list, item])`).
+
+A function passed to `.set()` is called as an updater. To store a function, wrap it: `set(() => callback)`.
 :::
 
 This gives you a reactive, lightweight state system without needing proxies, observers, or re-renders.
@@ -126,6 +130,47 @@ export class Dice extends Jadis {
 
 Dice.register();
 ```
+
+## Bound to an attribute
+
+A field that can also be written in HTML names its attribute. The attribute sets the field through `.set()`, so the callback runs as for a property, and the attribute is applied while the component connects, before the first paint:
+
+```tsx
+class ProgressBar extends Jadis {
+  static readonly selector = 'progress-bar';
+
+  readonly label = this.useChange('', (value) => {
+    this.refs.label.textContent = value;
+  }, { attribute: 'label' });
+  readonly value = this.useChange(0, (value) => {
+    this.refs.bar.style.width = `${value}%`;
+  }, { attribute: 'value' });
+  readonly striped = this.useChange(false, (value) => {
+    this.toggleClass('striped', value);
+  }, { attribute: 'striped' });
+  readonly tone = this.useChange<Tone>('neutral', (value) => {
+    this.refs.bar.dataset.tone = value;
+  }, { attribute: 'tone', parse: (value) => TONES.find((tone) => tone === value) ?? 'neutral' });
+
+  // …
+}
+```
+
+```html
+<progress-bar label="Upload" value="40" striped tone="ok"></progress-bar>
+```
+
+The default parsers, chosen from the initial value:
+
+| Initial value | Attribute present | Attribute absent |
+|---|---|---|
+| string | its text | the initial value |
+| number | its number; the initial value when blank or not a number | the initial value |
+| boolean | `true`, whatever its text, as for `disabled` | `false` |
+
+Anything else, a union of strings or a nullable value, needs `parse`: TypeScript asks for it.
+
+The field does not write the attribute back: setting `.label` leaves `label=""` alone. A callback that does write it (to style `:host([tone])`, for instance) must skip a value the attribute already has: even an unchanged `setAttribute` is a change to the observer, which would call the field back without end.
 
 ## Typing Notes
 

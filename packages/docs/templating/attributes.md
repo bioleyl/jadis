@@ -24,6 +24,10 @@ Attribute changes are observed automatically when the component is connected:
 
 Do not declare `static observedAttributes`: the callbacks object is the list of observed attributes.
 
+:::tip An attribute for a `useChange` field
+When an attribute only sets a [`useChange`](../state/use-change.md#bound-to-an-attribute) field, name it in the field's options instead: `this.useChange('', render, { attribute: 'label' })`.
+:::
+
 :::warning JSX props are not attributes
 `<hello-page name="Ada" />` sets the `name` **property**, so the `name` callback does not run. Pass attributes through the `attrs` prop, call `setAttribute`, or let the router set them (route parameters are attributes):
 

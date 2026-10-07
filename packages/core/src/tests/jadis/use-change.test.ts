@@ -30,6 +30,44 @@ class LabelComponent extends Jadis {
 
 LabelComponent.register();
 
+const TONES = ['neutral', 'ok'] as const;
+type Tone = (typeof TONES)[number];
+const parseTone = (value: string | null): Tone => TONES.find((tone) => tone === value) ?? 'neutral';
+
+/** Its fields are bound to attributes; the tone is written back on the host, as styles read :host([tone]). */
+class BoundComponent extends Jadis {
+  static readonly selector = 'x-bound';
+
+  readonly label = this.useChange(
+    'initial',
+    (value) => {
+      this.getElement('span').textContent = value;
+    },
+    { attribute: 'label' }
+  );
+  readonly disabled = this.useChange(false, () => undefined, { attribute: 'disabled' });
+  readonly size = this.useChange(10, () => undefined, { attribute: 'size' });
+  readonly tone = this.useChange<Tone>('neutral', (value) => this.reflectTone(value), {
+    attribute: 'tone',
+    parse: parseTone,
+  });
+
+  templateHtml() {
+    return document.createElement('span');
+  }
+
+  // Even an unchanged value would be a mutation, calling the attribute back without end.
+  private reflectTone(value: Tone): void {
+    if (this.getAttribute('tone') !== value) {
+      this.setAttribute('tone', value);
+    }
+  }
+}
+
+BoundComponent.register();
+
+const flushAttributes = (): Promise<unknown> => new Promise((resolve) => setTimeout(resolve));
+
 const shownLabel = (el: LabelComponent): string | null | undefined =>
   el.shadowRoot?.querySelector('span')?.textContent;
 
@@ -138,5 +176,91 @@ describe('Jadis — useChange', () => {
     document.body.appendChild(el);
 
     expect(shownLabel(el)).toBe('while away');
+  });
+
+  it('keeps the previous value as oldValue, without copying it', () => {
+    const el = createElement(TestComponent, {}, document.body);
+    const spy = vi.fn();
+    const first = { node: document.createElement('p'), render: () => 'first' };
+    const handler = el['useChange'](first, spy);
+
+    handler.set({ node: document.createElement('p'), render: () => 'second' });
+
+    expect(spy.mock.calls[0][1]).toBe(first);
+  });
+});
+
+describe('Jadis — useChange bound to an attribute', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('applies the attribute the element was written with before the first paint', () => {
+    document.body.innerHTML = '<x-bound label="from HTML"></x-bound>';
+    const el = document.querySelector('x-bound') as BoundComponent;
+
+    expect(el.label.get()).toBe('from HTML');
+    expect(el.shadowRoot?.querySelector('span')?.textContent).toBe('from HTML');
+  });
+
+  it('renders the initial value without an attribute, as immediate is on', () => {
+    const el = createElement(BoundComponent, {}, document.body);
+
+    expect(el.shadowRoot?.querySelector('span')?.textContent).toBe('initial');
+  });
+
+  it('follows the attribute once connected, and goes back to the initial value when it is removed', async () => {
+    const el = createElement(BoundComponent, {}, document.body);
+
+    el.setAttribute('label', 'changed');
+    await flushAttributes();
+    expect(el.label.get()).toBe('changed');
+
+    el.removeAttribute('label');
+    await flushAttributes();
+    expect(el.label.get()).toBe('initial');
+  });
+
+  it('reads a boolean as present or absent', async () => {
+    const el = createElement(BoundComponent, { attrs: { disabled: '' } }, document.body);
+    expect(el.disabled.get()).toBe(true);
+
+    el.removeAttribute('disabled');
+    await flushAttributes();
+    expect(el.disabled.get()).toBe(false);
+  });
+
+  it('reads a number, and keeps the initial value for one that is blank or not a number', async () => {
+    const el = createElement(BoundComponent, { attrs: { size: '42' } }, document.body);
+    expect(el.size.get()).toBe(42);
+
+    for (const notANumber of ['', 'large']) {
+      el.setAttribute('size', notANumber);
+      await flushAttributes();
+      expect(el.size.get()).toBe(10);
+    }
+  });
+
+  it('reads the attribute through the parse option', () => {
+    const el = createElement(BoundComponent, { attrs: { tone: 'unknown' } }, document.body);
+
+    expect(el.tone.get()).toBe('neutral');
+  });
+
+  it('keeps the attribute an element was written with when a waiting change writes it back', () => {
+    const el = createElement(BoundComponent, { attrs: { tone: 'ok' } });
+
+    document.body.appendChild(el);
+
+    expect(el.getAttribute('tone')).toBe('ok');
+    expect(el.tone.get()).toBe('ok');
+  });
+
+  it('asks for a parser when the initial value has no default one', () => {
+    const el = createElement(TestComponent);
+
+    expect(() =>
+      el['useChange']<string | null>(null, vi.fn(), { attribute: 'min', parse: undefined as never })
+    ).toThrow(/pass options.parse/);
   });
 });

@@ -1,6 +1,7 @@
 /** biome-ignore-all lint/complexity/noThisInStatic: I explicitly need to refer to "this" and not Jadis for code hint when creating components */
 
 import { assert } from './helpers/assert.helper';
+import { defaultAttributeParser } from './helpers/attribute.helper';
 import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
 
@@ -17,7 +18,7 @@ import type {
   SchemaToEvents,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
-import type { ChangeOptions, UseChangeHandler, UseEventsHandler } from './types/jadis.type';
+import type { AttributeParser, ChangeOptions, UseChangeHandler, UseEventsHandler } from './types/jadis.type';
 
 type AttributeCallback = (value: string | null, oldValue: string | null) => void;
 type AttributeCallbacks<Attribute extends string> = Record<Attribute, AttributeCallback>;
@@ -160,11 +161,13 @@ export abstract class Jadis extends HTMLElement {
 
     this.renderTemplate();
     this._isConnected = true;
-    // Changes made before the connection apply now, before the browser
-    // paints; attributes come after them, so an attribute set on the element
-    // wins over a property set before it was connected.
-    this.runConnectActions();
+    // Attributes apply first, then the changes made before the connection,
+    // all before the browser paints. A waiting change calls back with the
+    // value current then, so an attribute set on the element still wins over
+    // a property set before it was connected, and a callback writing an
+    // attribute on the element cannot overwrite one it was written with.
     this.observeAttributes();
+    this.runConnectActions();
 
     setTimeout(() => {
       this.onConnect?.();
@@ -360,17 +363,29 @@ export abstract class Jadis extends HTMLElement {
   }
 
   /**
-   * Registers a callback for a specific event on an element.
-   * @param element The element to listen for events on
+   * Registers a callback for a specific event on an element, the window or the document.
+   * The listener is removed when the component disconnects.
+   * @param target The element, window or document to listen for events on
    * @param eventName The event key to listen for
    * @param callback The callback to invoke when the event is emitted
    */
   protected on<Element extends HTMLElement, EventName extends keyof HTMLElementEventMap>(
-    element: Element,
+    target: Element,
     eventName: EventName,
     callback: (event: HTMLElementEventMap[EventName]) => void
-  ): void {
-    element.addEventListener(eventName, callback, {
+  ): void;
+  protected on<EventName extends keyof WindowEventMap>(
+    target: Window,
+    eventName: EventName,
+    callback: (event: WindowEventMap[EventName]) => void
+  ): void;
+  protected on<EventName extends keyof DocumentEventMap>(
+    target: Document,
+    eventName: EventName,
+    callback: (event: DocumentEventMap[EventName]) => void
+  ): void;
+  protected on(target: EventTarget, eventName: string, callback: (event: Event) => void): void {
+    target.addEventListener(eventName, callback, {
       signal: this.killSignal,
     });
   }
@@ -422,14 +437,22 @@ export abstract class Jadis extends HTMLElement {
    * Creates a change handler variable.
    * @param initialValue The initial value of the change handler variable
    * @param onChange A callback function that is called when the change handler variable changes
-   * @param options Optional configuration for the change handler
+   * @param options Optional configuration for the change handler:
+   * `immediate` calls onChange once with the initial value;
+   * `attribute` sets the variable from that attribute, through `parse`
+   * (by default from the initial value's type: text, a number, or present for true),
+   * and turns `immediate` on unless it is given
    * @returns An object with `get` and `set` methods for the change handler variable
+   * @example
+   * readonly label = this.useChange('', (value) => { this.refs.label.textContent = value; }, { attribute: 'label' });
    */
   protected useChange<T>(
     initialValue: T,
     onChange: (newValue: T, oldValue: T) => void,
-    { immediate = false }: ChangeOptions = {}
+    options: ChangeOptions<T> = {}
   ): Readonly<UseChangeHandler<T>> {
+    const { attribute, parse } = options;
+    const immediate = options.immediate ?? attribute !== undefined;
     // Changes made while disconnected wait for the connection, then call
     // onChange once: with the value current then, and the value before the
     // first of them.
@@ -457,8 +480,15 @@ export abstract class Jadis extends HTMLElement {
     if (immediate) {
       update(initialValue, initialValue);
     }
+    if (attribute !== undefined) {
+      this.bindAttribute(attribute, handler, parse ?? defaultAttributeParser(initialValue));
+    }
 
     return handler;
+  }
+
+  private bindAttribute<T>(attribute: string, handler: ChangeHandler<T>, parse: AttributeParser<T>): void {
+    this.useAttributes({ [attribute]: (value: string | null) => handler.set(parse(value)) });
   }
 
   private renderTemplate(): void {
