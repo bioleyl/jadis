@@ -34,12 +34,13 @@ When the component is removed from the DOM, the signal aborts and all associated
 
 ## Manual Usage
 
-For event listeners outside of Jadis helpers (e.g., on `window` or `document`):
+`this.on()` also takes `window` and `document`. For anything else that outlives the component, a `fetch` or another event target, pass the signal yourself:
 
 ```typescript
 onConnect(): void {
-  window.addEventListener('resize', () => {
-    console.log('Resized');
+  fetch('/api/items', { signal: this.killSignal });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    console.log('Theme changed');
   }, { signal: this.killSignal });
 }
 ```

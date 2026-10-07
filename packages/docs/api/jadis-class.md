@@ -87,7 +87,7 @@ See [Templates](../guides/templates.md) and [Styles](../templating/css.md).
 | `useChange(initial, onChange, options?)` | State with getter/setter and change callback. |
 | `useEvents<T>()` | Type-safe event emitter with `register()` and `emit()`. |
 | `onBus(bus, eventName, callback)` | Listen to events on a shared Bus. |
-| `this.on(element, event, callback)` | Auto-cleaned DOM event listener. |
+| `this.on(target, event, callback)` | Auto-cleaned event listener on an element, the window or the document. |
 
 ## Example
 

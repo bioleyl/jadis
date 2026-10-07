@@ -360,17 +360,29 @@ export abstract class Jadis extends HTMLElement {
   }
 
   /**
-   * Registers a callback for a specific event on an element.
-   * @param element The element to listen for events on
+   * Registers a callback for a specific event on an element, the window or the document.
+   * The listener is removed when the component disconnects.
+   * @param target The element, window or document to listen for events on
    * @param eventName The event key to listen for
    * @param callback The callback to invoke when the event is emitted
    */
   protected on<Element extends HTMLElement, EventName extends keyof HTMLElementEventMap>(
-    element: Element,
+    target: Element,
     eventName: EventName,
     callback: (event: HTMLElementEventMap[EventName]) => void
-  ): void {
-    element.addEventListener(eventName, callback, {
+  ): void;
+  protected on<EventName extends keyof WindowEventMap>(
+    target: Window,
+    eventName: EventName,
+    callback: (event: WindowEventMap[EventName]) => void
+  ): void;
+  protected on<EventName extends keyof DocumentEventMap>(
+    target: Document,
+    eventName: EventName,
+    callback: (event: DocumentEventMap[EventName]) => void
+  ): void;
+  protected on(target: EventTarget, eventName: string, callback: (event: Event) => void): void {
+    target.addEventListener(eventName, callback, {
       signal: this.killSignal,
     });
   }

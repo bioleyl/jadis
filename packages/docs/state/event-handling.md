@@ -10,7 +10,7 @@ this.on(<element>, <eventName>, <callback>)
 
 ### Parameters
 
-- `element`: an `<HTMLElement>` on which a listener is added
+- `element`: an `<HTMLElement>`, `window` or `document` on which a listener is added
 - `eventName`: a string corresponding to the event name to listen to
 - `callback`: a callback function invoked as the event is emitted
 

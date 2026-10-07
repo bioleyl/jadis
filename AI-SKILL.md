@@ -22,7 +22,7 @@ Consequences:
 
 - Wire **all** listeners inside `onConnect()`. Cleanup is automatic; manual `removeEventListener` is a smell.
 - Never assume a single connection: `onConnect()` runs again on the same DOM after every reconnection (moving an element counts). Make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds rather than a "connected once" flag.
-- Stop what outlives the component: pass `this.killSignal` to `fetch` and to listeners on `window` or `document` (`addEventListener(type, listener, { signal: this.killSignal })`; `this.on()` only takes elements), clear timers in `onDisconnect()`. After an `await` in `onConnect()`, check `this.isConnected` before touching the DOM.
+- Stop what outlives the component: pass `this.killSignal` to `fetch` and to listeners on `window` or `document` (`this.on(window, 'resize', …)` and `this.on(document, …)` do it for you), clear timers in `onDisconnect()`. After an `await` in `onConnect()`, check `this.isConnected` before touching the DOM.
 - In tests, what `useChange` and attribute callbacks render is there right after `appendChild`; what `onConnect()` does needs a task (Playwright's auto-waiting or `waitForFunction` handles this).
 - `useChange` updates made before connection are applied **synchronously** while the component connects, once per handler with the latest value, before attribute callbacks and before the browser paints. `onConnect()` still runs a task later.
 

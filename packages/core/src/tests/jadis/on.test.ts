@@ -48,4 +48,24 @@ describe('Jadis — on', () => {
     // The callback should not be called because signal is aborted
     expect(callback).not.toHaveBeenCalled();
   });
+
+  it('listens on the window and the document until the component disconnects', () => {
+    const el = createElement(TestComponent, {}, document.body);
+    const onWindow = vi.fn();
+    const onDocument = vi.fn();
+    el['on'](window, 'resize', onWindow);
+    el['on'](document, 'keydown', onDocument);
+
+    window.dispatchEvent(new Event('resize'));
+    document.dispatchEvent(new KeyboardEvent('keydown'));
+    expect(onWindow).toHaveBeenCalledTimes(1);
+    expect(onDocument).toHaveBeenCalledTimes(1);
+
+    document.body.removeChild(el);
+    window.dispatchEvent(new Event('resize'));
+    document.dispatchEvent(new KeyboardEvent('keydown'));
+
+    expect(onWindow).toHaveBeenCalledTimes(1);
+    expect(onDocument).toHaveBeenCalledTimes(1);
+  });
 });
