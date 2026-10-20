@@ -25,4 +25,11 @@ export type {
   UseChangeHandler as ChangeStateHandler,
   UseEventsHandler,
 } from './types/jadis.type';
-export type { Route, RouterMode, RouterOptions } from './types/router.type';
+export type {
+  ActiveRoute,
+  Route,
+  RouteDefinition,
+  RoutedPage,
+  RouterMode,
+  RouterOptions,
+} from './types/router.type';

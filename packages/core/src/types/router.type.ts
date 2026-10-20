@@ -25,7 +25,12 @@ export interface RouterOptions {
   mode?: RouterMode;
   /** The base URL for the router, defaults to '/'. */
   baseUrl?: string;
+  /** Stops the router from following the URL once aborted. */
+  signal?: AbortSignal;
 }
+
+/** The router's configuration, as `config` gives it back. */
+export type RouterConfig = Required<Omit<RouterOptions, 'signal'>>;
 
 export interface RouteOptions {
   /** The prefix for the route names in the group. */
@@ -40,12 +45,45 @@ export interface Route {
   componentSelector: string;
 }
 
+/** The route the URL is on: its parameters, and its query. */
+export interface ActiveRoute extends Route {
+  /** The path parameters read from the URL, by their names in the route's path. */
+  params: Record<string, string>;
+  /** The query of the URL; in hash mode, the part of the hash after `?`. */
+  query: URLSearchParams;
+}
+
+/**
+ * What a page component can declare to work with the router. Both are optional:
+ * a page without onRoute is made again at each navigation.
+ */
+export interface RoutedPage {
+  /**
+   * Called with the route once the page is connected (after its onConnect), then at each
+   * URL change whose route is on the same page: the router keeps the page instead of making it again.
+   */
+  onRoute?(route: ActiveRoute): void;
+  /** Called before the URL changes; returning false keeps the page, and puts the URL back. */
+  canLeave?(next: ActiveRoute): boolean;
+}
+
 export interface InternalRoute extends Route {
   regexp: RegExp;
 }
 
 export interface MatchedRoute extends InternalRoute {
   urlPath: string;
+}
+
+/** What the router mounted for a route: the elements from the root component to the page. */
+export interface MountedPage {
+  componentSelector: string;
+  elements: HTMLElement[];
+  page: HTMLElement & RoutedPage;
+  /** The parameters set as attributes on the elements. */
+  params: Record<string, string>;
+  /** Whether the page's onConnect has run: until then, the route waits to be given to it. */
+  connected: boolean;
 }
 
 /** Extracts route parameters from a path literal */
