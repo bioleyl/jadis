@@ -78,20 +78,20 @@ jobs:
           git push origin "core-v${{ env.VERSION }}"
       
       - name: Create GitHub Release
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: core-v${{ env.VERSION }}
-          release_name: '@jadis/core v${{ env.VERSION }}'
-          body: |
-            ## @jadis/core v${{ env.VERSION }}
-            
-            ${{ inputs.release_notes }}
-            
-            ### Installation
-            ```bash
-            npm install @jadis/core@${{ env.VERSION }}
-            ```
-          draft: false
-          prerelease: ${{ inputs.prerelease }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          printf -v notes '## @jadis/core v%s\n\n%s\n\n### Installation\n```bash\nnpm install @jadis/core@%s\n```' \
+            "$VERSION" "$RELEASE_NOTES" "$VERSION"
+
+          release_args=(
+            --title "@jadis/core v$VERSION"
+            --notes "$notes"
+          )
+          if [[ "$PRERELEASE" == "true" ]]; then
+            release_args+=(--prerelease)
+          fi
+
+          gh release create "core-v$VERSION" "${release_args[@]}"
