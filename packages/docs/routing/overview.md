@@ -59,6 +59,10 @@ const routes = defineRoutes({
 
 Navigating to `/user/42` renders `<user-page id="42"></user-page>`.
 
+## Query
+
+The query is not part of matching: `/user/42?tab=posts` (or `/#/user/42?tab=posts` in hash mode) matches `/user/:id`. Read it from `router.currentRoute.query`, a `URLSearchParams`, or from the route a [routed page](./routed-pages.md) receives.
+
 ## Root Components
 
 Routes can specify a `rootComponentSelector` for shared layouts:
@@ -80,11 +84,12 @@ This wraps the page component inside the specified layout component, which shows
 - **The first matching route wins**, and a `:param` matches across `/`: `/user/:id` also matches `/user/42/edit`. List specific routes before general ones.
 - **A URL that no route matches throws.** End your routes with a catch-all, such as `notFound: { path: '/:rest', page: NotFoundPage }`.
 - **Links are not intercepted.** In history mode, `<a href="/about">` reloads the whole page. Call `router.goto()` from a click handler, or use hash mode with `href="#/about"`.
-- **Every navigation creates the page component again**, and its root component too: state kept in them is lost. Keep what must outlive a page in a service or a [Bus](../api/bus-class.md).
+- **Every navigation creates the page component again**, and its root component too: state kept in them is lost. A page that declares `onRoute` is kept while the routes stay on it, and one that declares `canLeave` can hold the person back: see [Routed Pages](./routed-pages.md). Keep what must outlive a page in a service or a [Bus](../api/bus-class.md).
 - Register the page and root components before navigating to them.
 
 ## See Also
 
 - [Declaring Routes](./routes.md) — Route definitions and navigation.
 - [Route Groups](./route-groups.md) — Organizing routes with shared prefixes.
+- [Routed Pages](./routed-pages.md) — Keeping a page between routes, and holding the person back.
 - [Router API Reference](../api/router-class.md) — Complete API documentation.

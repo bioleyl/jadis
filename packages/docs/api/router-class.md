@@ -27,6 +27,7 @@ new Router(routes: RouteDefinitions, options?: RouterOptions);
 interface RouterOptions {
   mode?: 'hash' | 'history';   // Navigation mode (default: 'history')
   baseUrl?: string;             // Base URL for subdirectory deployments
+  signal?: AbortSignal;         // Stops following the URL once aborted
 }
 ```
 
@@ -34,7 +35,7 @@ interface RouterOptions {
 
 | Property | Type | Description |
 |---|---|---|
-| `currentRoute` | `Route` | The currently matched route (`name`, `path`, and `componentSelector`). Throws if no route has been matched yet. |
+| `currentRoute` | `ActiveRoute` | The currently matched route (`name`, `path`, `componentSelector`), with its `params` and its `query`. Throws if no route has been matched yet. |
 
 ## Methods
 
@@ -52,7 +53,7 @@ router.mountOn(document.getElementById('app') ?? document.body);
 
 ### `goto(routeKey, params?)`
 
-Navigates to a route by its key.
+Navigates to a route by its key, unless the current page's `canLeave` refuses it.
 
 ```typescript
 router.goto('home');
@@ -91,6 +92,19 @@ const routes = defineRoutes({
 ```
 
 Parameters are passed as attributes to the page component.
+
+## Routed Pages
+
+A page can declare `onRoute(route)`, to be kept while the routes stay on it, and `canLeave(next)`, to hold the person back:
+
+```typescript
+interface RoutedPage {
+  onRoute?(route: ActiveRoute): void;
+  canLeave?(next: ActiveRoute): boolean;
+}
+```
+
+See [Routed Pages](../routing/routed-pages.md) for details.
 
 ## Route Groups
 
@@ -132,3 +146,4 @@ router.goto('adminUsers');
 - [Routing Overview](../routing/overview.md) — Getting started with routing.
 - [Declaring Routes](../routing/routes.md) — Route definitions and navigation.
 - [Route Groups](../routing/route-groups.md) — Organizing routes.
+- [Routed Pages](../routing/routed-pages.md) — Keeping a page between routes, and holding the person back.

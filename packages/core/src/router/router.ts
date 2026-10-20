@@ -1,19 +1,22 @@
 import { assert } from '../helpers/assert.helper';
-import { createElement } from '../helpers/element.helper';
+import { applyElementAttributes, createElement } from '../helpers/element.helper';
 import { normalizePath } from '../helpers/router.helper';
-import { COMPONENT_SELECTOR_SEPARATOR, ROUTER_PARAMETER_PREFIX } from './router-constants';
+import { toKebabCase } from '../helpers/string.helper';
+import { COMPONENT_SELECTOR_SEPARATOR, QUERY_SEPARATOR, ROUTER_PARAMETER_PREFIX } from './router-constants';
 
 import type {
+  ActiveRoute,
   ExtractParams,
   InternalRoute,
   MatchedRoute,
-  Route,
+  MountedPage,
   RouteDefinition,
+  RouterConfig,
   RouterMode,
   RouterOptions,
 } from '../types/router.type';
 
-const defaultOptions: Required<RouterOptions> = {
+const defaultOptions: RouterConfig = {
   baseUrl: '/',
   mode: 'history',
 };
@@ -22,6 +25,8 @@ const defaultOptions: Required<RouterOptions> = {
  * Router class for managing navigation and routing in a web application.
  * It supports both hash and history modes for navigation.
  * It allows defining routes, navigating to them, and mounting components based on the current URL.
+ * A page that declares onRoute is kept while the routes stay on it; one that declares canLeave
+ * can keep the person on it (see RoutedPage).
  */
 export class Router<T extends Record<string, RouteDefinition>> {
   private readonly _routes: Array<InternalRoute> = [];
@@ -29,35 +34,31 @@ export class Router<T extends Record<string, RouteDefinition>> {
   private readonly _baseUrl: string;
   private readonly _parametersRegexp = new RegExp(`${ROUTER_PARAMETER_PREFIX}\\w+`, 'g');
   private _mount?: HTMLElement;
-  private _currentRoute?: Route;
+  private _currentRoute?: ActiveRoute;
+  private _mountedPage?: MountedPage;
+  /** The URL of the route shown: put back when the page refuses to be left. */
+  private _shownUrl?: string;
 
   constructor(routes: T, options?: RouterOptions) {
     this._mode = options?.mode ?? defaultOptions.mode;
     this._baseUrl = options?.baseUrl ?? defaultOptions.baseUrl;
-    this._routes = Object.entries(routes).map(([name, def]) => {
-      const path = normalizePath(`/${def.path}`);
-      const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
-      return {
-        componentSelector: [def.options?.rootComponentSelector, def.page.selector]
-          .filter(Boolean)
-          .join(COMPONENT_SELECTOR_SEPARATOR),
-        name,
-        path,
-        regexp: new RegExp(`^${pathWithoutParameters}$`),
-      };
-    });
+    this._routes = Object.entries(routes).map(([name, def]) => this.toInternalRoute(name, def));
 
-    window.addEventListener(this.eventName, (evt) => {
-      evt.preventDefault();
-      this.onUrlChange();
-    });
+    window.addEventListener(
+      this.eventName,
+      (evt) => {
+        evt.preventDefault();
+        this.onUrlChange();
+      },
+      { signal: options?.signal }
+    );
   }
 
   /**
    * Gets the router configuration.
-   * @returns {Required<RouterOptions>} The router configuration including mode and baseUrl
+   * @returns {RouterConfig} The router configuration including mode and baseUrl
    */
-  get config(): Required<RouterOptions> {
+  get config(): RouterConfig {
     return {
       baseUrl: this._baseUrl,
       mode: this._mode,
@@ -65,11 +66,11 @@ export class Router<T extends Record<string, RouteDefinition>> {
   }
 
   /**
-   * Gets the current route.
+   * Gets the current route, with its parameters and its query.
    * @throws Will throw an error if no route is found
-   * @returns {Route} The current route
+   * @returns {ActiveRoute} The current route
    */
-  get currentRoute(): Route {
+  get currentRoute(): ActiveRoute {
     assert(this._currentRoute, 'No route found');
     return this._currentRoute;
   }
@@ -80,11 +81,11 @@ export class Router<T extends Record<string, RouteDefinition>> {
    */
   mountOn(el: HTMLElement) {
     this._mount = el;
-    this.onUrlChange();
+    this.showRoute(this.matchCurrentUrl());
   }
 
   /**
-   * Navigates to a route by its name.
+   * Navigates to a route by its name, unless the current page refuses to be left.
    * @param {string} name The name of the route to navigate to
    * @param {Record<string, string>} [params] The parameters to include with the route
    */
@@ -97,7 +98,13 @@ export class Router<T extends Record<string, RouteDefinition>> {
     const route = this.getRouteByName(String(name));
     assert(route, `No route found for name: ${String(name)}`);
 
-    this.gotoPath(this.buildPath(route.path, params));
+    const path = this.buildPath(route.path, params);
+    const next = this.matchPath(path, new URLSearchParams());
+    if (this.pageRefusesToLeave(next)) {
+      return;
+    }
+    this.pushUrl(path);
+    this.showRoute(next);
   }
 
   private get baseUrl(): string {
@@ -113,29 +120,164 @@ export class Router<T extends Record<string, RouteDefinition>> {
     return this._mode === 'hash' ? 'hashchange' : 'popstate';
   }
 
-  private get currentUrlPath() {
-    const formattedPath = window.location.pathname.startsWith(this.baseUrl)
-      ? window.location.pathname.slice(this.baseUrl.length)
-      : window.location.pathname;
-    const path = this._mode === 'hash' ? window.location.hash.slice(1) : formattedPath;
-    return normalizePath(path);
+  private toInternalRoute(name: string, def: RouteDefinition): InternalRoute {
+    const path = normalizePath(`/${def.path}`);
+    return {
+      componentSelector: this.buildComponentSelector(def),
+      name,
+      path,
+      regexp: this.buildPathRegexp(path),
+    };
   }
 
-  private gotoPath(path: string) {
+  private buildComponentSelector(def: RouteDefinition): string {
+    return [def.options?.rootComponentSelector, def.page.selector]
+      .filter(Boolean)
+      .join(COMPONENT_SELECTOR_SEPARATOR);
+  }
+
+  /** The regexp matching the path, each parameter capturing its value. */
+  private buildPathRegexp(path: string): RegExp {
+    const pathWithoutParameters = path.replace(this._parametersRegexp, '(.+)');
+    return new RegExp(`^${pathWithoutParameters}$`);
+  }
+
+  /** The route of the current URL: its path, and its query (in hash mode, the hash's). */
+  private matchCurrentUrl(): ActiveRoute {
+    const [path, query] = this._mode === 'hash' ? this.readHashUrl() : this.readHistoryUrl();
+    return this.matchPath(normalizePath(path), query);
+  }
+
+  private readHashUrl(): [string, URLSearchParams] {
+    return this.splitPathAndQuery(window.location.hash.slice(1));
+  }
+
+  private readHistoryUrl(): [string, URLSearchParams] {
+    return [this.stripBaseUrl(window.location.pathname), new URLSearchParams(window.location.search)];
+  }
+
+  private stripBaseUrl(pathname: string): string {
+    return pathname.startsWith(this.baseUrl) ? pathname.slice(this.baseUrl.length) : pathname;
+  }
+
+  /** Splits a URL path from its query, at the first `?`. */
+  private splitPathAndQuery(text: string): [string, URLSearchParams] {
+    const index = text.indexOf(QUERY_SEPARATOR);
+    return index === -1
+      ? [text, new URLSearchParams()]
+      : [text.slice(0, index), new URLSearchParams(text.slice(index))];
+  }
+
+  private pushUrl(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
     window.history.pushState({}, '', normalizePath(`${this.baseUrl}/${urlPath}`));
-    this.onUrlChange();
   }
 
   private onUrlChange() {
-    const urlPath = this.currentUrlPath;
+    const next = this.matchCurrentUrl();
+    if (this.urlDiffersFromShown() && this.pageRefusesToLeave(next)) {
+      this.restoreShownUrl();
+      return;
+    }
+    this.showRoute(next);
+  }
 
-    const matchedRoute = this.getRouteByPath(urlPath);
-    assert(matchedRoute, `No route found for path: ${urlPath}`);
-    this._currentRoute = matchedRoute;
+  private urlDiffersFromShown(): boolean {
+    return window.location.href !== this._shownUrl;
+  }
 
-    const component = this.getComponentToLoad({ ...matchedRoute, urlPath });
-    this.mountPoint.replaceChildren(component);
+  /** Puts back the URL of the route shown, without adding a history entry. */
+  private restoreShownUrl() {
+    window.history.replaceState(window.history.state, '', this._shownUrl);
+  }
+
+  /** Whether the mounted page refuses to let the person go to the next route. */
+  private pageRefusesToLeave(next: ActiveRoute): boolean {
+    return this._mountedPage?.page.canLeave?.(next) === false;
+  }
+
+  /** Shows the route: on the page mounted when it can follow it, else on a new one. */
+  private showRoute(next: ActiveRoute) {
+    this._currentRoute = next;
+    this._shownUrl = window.location.href;
+    this.sendRouteToPage(this.reuseMountedPage(next) ?? this.mountPage(next));
+  }
+
+  /** The page mounted, with the new parameters, when it is the route's page and follows routes itself. */
+  private reuseMountedPage(next: ActiveRoute): MountedPage | undefined {
+    const mounted = this._mountedPage;
+    if (!mounted || !this.canReusePage(mounted, next)) {
+      return undefined;
+    }
+    this.updatePageParams(mounted, next.params);
+    return mounted;
+  }
+
+  /** Whether the mounted page is the route's page and follows routes itself. */
+  private canReusePage(mounted: MountedPage, next: ActiveRoute): boolean {
+    return mounted.componentSelector === next.componentSelector && typeof mounted.page.onRoute === 'function';
+  }
+
+  /** Sets the new parameters on the page's elements, removing those the route no longer has. */
+  private updatePageParams(mounted: MountedPage, params: Record<string, string>) {
+    const removedParams = Object.keys(mounted.params).filter((param) => !Object.hasOwn(params, param));
+    for (const element of mounted.elements) {
+      for (const param of removedParams) {
+        element.removeAttribute(toKebabCase(param));
+      }
+      applyElementAttributes(element, params);
+    }
+    mounted.params = params;
+  }
+
+  private mountPage(next: ActiveRoute): MountedPage {
+    const { componentSelector, params } = next;
+    const elements = this.createPageElements(componentSelector, params);
+    const [rootElement] = elements;
+    const mounted: MountedPage = {
+      componentSelector,
+      connected: false,
+      elements,
+      page: elements.at(-1) ?? rootElement,
+      params,
+    };
+    this._mountedPage = mounted;
+    this.mountPoint.replaceChildren(rootElement);
+    this.sendRouteOnceConnected(mounted);
+    return mounted;
+  }
+
+  /** Creates the page's elements, from the root component down, each nested in the previous one. */
+  private createPageElements(componentSelector: string, params: Record<string, string>): Array<HTMLElement> {
+    const [rootComponent, ...childComponents] = componentSelector.split(COMPONENT_SELECTOR_SEPARATOR);
+    const elements = [createElement(rootComponent, { attrs: params })];
+    for (const selector of childComponents) {
+      elements.push(createElement(selector, { attrs: params }, elements.at(-1)));
+    }
+    return elements;
+  }
+
+  private sendRouteOnceConnected(mounted: MountedPage) {
+    // Jadis runs onConnect in the task after connecting: the page gets its route once it is wired.
+    setTimeout(() => {
+      mounted.connected = true;
+      this.sendRouteToPage(mounted);
+    });
+  }
+
+  /** Sends the current route to the mounted page's onRoute, once it is connected and while it is still shown. */
+  private sendRouteToPage(mounted: MountedPage) {
+    if (!mounted.connected || this._mountedPage !== mounted) {
+      return;
+    }
+    mounted.page.onRoute?.(this.currentRoute);
+  }
+
+  private matchPath(urlPath: string, query: URLSearchParams): ActiveRoute {
+    const route = this.getRouteByPath(urlPath);
+    assert(route, `No route found for path: ${urlPath}`);
+    const { componentSelector, name, path } = route;
+    return { componentSelector, name, params: this.getRouteParameters({ ...route, urlPath }), path, query };
   }
 
   private buildPath(routePath: string, params: Record<string, string> = {}): string {
@@ -144,16 +286,6 @@ export class Router<T extends Record<string, RouteDefinition>> {
       return acc.replace(`${ROUTER_PARAMETER_PREFIX}${param}`, params[param]);
     }, routePath);
     return normalizePath(path);
-  }
-
-  private getComponentToLoad(matchedRoute: MatchedRoute): Node {
-    const { componentSelector } = matchedRoute;
-    const params = this.getRouteParameters(matchedRoute);
-
-    const [rootComponent, ...childComponents] = componentSelector.split(COMPONENT_SELECTOR_SEPARATOR);
-    const rootElement = createElement(rootComponent, { attrs: params });
-    childComponents.reduce((parent, selector) => createElement(selector, { attrs: params }, parent), rootElement);
-    return rootElement;
   }
 
   private getRouteParameters(matchedRoute: MatchedRoute): Record<string, string> {

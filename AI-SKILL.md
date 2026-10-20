@@ -322,7 +322,10 @@ router.goto('profile', { id: '42' });
 - **The first route that matches wins**, and a `:param` matches across `/` (`/user/:id` also matches `/user/1/edit`): list specific routes first.
 - **A URL no route matches throws.** End the routes with a catch-all such as `notFound: { page: NotFoundPage, path: '/:rest' }`.
 - **Links are not intercepted.** In history mode, `<a href="/profile/42">` reloads the page: call `router.goto(...)` from a click handler, or use hash mode with `href="#/profile/42"`.
-- Every navigation creates the page component (and its group's root component) again: their state is lost. A root component shows the page through a `<slot>`.
+- Every navigation creates the page component (and its group's root component) again: their state is lost, unless the page declares `onRoute(route)`. Such a page is kept while the routes stay on it (same page and root component, even under another route name): the router updates its parameter attributes and calls `onRoute` again. The first `onRoute` comes after `onConnect`. A root component shows the page through a `<slot>`.
+- A page's `canLeave(next)` is asked before each URL change; `false` cancels a `goto`, or puts back a URL changed by a link or the back button. Keep it synchronous. Type both with `implements RoutedPage`.
+- The query is not matched: `router.currentRoute.query` (and the route given to `onRoute`) holds it as `URLSearchParams`, in hash mode too.
+- Pass `signal` in the options to stop the router following the URL.
 - Params become attributes on the page component: read `id` with `useAttributes` or `getAttribute('id')`.
 - Group routes with `defineRouteGroup('/group', { ... }, { rootComponentSelector: 'group-root' })`; names concatenate (`groupHome`).
 - `goto` throws on unknown routes and missing params — handle both deliberately.

@@ -143,6 +143,10 @@ export default defineConfig({
               link: '/routing/route-groups',
               text: 'Route Groups',
             },
+            {
+              link: '/routing/routed-pages',
+              text: 'Routed Pages',
+            },
           ],
         },
         {
