@@ -129,5 +129,17 @@
         }
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        }
+      },
+      "includes": ["**/*.json"]
+    }
+  ]
 }

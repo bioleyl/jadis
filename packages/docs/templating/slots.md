@@ -107,6 +107,10 @@ MainPage.register();
 
 The `<h1>` and the `<p>` elements will be rendered through the MainPage component using the MyComponent component.
 
+In TypeScript, the component can be written by its class too, with the same content between its tags:
+`<MyComponent><h1>My Title</h1></MyComponent>`. Its inputs are then type-checked, and a bundler keeps the
+component, since the page uses its class.
+
 ## Named slots
 
 If you need to use several slots in the same component, just name them!
