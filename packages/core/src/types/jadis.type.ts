@@ -1,4 +1,17 @@
-import type { KeysWithoutUndefined, KeysWithUndefined } from '../helpers/type.helper';
+import type { JadisConstructor } from '../base-component';
+import type {
+  KeysWithoutUndefined,
+  KeysWithUndefined,
+  SelectorToElementWithFallback,
+} from '../helpers/type.helper';
+
+/** The `ref` that `useRefs` hands its callback: points at an element by a query, or at a component by its class. */
+export type UseRefsRef = {
+  <Element extends HTMLElement = HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+    query: Tag
+  ): SelectorToElementWithFallback<Tag, Element>;
+  <Component extends JadisConstructor>(component: Component): InstanceType<Component>;
+};
 
 export type UseEventsHandler<EventTypes extends Record<string, unknown>> = {
   /**

@@ -30,7 +30,7 @@ class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
   _refs = this.useRefs((ref) => ({
-    childComponent: ref('child-component'),
+    childComponent: ref(ChildComponent),
   }));
 
   templateHtml() {
@@ -65,7 +65,7 @@ class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
 
   readonly _refs = this.useRefs((ref) => ({
-    childComponent: ref<ChildComponent>('child-component'),
+    childComponent: ref(ChildComponent),
   }));
 
   templateHtml(): Node {
@@ -105,8 +105,7 @@ class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
   _refs = this.useRefs((ref) => ({
-    /** @type {ChildComponent} */
-    childComponent: ref('child-component'),
+    childComponent: ref(ChildComponent),
   }));
 
   templateHtml() {

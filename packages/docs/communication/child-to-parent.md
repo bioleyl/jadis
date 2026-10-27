@@ -89,7 +89,7 @@ class ParentComponent extends Jadis {
 
   _refs = this.useRefs((ref) => ({
     message: ref('#message'),
-    childComponent: ref('child-component'),
+    childComponent: ref(ChildComponent),
   }));
 
   templateHtml() {
@@ -138,7 +138,7 @@ class ParentComponent extends Jadis {
 
   _refs = this.useRefs((ref) => ({
     message: ref<HTMLParagraphElement>('#message'),
-    childComponent: ref<ChildComponent>('child-component'),
+    childComponent: ref(ChildComponent),
   }));
 
   templateHtml(): Node {
@@ -191,8 +191,7 @@ class ParentComponent extends Jadis {
   _refs = this.useRefs((ref) => ({
     /** @type {HTMLParagraphElement} */
     message: ref('#message'),
-    /** @type {ChildComponent} */
-    childComponent: ref('child-component'),
+    childComponent: ref(ChildComponent),
   }));
 
   templateHtml() {

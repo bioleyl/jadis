@@ -192,6 +192,7 @@ Three tools, in order of preference:
 private readonly _refs = this.useRefs((ref) => ({
   input: ref<HTMLInputElement>('#input'),
   submit: ref<HTMLButtonElement>('#submit'),
+  status: ref(StatusBadge), // a Jadis class: found by its selector, typed as StatusBadge
 }));
 ```
 
