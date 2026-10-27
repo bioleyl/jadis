@@ -55,10 +55,10 @@ class CounterButton extends Jadis {
   static selector = createSelector('counter-component');
 
   count = this.useChange(0, (val) => {
-    this.refs.count.textContent = val.toString();
+    this._refs.count.textContent = val.toString();
   }, { immediate: true });
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     count: ref('span'),
     incrementButton: ref('button'),
   }));
@@ -73,7 +73,7 @@ class CounterButton extends Jadis {
   }
 
   onConnect() {
-    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
+    this.on(this._refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
   }
 }
 
@@ -87,10 +87,10 @@ class CounterButton extends Jadis {
   static readonly selector = 'counter-component';
 
   private readonly count = this.useChange(0, (val) => {
-    this.refs.count.textContent = val.toString();
+    this._refs.count.textContent = val.toString();
   }, { immediate: true });
 
-  private readonly refs = this.useRefs((ref) => ({
+  private readonly _refs = this.useRefs((ref) => ({
     count: ref('span'),
     incrementButton: ref('button'),
   }));
@@ -105,7 +105,7 @@ class CounterButton extends Jadis {
   }
 
   onConnect(): void {
-    this.on(this.refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
+    this.on(this._refs.incrementButton, 'click', () => this.count.set((v) => v + 1));
   }
 }
 

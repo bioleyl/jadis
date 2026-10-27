@@ -87,7 +87,7 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     message: ref('#message'),
     childComponent: ref('child-component'),
   }));
@@ -102,8 +102,8 @@ class ParentComponent extends Jadis {
   }
 
   onConnect() {
-    this.refs.childComponent.events.register('someEvent', (data) => {
-      this.refs.message.textContent = data;
+    this._refs.childComponent.events.register('someEvent', (data) => {
+      this._refs.message.textContent = data;
     });
   }
 }
@@ -136,7 +136,7 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static readonly selector = 'parent-component';
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     message: ref<HTMLParagraphElement>('#message'),
     childComponent: ref<ChildComponent>('child-component'),
   }));
@@ -151,8 +151,8 @@ class ParentComponent extends Jadis {
   }
 
   onConnect(): void {
-    this.refs.childComponent.events.register('someEvent', (data) => {
-      this.refs.message.textContent = data;
+    this._refs.childComponent.events.register('someEvent', (data) => {
+      this._refs.message.textContent = data;
     });
   }
 }
@@ -188,7 +188,7 @@ class ChildComponent extends Jadis {
 class ParentComponent extends Jadis {
   static selector = createSelector('parent-component');
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     /** @type {HTMLParagraphElement} */
     message: ref('#message'),
     /** @type {ChildComponent} */
@@ -205,8 +205,8 @@ class ParentComponent extends Jadis {
   }
 
   onConnect() {
-    this.refs.childComponent.events.register('someEvent', (data) => {
-      this.refs.message.textContent = data;
+    this._refs.childComponent.events.register('someEvent', (data) => {
+      this._refs.message.textContent = data;
     });
   }
 }

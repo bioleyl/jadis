@@ -59,14 +59,14 @@ class FormComponent extends Jadis {
     );
   }
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     input: ref('input.my-input'),
     button: ref('button'),
   }));
 
   onConnect() {
-    this.refs.button.addEventListener('click', () => {
-      console.log('Input value:', this.refs.input.value);
+    this._refs.button.addEventListener('click', () => {
+      console.log('Input value:', this._refs.input.value);
     }, { signal: this.killSignal });
   }
 }
@@ -87,14 +87,14 @@ class FormComponent extends Jadis {
     );
   }
 
-  readonly refs = this.useRefs((ref) => ({
+  readonly _refs = this.useRefs((ref) => ({
     input: ref<HTMLInputElement>('input.my-input'),
     button: ref('button'),
   }));
 
   onConnect() {
-    this.refs.button.addEventListener('click', () => {
-      console.log('Input value:', this.refs.input.value);
+    this._refs.button.addEventListener('click', () => {
+      console.log('Input value:', this._refs.input.value);
     }, { signal: this.killSignal });
   }
 }
@@ -119,15 +119,15 @@ class FormComponent extends Jadis {
     );
   }
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     /** @type {HTMLInputElement} */
     input: ref('input.my-input'),
     button: ref('button'),
   }));
 
   onConnect() {
-    this.refs.button.addEventListener('click', () => {
-      console.log('Input value:', this.refs.input.value);
+    this._refs.button.addEventListener('click', () => {
+      console.log('Input value:', this._refs.input.value);
     }, { signal: this.killSignal });
   }
 }

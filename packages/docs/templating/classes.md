@@ -31,7 +31,7 @@ export default class MyButton extends Jadis {
   static selector = createSelector('my-button');
   isError = false;
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     button: ref('button')
   }));
 
@@ -57,7 +57,7 @@ export default class MyButton extends Jadis {
   }
 
   onConnect() {
-    this.on(this.refs.button, 'click', () => {
+    this.on(this._refs.button, 'click', () => {
       this.isError = !this.isError;
       this.toggleClass('error', this.isError)
     });
@@ -74,7 +74,7 @@ export default class MyButton extends Jadis {
   static readonly selector = 'my-button';
   private isError = false;
 
-  private readonly refs = this.useRefs((ref) => ({
+  private readonly _refs = this.useRefs((ref) => ({
     button: ref<HTMLButtonElement>('button')
   }));
 
@@ -100,7 +100,7 @@ export default class MyButton extends Jadis {
   }
 
   onConnect(): void {
-    this.on(this.refs.button, 'click', () => {
+    this.on(this._refs.button, 'click', () => {
       this.isError = !this.isError;
       this.toggleClass('error', this.isError)
     });

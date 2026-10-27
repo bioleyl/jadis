@@ -69,13 +69,13 @@ import { createSelector, Jadis } from '@jadis/core';
 export default class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     name: ref('span'),
   }));
 
   attrs = this.useAttributes({
     name: (value) => {
-      this.refs.name.textContent = value ?? '';
+      this._refs.name.textContent = value ?? '';
     },
   });
 
@@ -93,13 +93,13 @@ import { Jadis } from '@jadis/core';
 export default class HelloPage extends Jadis {
   static readonly selector = 'hello-page';
 
-  readonly refs = this.useRefs((ref) => ({
+  readonly _refs = this.useRefs((ref) => ({
     name: ref('span'),
   }));
 
   readonly attrs = this.useAttributes({
     name: (value) => {
-      this.refs.name.textContent = value ?? '';
+      this._refs.name.textContent = value ?? '';
     },
   });
 

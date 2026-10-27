@@ -97,13 +97,13 @@ import { Jadis, css } from '@jadis/core';
 class MyComponent extends Jadis {
   static readonly selector = 'my-component';
 
-  private readonly refs = this.useRefs((ref) => ({
+  private readonly _refs = this.useRefs((ref) => ({
     display: ref<HTMLSpanElement>('span'),
     button: ref<HTMLButtonElement>('button'),
   }));
 
   private readonly count = this.useChange(0, (value) => {
-    this.refs.display.textContent = value.toString();
+    this._refs.display.textContent = value.toString();
   }, { immediate: true });
 
   templateHtml(): Node {
@@ -115,7 +115,7 @@ class MyComponent extends Jadis {
   }
 
   onConnect(): void {
-    this.on(this.refs.button, 'click', () => this.count.set((value) => value + 1));
+    this.on(this._refs.button, 'click', () => this.count.set((value) => value + 1));
   }
 }
 
