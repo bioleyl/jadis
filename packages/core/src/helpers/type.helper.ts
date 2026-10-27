@@ -49,7 +49,7 @@ export type ElementValues<T extends HTMLElement> = {
 export type OptionsWithProps<T> = { props?: T; attrs?: Record<string, string> };
 
 export type SelectorToElementWithFallback<
-  S extends keyof HTMLElementTagNameMap | string,
+  S extends string,
   Fallback extends HTMLElement = HTMLElement,
 > = S extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[S] : Fallback;
 

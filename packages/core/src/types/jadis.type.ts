@@ -7,7 +7,7 @@ import type {
 
 /** The `ref` that `useRefs` hands its callback: points at an element by a query, or at a component by its class. */
 export type UseRefsRef = {
-  <Element extends HTMLElement = HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+  <Element extends HTMLElement = HTMLElement, Tag extends string = string>(
     query: Tag
   ): SelectorToElementWithFallback<Tag, Element>;
   <Component extends JadisConstructor>(component: Component): InstanceType<Component>;

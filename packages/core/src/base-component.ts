@@ -31,10 +31,9 @@ type AttributeCallbacks<Attribute extends string> = Record<Attribute, AttributeC
 
 // The `ref` useRefs collects its queries with: it hands back the query, not
 // the element its signatures promise, and the getters look the element up.
-function collectRefQuery<
-  Element extends HTMLElement = HTMLElement,
-  Tag extends keyof HTMLElementTagNameMap | string = string,
->(query: Tag): SelectorToElementWithFallback<Tag, Element>;
+function collectRefQuery<Element extends HTMLElement = HTMLElement, Tag extends string = string>(
+  query: Tag
+): SelectorToElementWithFallback<Tag, Element>;
 function collectRefQuery<Component extends JadisConstructor>(component: Component): InstanceType<Component>;
 function collectRefQuery(target: string | JadisConstructor): string {
   return typeof target === 'string' ? target : target.selector;
@@ -260,7 +259,7 @@ export abstract class Jadis extends HTMLElement {
    * @returns The found element
    * @throws Will throw an error if the element is not found
    */
-  protected getElement<Element extends HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+  protected getElement<Element extends HTMLElement, Tag extends string = string>(
     query: Tag
   ): SelectorToElementWithFallback<Tag, Element> {
     const el = query.split('>>>').reduce((nextEl: HTMLElement, nextQuery: string) => {

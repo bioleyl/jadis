@@ -13,7 +13,7 @@ Instead of writing multiple getters, `useRefs` lets you define all your element 
 this.useRefs<ElementMap>((ref) => ElementMap): Readonly<ElementMap>
 
 // where ref is
-ref<Element extends HTMLElement = HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
+ref<Element extends HTMLElement = HTMLElement, Tag extends string = string>(
   query: Tag
 ): SelectorToElementWithFallback<Tag, Element>;
 ref<Component extends JadisConstructor>(component: Component): InstanceType<Component>;
