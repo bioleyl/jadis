@@ -81,3 +81,11 @@ export type RemoveIndexSignature<T> = {
  * Element values safe for JSX props — strips index signatures.
  */
 export type SafeElementValues<T extends HTMLElement> = RemoveIndexSignature<ElementValues<T>>;
+
+/**
+ * A component's props in JSX: its element values, less the element's own `children` (an HTMLCollection), whose
+ * name JSX gives to what is written between the component's tags: `<MyCard><p>…</p></MyCard>`.
+ */
+export type ComponentJsxProps<T extends HTMLElement> = Omit<SafeElementValues<T>, 'children'> & {
+  children?: unknown;
+};

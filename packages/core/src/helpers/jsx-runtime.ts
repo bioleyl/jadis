@@ -103,7 +103,7 @@ export type IntrinsicElements = {
   [elementName: `${string}-${string}`]: JadisProps;
 };
 
-type ComponentProps<T extends Jadis> = SafeElementValues<T> & BaseProps;
+type ComponentProps<T extends Jadis> = Omit<SafeElementValues<T>, 'children'> & BaseProps;
 
 /**
  * Common JSX type definitions for Jadis components.

@@ -7,6 +7,7 @@ import { createElement } from './helpers/element.helper';
 
 import type { Bus } from './helpers/bus.helper';
 import type {
+  ComponentJsxProps,
   ComponentSelector,
   ElementValues,
   EventKey,
@@ -14,7 +15,6 @@ import type {
   KeysWithoutUndefined,
   KeysWithUndefined,
   OptionsWithProps,
-  SafeElementValues,
   SchemaToEvents,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
@@ -45,7 +45,7 @@ export interface JadisConstructor<T extends Jadis = Jadis> {
   readonly template: string;
   readonly observedAttributes: Array<string>;
   readonly useShadowDom: boolean;
-  readonly __jadisProps: SafeElementValues<T>;
+  readonly __jadisProps: ComponentJsxProps<T>;
 }
 
 /**
@@ -62,9 +62,9 @@ export abstract class Jadis extends HTMLElement {
   /** Marker for JSX attribute type inference — static version for JadisConstructor compat */
   static readonly __jadisProps: Record<string, unknown> = {};
   /** Instance-level access for JSX attribute type inference — resolves per-subclass */
-  get __jadisProps(): SafeElementValues<this> {
+  get __jadisProps(): ComponentJsxProps<this> {
     const props = (this.constructor as unknown as Record<string, unknown>).__jadisProps;
-    return (props ?? {}) as SafeElementValues<this>;
+    return (props ?? {}) as ComponentJsxProps<this>;
   }
 
   readonly shadowRoot: ShadowRoot | null = null;
