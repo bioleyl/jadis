@@ -54,6 +54,10 @@ export default defineConfig({
               link: '/guides/shadow-dom',
               text: 'Shadow DOM',
             },
+            {
+              link: '/guides/server-rendering',
+              text: 'Server Rendering',
+            },
           ],
         },
         {
@@ -163,6 +167,10 @@ export default defineConfig({
             {
               link: '/api/create-element',
               text: 'createElement()',
+            },
+            {
+              link: '/api/assert-and-selectors',
+              text: 'assert() / isComponentSelector()',
             },
             {
               link: '/api/bus-class',

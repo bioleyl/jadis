@@ -10,26 +10,29 @@ Instead of writing multiple getters, `useRefs` lets you define all your element 
 ## Signature
 
 ```typescript
-this.useRefs<ElementMap>(
-  (ref: <Element extends HTMLElement = HTMLElement, Tag extends keyof HTMLElementTagNameMap | string = string>(
-    query: Tag
-  ) => SelectorToElementWithFallback<Tag, Element>) => ElementMap
-): Readonly<ElementMap>
+this.useRefs<ElementMap>((ref) => ElementMap): Readonly<ElementMap>
+
+// where ref is
+ref<Element extends HTMLElement = HTMLElement, Tag extends string = string>(
+  query: Tag
+): SelectorToElementWithFallback<Tag, Element>;
+ref<Component extends JadisConstructor>(component: Component): InstanceType<Component>;
 ```
 
-`ref()` supports both tag-name inference and an explicit element type:
+`ref()` supports tag-name inference, an explicit element type, and a *Jadis* component class:
 
 ```typescript
 const refs = this.useRefs((ref) => ({
   input: ref<HTMLInputElement>('input'),
   button: ref('button'), // inferred as HTMLButtonElement
+  status: ref(StatusBadge), // inferred as StatusBadge
 }));
 ```
 
 ### Parameters
 
 - `mapFn`: callback function that receives a special `ref()` function.  
-You call `ref(selector)` for each element you want to reference, and `useRefs` returns an object with **lazy getters** for those elements.
+You call `ref(selector)` or `ref(Component)` for each element you want to reference, and `useRefs` returns an object with **lazy getters** for those elements.
 
 Each getter calls [`getElement()`](./get-element.md) every time it is read: nothing is cached, and a selector that matches nothing throws. It enters a child's shadow root only where the selector says so, with `>>>`. Refs exist once the template is rendered: reading one in the constructor or a field initializer throws.
 
@@ -59,14 +62,14 @@ class FormComponent extends Jadis {
     );
   }
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     input: ref('input.my-input'),
     button: ref('button'),
   }));
 
   onConnect() {
-    this.refs.button.addEventListener('click', () => {
-      console.log('Input value:', this.refs.input.value);
+    this._refs.button.addEventListener('click', () => {
+      console.log('Input value:', this._refs.input.value);
     }, { signal: this.killSignal });
   }
 }
@@ -87,14 +90,14 @@ class FormComponent extends Jadis {
     );
   }
 
-  readonly refs = this.useRefs((ref) => ({
+  readonly _refs = this.useRefs((ref) => ({
     input: ref<HTMLInputElement>('input.my-input'),
     button: ref('button'),
   }));
 
   onConnect() {
-    this.refs.button.addEventListener('click', () => {
-      console.log('Input value:', this.refs.input.value);
+    this._refs.button.addEventListener('click', () => {
+      console.log('Input value:', this._refs.input.value);
     }, { signal: this.killSignal });
   }
 }
@@ -119,21 +122,37 @@ class FormComponent extends Jadis {
     );
   }
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     /** @type {HTMLInputElement} */
     input: ref('input.my-input'),
     button: ref('button'),
   }));
 
   onConnect() {
-    this.refs.button.addEventListener('click', () => {
-      console.log('Input value:', this.refs.input.value);
+    this._refs.button.addEventListener('click', () => {
+      console.log('Input value:', this._refs.input.value);
     }, { signal: this.killSignal });
   }
 }
 ```
 
 :::
+
+## Referencing a child component
+
+Pass a *Jadis* component class instead of a selector, and `ref()` finds the first element matching its `selector`, typed as that component. There is no need to repeat the class as a type argument:
+
+```typescript
+private readonly _refs = this.useRefs((ref) => ({
+  status: ref(StatusBadge), // same as ref<StatusBadge>(StatusBadge.selector)
+}));
+
+onConnect(): void {
+  this._refs.status.tone = 'success'; // a StatusBadge field, checked by TypeScript
+}
+```
+
+A class stands for its selector alone: to reach into a child's shadow root, or to tell two children of the same component apart, use a CSS selector such as `ref<StatusBadge>('status-badge.primary')`.
 
 ## Advanced Example: Nested Components
 

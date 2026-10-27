@@ -64,12 +64,12 @@ class ToggleSwitch extends Jadis {
   private readonly toggleValue = this.useChange(
     false,
     (value) => {
-      this.refs.label.textContent = value ? 'ON' : 'OFF';
+      this._refs.label.textContent = value ? 'ON' : 'OFF';
     },
     { immediate: true }
   );
 
-  private readonly refs = this.useRefs((ref) => ({
+  private readonly _refs = this.useRefs((ref) => ({
     label: ref<HTMLSpanElement>('span'),
     button: ref<HTMLButtonElement>('button'),
   }));
@@ -84,7 +84,7 @@ class ToggleSwitch extends Jadis {
   }
 
   onConnect() {
-    this.on(this.refs.button, 'click', () => {
+    this.on(this._refs.button, 'click', () => {
       this.toggleValue.set((v) => !v);
     });
   }
@@ -101,12 +101,12 @@ export class Dice extends Jadis {
   private readonly rolled = this.useChange(
     0,
     (value) => {
-      this.refs.label.textContent = value.toString();
+      this._refs.label.textContent = value.toString();
     },
     { immediate: true }
   );
 
-  private readonly refs = this.useRefs((ref) => ({
+  private readonly _refs = this.useRefs((ref) => ({
     label: ref<HTMLSpanElement>('span'),
     button: ref<HTMLButtonElement>('button')
   }));
@@ -121,7 +121,7 @@ export class Dice extends Jadis {
   }
 
   onConnect(): void {
-    this.on(this.refs.button, 'click', () => {
+    this.on(this._refs.button, 'click', () => {
       const roll = Math.floor(Math.random() * 6) + 1;
       this.rolled.set(roll);
     })
@@ -140,16 +140,16 @@ class ProgressBar extends Jadis {
   static readonly selector = 'progress-bar';
 
   readonly label = this.useChange('', (value) => {
-    this.refs.label.textContent = value;
+    this._refs.label.textContent = value;
   }, { attribute: 'label' });
   readonly value = this.useChange(0, (value) => {
-    this.refs.bar.style.width = `${value}%`;
+    this._refs.bar.style.width = `${value}%`;
   }, { attribute: 'value' });
   readonly striped = this.useChange(false, (value) => {
     this.toggleClass('striped', value);
   }, { attribute: 'striped' });
   readonly tone = this.useChange<Tone>('neutral', (value) => {
-    this.refs.bar.dataset.tone = value;
+    this._refs.bar.dataset.tone = value;
   }, { attribute: 'tone', parse: (value) => TONES.find((tone) => tone === value) ?? 'neutral' });
 
   // …

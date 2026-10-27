@@ -16,7 +16,7 @@ import { Jadis, createSelector, Router, defineRoutes } from '@jadis/core';
 class HelloPage extends Jadis {
   static selector = createSelector('hello-page');
 
-  refs = this.useRefs((ref) => ({
+  _refs = this.useRefs((ref) => ({
     name: ref('#name'),
   }));
 
@@ -26,7 +26,7 @@ class HelloPage extends Jadis {
 
   onConnect() {
     const name = this.getAttribute('name');
-    this.refs.name.textContent = name || 'Guest';
+    this._refs.name.textContent = name || 'Guest';
   }
 }
 
