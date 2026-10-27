@@ -60,6 +60,14 @@ const updates = [
       return data;
     },
   },
+  // Vanilla template - the CDN version the create CLI writes into the import map
+  {
+    path: 'packages/create/templates/vanilla/package.json',
+    update: (data) => {
+      data.jadis.cdnVersion = newCoreVersion;
+      return data;
+    },
+  },
   // Create package version - bump minor, reset patch to 0
   {
     path: 'packages/create/package.json',

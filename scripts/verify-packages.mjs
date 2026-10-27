@@ -53,8 +53,9 @@ try {
   const generatedIndex = join(createProject, 'generated/index.html');
   statSync(generatedIndex);
   const generatedSource = readFileSync(generatedIndex, 'utf8');
-  if (!generatedSource.includes('@jadis/core@1.0.0')) {
-    throw new Error('The generated vanilla project does not reference the expected core version.');
+  const { version: coreVersion } = JSON.parse(readFileSync(join(rootDirectory, 'packages/core/package.json'), 'utf8'));
+  if (!generatedSource.includes(`@jadis/core@${coreVersion}"`)) {
+    throw new Error(`The generated vanilla project does not load @jadis/core@${coreVersion}.`);
   }
 
   console.log('Package smoke tests passed.');
