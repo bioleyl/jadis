@@ -217,7 +217,7 @@ private readonly _count = this.useChange(0, (value) => {
 
 - Once connected, every `set()` calls the callback, even with an equal value.
 - `oldValue` is the previous value itself, not a copy: replace values (`set((list) => [...list, item])`), do not change them in place. Any value can be stored; a function goes through an updater, `set(() => callback)`.
-- `{ attribute: 'label' }` also sets the field from that attribute (and turns `immediate` on). Strings, numbers and booleans (present = true) have a default parser; other types pass `parse: (value: string | null) => T`. Prefer it to a `useAttributes` entry that only calls `.set()`.
+- `{ attribute: 'label' }` also sets the field from that attribute (and turns `immediate` on). Strings, numbers and booleans (present = true) have a default parser; other types pass `parse: (value: string | null) => T`, a type built on the component's own type parameter (`class ChoiceList<Value extends string>`) included. Prefer it to a `useAttributes` entry that only calls `.set()`.
 - Attributes apply before the changes queued while disconnected. A callback that writes an attribute on the host must skip a value it already has, or the observer calls it back without end.
 
 **Attributes** — the callback-object API:
