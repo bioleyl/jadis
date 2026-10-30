@@ -84,6 +84,7 @@
     "test:coverage": "vitest run --coverage --reporter=html",
     "test:types": "tsc --project tests/types/tsconfig.json"
   },
+  "sideEffects": false,
   "type": "module",
   "types": "./dist/dts/index.d.ts",
   "version": "1.4.2"
