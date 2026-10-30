@@ -1,6 +1,6 @@
 ---
 name: jadis-app
-description: Build TypeScript web applications with Jadis, a thin layer over native Web Components. Covers project setup with or without a bundler, JSX or createElement templating, the component lifecycle, state, communication, and routing.
+description: Build TypeScript web applications with Jadis, a thin layer over native Web Components. Covers project setup with or without a bundler, JSX or createElement templating, the component lifecycle, state, communication, routing, and translations.
 ---
 
 # Building applications with Jadis
@@ -329,8 +329,40 @@ router.goto('profile', { id: '42' });
 - Pass `signal` in the options to stop the router following the URL.
 - Params become attributes on the page component: read `id` with `useAttributes` or `getAttribute('id')`.
 - Group routes with `defineRouteGroup('/group', { ... }, { rootComponentSelector: 'group-root' })`; names concatenate (`groupHome`).
-- `goto` throws on unknown routes and missing params — handle both deliberately.
+- `goto` checks its route name and params at compile time: a path's params are required by name, and a route without params takes no second argument. Untyped code that asks for an unknown route makes it throw.
 - Register page and root components before navigating to them.
+
+## Translations
+
+```ts
+// i18n/en.ts — the source texts: their keys and placeholders are what every translation has
+export default defineTranslations({
+  home: { title: 'Welcome', greeting: 'Hello {name}!' },
+  cart: { items: { one: '{count} item', other: '{count} items' } },
+});
+
+// i18n/fr.ts — checked against en: same keys, same placeholders
+import en from './en';
+export default defineTranslations(en, {
+  home: { title: 'Bienvenue', greeting: 'Bonjour {name} !' },
+  cart: { items: { one: '{count} article', other: '{count} articles' } },
+});
+
+// i18n/i18n.ts
+export const i18n = new Translator({ en }, { fr: () => import('./fr') });
+
+// main.ts, before mounting
+await i18n.setLocale(i18n.match()); // the best fit for navigator.languages, else the source
+
+i18n.t('home.greeting', { name: 'Ada' });
+i18n.t('cart.items', { count: 3 });
+```
+
+- Keys join groups with dots. `t` requires each placeholder by name, a numeric `count` for plural forms, and no second argument for a text without placeholders.
+- A translation missing a key or a placeholder, or writing a key, placeholder or plural form the source lacks, is a type error on that line. Texts live in `.ts` files: a `.json` import loses the strings' types.
+- Plural forms are an object of plural categories (`zero one two few many other`, `other` required), chosen with `Intl.PluralRules`; each language uses its own. Numbers in placeholders are formatted with `Intl.NumberFormat`; pass a string to keep one as written.
+- `setLocale` loads a translation once, sets `<html lang>`, and emits `change` on `i18n.bus`. Nothing re-renders: a component follows the language with `this.useTranslation(i18n, () => { … })`, called once in the constructor. The callback writes the texts with `i18n.t`; it runs at every connection (after the template, attribute callbacks and waiting changes, before the paint, so refs work) and at each `change` while connected. A text with a changing parameter goes in a method called from both `useTranslation` and the `useChange` callback. Never name that method `translate`: `HTMLElement.translate` already exists.
+- Locales are language tags (`fr`, `de-CH`); `i18n.locales` lists them, the source first.
 
 ## Testing an application
 

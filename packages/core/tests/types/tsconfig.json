@@ -13,7 +13,9 @@
     "jsx.tsx",
     "on.ts",
     "router.ts",
+    "translation.ts",
     "use-change.ts",
+    "use-translation.ts",
     "use-refs.ts"
   ]
 }

@@ -87,6 +87,7 @@ See [Templates](../guides/templates.md) and [Styles](../templating/css.md).
 | `useChange(initial, onChange, options?)` | State with getter/setter and change callback, optionally set from an attribute. |
 | `useEvents<T>()` | Type-safe event emitter with `register()` and `emit()`. |
 | `onBus(bus, eventName, callback)` | Listen to events on a shared Bus. |
+| `useTranslation(translator, draw)` | Draw the component's texts at every connection, before the paint, and at each language change. Call it in the constructor. See [Translations](../translation/overview.md#texts-that-follow-the-language). |
 | `this.on(target, event, callback)` | Auto-cleaned event listener on an element, the window or the document. |
 
 ## Example
