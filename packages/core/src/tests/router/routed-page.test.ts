@@ -367,6 +367,56 @@ describe('Router with routed pages', () => {
       expect(window.location.search).toBe(`?origin=${origin}`);
     });
 
+    it('goes back to the entry shown past an entry the app pushed on its own, and asks only once', async () => {
+      origin += 1;
+      window.history.pushState(null, '', `/items?origin=${origin}`);
+      const router = start();
+      await nextTask();
+      const items = page<ItemsPage>('items-page');
+      // The page keeps its tab in the query, without a popstate: the router does not see that entry.
+      window.history.pushState({}, '', `/items?origin=${origin}&tab=2`);
+      router.goto('item', { itemId: '1' });
+      items.allowLeave = false;
+      const asked = items.leaveAsked.length;
+
+      window.history.back();
+      await vi.waitFor(() => expect(items.leaveAsked).toHaveLength(asked + 1));
+      await vi.waitFor(() => expect(window.location.pathname).toBe('/items/1'));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(items.leaveAsked).toHaveLength(asked + 1);
+      expect(window.location.pathname).toBe('/items/1');
+      items.allowLeave = true;
+      window.history.back();
+      await vi.waitFor(() => expect(window.location.search).toBe(`?origin=${origin}&tab=2`));
+      expect(router.currentRoute.name).toBe('items');
+    });
+
+    it('puts the URL back where its way back lands when the history holds entries it could not number', async () => {
+      origin += 1;
+      window.history.pushState(null, '', `/items?origin=${origin}`);
+      const router = start();
+      await nextTask();
+      const items = page<ItemsPage>('items-page');
+      // Two entries the router does not see: going back, it takes the first for the one just after the page's.
+      window.history.pushState({}, '', `/items?origin=${origin}&tab=2`);
+      window.history.pushState({}, '', `/items?origin=${origin}&tab=3`);
+      router.goto('item', { itemId: '1' });
+      window.history.back();
+      await vi.waitFor(() => expect(window.location.search).toBe(`?origin=${origin}&tab=3`));
+      items.allowLeave = false;
+      const asked = items.leaveAsked.length;
+
+      window.history.back();
+      await vi.waitFor(() => expect(items.leaveAsked).toHaveLength(asked + 1));
+      await vi.waitFor(() => expect(window.location.search).toBe(`?origin=${origin}&tab=3`));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(items.leaveAsked).toHaveLength(asked + 1);
+      expect(window.location.search).toBe(`?origin=${origin}&tab=3`);
+      expect(router.currentRoute.query.get('tab')).toBe('3');
+    });
+
     it("keeps the app's own state in the history entries it numbers", async () => {
       window.history.replaceState({ scroll: 120 }, '', '/items');
 

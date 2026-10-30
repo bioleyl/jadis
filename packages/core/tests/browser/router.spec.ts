@@ -115,6 +115,31 @@ test.describe('Jadis router', () => {
     });
   });
 
+  test('goes back to a refusing page past an entry the app pushed on its own, asking once', async ({ page }) => {
+    await page.evaluate(() => {
+      window.startRouter('history');
+      window.__jadisRouter?.goto('home');
+      // The page keeps its tab in the query, without a popstate: the router does not see that entry.
+      window.history.pushState({}, '', '/home?tab=2');
+      window.__jadisRouter?.goto('editor');
+      window.__leaveAnswer = false;
+      window.__leaveAsked = 0;
+    });
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/editor$/);
+    await page.waitForTimeout(200);
+
+    await expect(page).toHaveURL(/\/editor$/);
+    expect(await page.evaluate(() => window.__leaveAsked)).toBe(1);
+    await page.evaluate(() => {
+      window.__leaveAnswer = true;
+    });
+    await page.goBack();
+    await expect(page).toHaveURL(/\/home\?tab=2$/);
+    await expect(page.locator('#router-app browser-home')).toBeVisible();
+  });
+
   test('rejects unknown routes', async ({ page }) => {
     await page.evaluate(() => window.startRouter('history'));
 
@@ -130,6 +155,7 @@ declare global {
       goto(name: string, params?: Record<string, string>): void;
     };
     __leaveAnswer?: boolean | 'later';
+    __leaveAsked?: number;
     __answerLeave?: (leave: boolean) => void;
     __jadisRouterReady?: boolean;
     startRouter(mode: 'hash' | 'history'): void;

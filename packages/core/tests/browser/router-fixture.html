@@ -46,6 +46,7 @@
         }
 
         canLeave() {
+          window.__leaveAsked = (window.__leaveAsked ?? 0) + 1;
           const answer = window.__leaveAnswer ?? true;
           if (answer !== 'later') {
             return answer;

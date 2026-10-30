@@ -184,11 +184,17 @@ export class Router<T extends Record<string, RouteDefinition>> {
 
   private pushUrl(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState(
-      { [HISTORY_INDEX_KEY]: this._shownIndex + 1 },
-      '',
-      normalizePath(`${this.baseUrl}/${urlPath}`)
-    );
+    this.pushEntry(normalizePath(`${this.baseUrl}/${urlPath}`));
+  }
+
+  /**
+   * Adds a history entry after the current one, numbering the current one first: an entry the app pushed without a
+   * popstate has no number yet, and the next entry's number must count it.
+   */
+  private pushEntry(url: string) {
+    const index = this.currentEntryIndex();
+    this.markEntry(index);
+    window.history.pushState({ [HISTORY_INDEX_KEY]: index + 1 }, '', url);
   }
 
   /** The number the router gave the current history entry; none for an entry a link or the address bar added. */
@@ -196,6 +202,11 @@ export class Router<T extends Record<string, RouteDefinition>> {
     const state: unknown = window.history.state;
     const index = isRecord(state) ? state[HISTORY_INDEX_KEY] : undefined;
     return typeof index === 'number' ? index : undefined;
+  }
+
+  /** The number of the current history entry: one the router has not numbered was just added after the one shown. */
+  private currentEntryIndex(): number {
+    return this.entryIndex() ?? this._shownIndex + 1;
   }
 
   /** Numbers the current history entry, keeping the state the app put in it. */
@@ -206,9 +217,8 @@ export class Router<T extends Record<string, RouteDefinition>> {
   }
 
   private onUrlChange() {
-    const returned = this._returning;
-    this._returning = false;
-    if (returned && !this.urlDiffersFromShown()) {
+    if (this._returning) {
+      this.endReturn();
       return;
     }
     const next = this.matchCurrentUrl();
@@ -227,7 +237,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
   /** Shows a route the URL went to, putting that URL back first if something changed it while the page asked. */
   private showUrl(url: string, next: ActiveRoute) {
     if (window.location.href !== url) {
-      window.history.pushState({ [HISTORY_INDEX_KEY]: this._shownIndex + 1 }, '', url);
+      this.pushEntry(url);
     }
     this.showRoute(next);
   }
@@ -238,13 +248,28 @@ export class Router<T extends Record<string, RouteDefinition>> {
    * shown). When the entry did not change, the URL is put back.
    */
   private returnToShown() {
-    const delta = this._shownIndex - (this.entryIndex() ?? this._shownIndex + 1);
+    const delta = this._shownIndex - this.currentEntryIndex();
     if (delta === 0) {
       this.restoreShownUrl();
       return;
     }
     this._returning = true;
     window.history.go(delta);
+  }
+
+  /**
+   * Ends the way back to the entry shown. Should it land on another entry (the history holds entries the router could
+   * not number), the URL shown is put back there rather than asking the page again, which could send the person back
+   * and forth without end.
+   */
+  private endReturn() {
+    this._returning = false;
+    if (!this.urlDiffersFromShown()) {
+      return;
+    }
+    this._shownIndex = this.currentEntryIndex();
+    this.markEntry(this._shownIndex);
+    this.restoreShownUrl();
   }
 
   private urlDiffersFromShown(): boolean {
@@ -288,7 +313,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
   /** Shows the route: on the page mounted when it can follow it, else on a new one. */
   private showRoute(next: ActiveRoute) {
     this._currentRoute = next;
-    this._shownIndex = this.entryIndex() ?? this._shownIndex + 1;
+    this._shownIndex = this.currentEntryIndex();
     this.markEntry(this._shownIndex);
     this._shownUrl = window.location.href;
     this.sendRouteToPage(this.reuseMountedPage(next) ?? this.mountPage(next));
