@@ -1,4 +1,5 @@
 import type { JadisConstructor } from '../base-component';
+import type { Merge } from '../helpers/type.helper';
 import type { ROUTER_PARAMETER_PREFIX } from '../router/router-constants';
 
 /** Remove trailing slash from a string literal */
@@ -99,11 +100,6 @@ export type ExtractParams<Path extends string> =
     : Path extends `${string}${typeof ROUTER_PARAMETER_PREFIX}${infer Param}`
       ? { [K in Param]: string }
       : Record<never, never>;
-
-/** Turn a union of object types into a single merged object type */
-type Merge<U> = (U extends unknown ? (k: U) => void : never) extends (k: infer I) => void
-  ? { [K in keyof I]: I[K] }
-  : never;
 
 /** Flatten a nested route tree into a single-level route map */
 export type FlattenRoutes<Tree, Prefix extends string = ''> = Merge<

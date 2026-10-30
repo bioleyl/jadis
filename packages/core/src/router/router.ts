@@ -4,6 +4,7 @@ import { normalizePath } from '../helpers/router.helper';
 import { toKebabCase } from '../helpers/string.helper';
 import { COMPONENT_SELECTOR_SEPARATOR, QUERY_SEPARATOR, ROUTER_PARAMETER_PREFIX } from './router-constants';
 
+import type { ParamsArgs } from '../helpers/type.helper';
 import type {
   ActiveRoute,
   ExtractParams,
@@ -95,11 +96,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
    * @param {string} name The name of the route to navigate to
    * @param {Record<string, string>} [params] The parameters to include with the route
    */
-  goto<K extends keyof T>(name: K & (keyof ExtractParams<T[K]['path']> extends never ? K : never)): void;
-  goto<K extends keyof T>(
-    name: K & (keyof ExtractParams<T[K]['path']> extends never ? never : K),
-    params: ExtractParams<T[K]['path']>
-  ): void;
+  goto<K extends keyof T>(name: K, ...params: ParamsArgs<ExtractParams<T[K]['path']>>): void;
   goto(name: keyof T, params?: Record<string, string>) {
     const route = this.getRouteByName(String(name));
     assert(route, `No route found for name: ${String(name)}`);
