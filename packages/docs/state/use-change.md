@@ -170,6 +170,28 @@ The default parsers, chosen from the initial value:
 
 Anything else, a union of strings or a nullable value, needs `parse`: TypeScript asks for it.
 
+So does a field built on the component's own type parameter, which can be any union of strings. Given a `parse`,
+it binds to its attribute like any other:
+
+```typescript
+export class ChoiceList<Value extends string = string> extends Jadis {
+  static readonly selector = 'choice-list';
+
+  readonly choices = this.useChange<Value[]>([], () => this.render(), {
+    attribute: 'choices',
+    parse: (value) => (value === null ? [] : JSON.parse(value)),
+  });
+  readonly value = this.useChange<Value | null>(null, () => this.render(), {
+    attribute: 'value',
+    parse: (value) => this.choices.get().find((choice) => choice === value) ?? null,
+  });
+
+  // …
+}
+```
+
+`new ChoiceList<'list' | 'grid'>()` then takes and gives back only those two values.
+
 The field does not write the attribute back: setting `.label` leaves `label=""` alone. A callback that does write it (to style `:host([tone])`, for instance) must skip a value the attribute already has: even an unchanged `setAttribute` is a change to the observer, which would call the field back without end.
 
 ## Typing Notes

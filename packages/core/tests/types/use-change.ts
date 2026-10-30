@@ -20,4 +20,22 @@ class Bound extends Jadis {
   readonly orphanParser = this.useChange('', () => undefined, { parse: (value) => value ?? '' });
 }
 
+/** A component typed by the values it chooses between: `Choice<'list' | 'grid'>`. */
+abstract class Choice<Value extends string = string> extends Jadis {
+  static readonly selector = 'x-choice';
+
+  protected abstract readonly choices: readonly Value[];
+
+  // A field of the type parameter takes the parser it is given.
+  readonly value = this.useChange<Value | null>(null, () => undefined, {
+    attribute: 'value',
+    parse: (value) => this.choices.find((choice) => choice === value) ?? null,
+  });
+  readonly picked = this.useChange<Value[]>([], () => undefined, { attribute: 'picked', parse: () => [] });
+
+  // @ts-expect-error The type parameter has no default parser: it can be any union of strings.
+  readonly unparsedValue = this.useChange<Value | null>(null, () => undefined, { attribute: 'value' });
+}
+
 void Bound;
+void Choice;

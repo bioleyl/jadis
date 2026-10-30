@@ -58,13 +58,18 @@ type HasDefaultParser<T> = true extends IsExactly<T, string> | IsExactly<T, numb
   ? true
   : false;
 
-type AttributeBinding<T> = HasDefaultParser<T> extends true
-  ? { attribute: string; parse?: AttributeParser<T> }
-  : { attribute: string; parse: AttributeParser<T> };
+/**
+ * A field bound to an attribute through its own parser: any type, including one built on the component's type
+ * parameter (`class Choice<Value extends string>`), which TypeScript cannot match with a default parser.
+ */
+type ParsedBinding<T> = { attribute: string; parse: AttributeParser<T> };
+
+/** A field bound to an attribute through the default parser: strings, numbers and booleans only. */
+type DefaultParsedBinding<T> = HasDefaultParser<T> extends true ? { attribute: string; parse?: undefined } : never;
 
 type NoAttributeBinding = { attribute?: undefined; parse?: undefined };
 
 export type ChangeOptions<T = unknown> = {
   /** Calls onChange once with the initial value; on by default for a field bound to an attribute. */
   immediate?: boolean;
-} & (NoAttributeBinding | AttributeBinding<T>);
+} & (NoAttributeBinding | ParsedBinding<T> | DefaultParsedBinding<T>);
