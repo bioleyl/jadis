@@ -40,7 +40,7 @@ test('creates the TypeScript template', () => {
   assert.equal(fs.existsSync(path.join(directory, 'example', 'src/main.ts')), true);
   assert.match(
     fs.readFileSync(path.join(directory, 'example', 'package.json'), 'utf8'),
-    /"@jadis\/core": "\^1\.5\.0"/
+    /"@jadis\/core": "\^1\.5\.1"/
   );
 });
 
