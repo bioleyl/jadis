@@ -2,7 +2,12 @@ import { assert } from '../helpers/assert.helper';
 import { applyElementAttributes, createElement } from '../helpers/element.helper';
 import { normalizePath } from '../helpers/router.helper';
 import { toKebabCase } from '../helpers/string.helper';
-import { COMPONENT_SELECTOR_SEPARATOR, QUERY_SEPARATOR, ROUTER_PARAMETER_PREFIX } from './router-constants';
+import {
+  COMPONENT_SELECTOR_SEPARATOR,
+  HISTORY_INDEX_KEY,
+  QUERY_SEPARATOR,
+  ROUTER_PARAMETER_PREFIX,
+} from './router-constants';
 
 import type { ParamsArgs } from '../helpers/type.helper';
 import type {
@@ -22,6 +27,8 @@ const defaultOptions: RouterConfig = {
   baseUrl: '/',
   mode: 'history',
 };
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
 /** Whether a page's answer to leaving is still to come: it asks the person first. */
 const isPending = (answer: LeaveAnswer | undefined): answer is Promise<boolean> => answer instanceof Promise;
@@ -43,6 +50,10 @@ export class Router<T extends Record<string, RouteDefinition>> {
   private _mountedPage?: MountedPage;
   /** The URL of the route shown: put back when the page refuses to be left. */
   private _shownUrl?: string;
+  /** The number of the history entry shown: a refused change of URL goes back to it in the history. */
+  private _shownIndex = 0;
+  /** The router went back to the entry shown after a refusal: the popstate that follows is its own. */
+  private _returning = false;
   /** Counts the navigations: an answer of canLeave that comes after a newer navigation is ignored. */
   private _leaveTicket = 0;
 
@@ -88,6 +99,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
    */
   mountOn(el: HTMLElement) {
     this._mount = el;
+    this.markEntry(this.entryIndex() ?? 0);
     this.showRoute(this.matchCurrentUrl());
   }
 
@@ -172,10 +184,43 @@ export class Router<T extends Record<string, RouteDefinition>> {
 
   private pushUrl(path: string) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    window.history.pushState({}, '', normalizePath(`${this.baseUrl}/${urlPath}`));
+    this.pushEntry(normalizePath(`${this.baseUrl}/${urlPath}`));
+  }
+
+  /**
+   * Adds a history entry after the current one, numbering the current one first: an entry the app pushed without a
+   * popstate has no number yet, and the next entry's number must count it.
+   */
+  private pushEntry(url: string) {
+    const index = this.currentEntryIndex();
+    this.markEntry(index);
+    window.history.pushState({ [HISTORY_INDEX_KEY]: index + 1 }, '', url);
+  }
+
+  /** The number the router gave the current history entry; none for an entry a link or the address bar added. */
+  private entryIndex(): number | undefined {
+    const state: unknown = window.history.state;
+    const index = isRecord(state) ? state[HISTORY_INDEX_KEY] : undefined;
+    return typeof index === 'number' ? index : undefined;
+  }
+
+  /** The number of the current history entry: one the router has not numbered was just added after the one shown. */
+  private currentEntryIndex(): number {
+    return this.entryIndex() ?? this._shownIndex + 1;
+  }
+
+  /** Numbers the current history entry, keeping the state the app put in it. */
+  private markEntry(index: number) {
+    const state: unknown = window.history.state;
+    const kept = isRecord(state) ? state : {};
+    window.history.replaceState({ ...kept, [HISTORY_INDEX_KEY]: index }, '', window.location.href);
   }
 
   private onUrlChange() {
+    if (this._returning) {
+      this.endReturn();
+      return;
+    }
     const next = this.matchCurrentUrl();
     if (!this.urlDiffersFromShown()) {
       this.showRoute(next);
@@ -185,16 +230,46 @@ export class Router<T extends Record<string, RouteDefinition>> {
     this.leaveFor(
       next,
       () => this.showUrl(nextUrl, next),
-      () => this.restoreShownUrl()
+      () => this.returnToShown()
     );
   }
 
-  /** Shows a route the URL went to, putting that URL back first when it was put back while the page asked. */
+  /** Shows a route the URL went to, putting that URL back first if something changed it while the page asked. */
   private showUrl(url: string, next: ActiveRoute) {
     if (window.location.href !== url) {
-      window.history.pushState({}, '', url);
+      this.pushEntry(url);
     }
     this.showRoute(next);
+  }
+
+  /**
+   * Takes the person back to the entry of the route shown after a refused change of URL: back or forward in the
+   * history, so the entries stay as they were (an entry the router did not number was just added after the one
+   * shown). When the entry did not change, the URL is put back.
+   */
+  private returnToShown() {
+    const delta = this._shownIndex - this.currentEntryIndex();
+    if (delta === 0) {
+      this.restoreShownUrl();
+      return;
+    }
+    this._returning = true;
+    window.history.go(delta);
+  }
+
+  /**
+   * Ends the way back to the entry shown. Should it land on another entry (the history holds entries the router could
+   * not number), the URL shown is put back there rather than asking the page again, which could send the person back
+   * and forth without end.
+   */
+  private endReturn() {
+    this._returning = false;
+    if (!this.urlDiffersFromShown()) {
+      return;
+    }
+    this._shownIndex = this.currentEntryIndex();
+    this.markEntry(this._shownIndex);
+    this.restoreShownUrl();
   }
 
   private urlDiffersFromShown(): boolean {
@@ -208,22 +283,18 @@ export class Router<T extends Record<string, RouteDefinition>> {
 
   /**
    * Goes on to the next route (`go`) unless the mounted page refuses it (`stay`). A page that answers with a promise
-   * keeps its URL while it asks; when it resolves to true, the router goes on, unless a newer navigation came first.
-   * A promise that rejects keeps the page.
+   * stays while it asks, and the URL with it: a URL a link or the back button changed is left as it is meanwhile, so
+   * going on adds nothing to the history, and is put back only when the answer is no. A promise that rejects keeps
+   * the page. An answer that comes after a newer navigation is ignored.
    */
   private leaveFor(next: ActiveRoute, go: () => void, stay: () => void = () => undefined) {
     this._leaveTicket += 1;
     const ticket = this._leaveTicket;
     const answer = this._mountedPage?.page.canLeave?.(next);
     if (isPending(answer)) {
-      stay();
       answer.then(
-        (leave) => {
-          if (leave && ticket === this._leaveTicket) {
-            go();
-          }
-        },
-        () => undefined
+        (leave) => this.settleLeave(ticket, leave ? go : stay),
+        () => this.settleLeave(ticket, stay)
       );
       return;
     }
@@ -231,9 +302,19 @@ export class Router<T extends Record<string, RouteDefinition>> {
     (leaves ? go : stay)();
   }
 
+  /** Acts on a page's late answer to leaving, unless a newer navigation came while it asked. */
+  private settleLeave(ticket: number, act: () => void) {
+    if (ticket !== this._leaveTicket) {
+      return;
+    }
+    act();
+  }
+
   /** Shows the route: on the page mounted when it can follow it, else on a new one. */
   private showRoute(next: ActiveRoute) {
     this._currentRoute = next;
+    this._shownIndex = this.currentEntryIndex();
+    this.markEntry(this._shownIndex);
     this._shownUrl = window.location.href;
     this.sendRouteToPage(this.reuseMountedPage(next) ?? this.mountPage(next));
   }
