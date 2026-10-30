@@ -4,10 +4,12 @@ import { normalizePath } from '../helpers/router.helper';
 import { toKebabCase } from '../helpers/string.helper';
 import { COMPONENT_SELECTOR_SEPARATOR, QUERY_SEPARATOR, ROUTER_PARAMETER_PREFIX } from './router-constants';
 
+import type { ParamsArgs } from '../helpers/type.helper';
 import type {
   ActiveRoute,
   ExtractParams,
   InternalRoute,
+  LeaveAnswer,
   MatchedRoute,
   MountedPage,
   RouteDefinition,
@@ -20,6 +22,9 @@ const defaultOptions: RouterConfig = {
   baseUrl: '/',
   mode: 'history',
 };
+
+/** Whether a page's answer to leaving is still to come: it asks the person first. */
+const isPending = (answer: LeaveAnswer | undefined): answer is Promise<boolean> => answer instanceof Promise;
 
 /**
  * Router class for managing navigation and routing in a web application.
@@ -38,6 +43,8 @@ export class Router<T extends Record<string, RouteDefinition>> {
   private _mountedPage?: MountedPage;
   /** The URL of the route shown: put back when the page refuses to be left. */
   private _shownUrl?: string;
+  /** Counts the navigations: an answer of canLeave that comes after a newer navigation is ignored. */
+  private _leaveTicket = 0;
 
   constructor(routes: T, options?: RouterOptions) {
     this._mode = options?.mode ?? defaultOptions.mode;
@@ -89,22 +96,17 @@ export class Router<T extends Record<string, RouteDefinition>> {
    * @param {string} name The name of the route to navigate to
    * @param {Record<string, string>} [params] The parameters to include with the route
    */
-  goto<K extends keyof T>(name: K & (keyof ExtractParams<T[K]['path']> extends never ? K : never)): void;
-  goto<K extends keyof T>(
-    name: K & (keyof ExtractParams<T[K]['path']> extends never ? never : K),
-    params: ExtractParams<T[K]['path']>
-  ): void;
+  goto<K extends keyof T>(name: K, ...params: ParamsArgs<ExtractParams<T[K]['path']>>): void;
   goto(name: keyof T, params?: Record<string, string>) {
     const route = this.getRouteByName(String(name));
     assert(route, `No route found for name: ${String(name)}`);
 
     const path = this.buildPath(route.path, params);
     const next = this.matchPath(path, new URLSearchParams());
-    if (this.pageRefusesToLeave(next)) {
-      return;
-    }
-    this.pushUrl(path);
-    this.showRoute(next);
+    this.leaveFor(next, () => {
+      this.pushUrl(path);
+      this.showRoute(next);
+    });
   }
 
   private get baseUrl(): string {
@@ -175,9 +177,22 @@ export class Router<T extends Record<string, RouteDefinition>> {
 
   private onUrlChange() {
     const next = this.matchCurrentUrl();
-    if (this.urlDiffersFromShown() && this.pageRefusesToLeave(next)) {
-      this.restoreShownUrl();
+    if (!this.urlDiffersFromShown()) {
+      this.showRoute(next);
       return;
+    }
+    const nextUrl = window.location.href;
+    this.leaveFor(
+      next,
+      () => this.showUrl(nextUrl, next),
+      () => this.restoreShownUrl()
+    );
+  }
+
+  /** Shows a route the URL went to, putting that URL back first when it was put back while the page asked. */
+  private showUrl(url: string, next: ActiveRoute) {
+    if (window.location.href !== url) {
+      window.history.pushState({}, '', url);
     }
     this.showRoute(next);
   }
@@ -191,9 +206,29 @@ export class Router<T extends Record<string, RouteDefinition>> {
     window.history.replaceState(window.history.state, '', this._shownUrl);
   }
 
-  /** Whether the mounted page refuses to let the person go to the next route. */
-  private pageRefusesToLeave(next: ActiveRoute): boolean {
-    return this._mountedPage?.page.canLeave?.(next) === false;
+  /**
+   * Goes on to the next route (`go`) unless the mounted page refuses it (`stay`). A page that answers with a promise
+   * keeps its URL while it asks; when it resolves to true, the router goes on, unless a newer navigation came first.
+   * A promise that rejects keeps the page.
+   */
+  private leaveFor(next: ActiveRoute, go: () => void, stay: () => void = () => undefined) {
+    this._leaveTicket += 1;
+    const ticket = this._leaveTicket;
+    const answer = this._mountedPage?.page.canLeave?.(next);
+    if (isPending(answer)) {
+      stay();
+      answer.then(
+        (leave) => {
+          if (leave && ticket === this._leaveTicket) {
+            go();
+          }
+        },
+        () => undefined
+      );
+      return;
+    }
+    const leaves = answer !== false;
+    (leaves ? go : stay)();
   }
 
   /** Shows the route: on the page mounted when it can follow it, else on a new one. */

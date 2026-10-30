@@ -1,6 +1,6 @@
 ---
 name: jadis-app
-description: Build TypeScript web applications with Jadis, a thin layer over native Web Components. Covers project setup with or without a bundler, JSX or createElement templating, the component lifecycle, state, communication, and routing.
+description: Build TypeScript web applications with Jadis, a thin layer over native Web Components. Covers project setup with or without a bundler, JSX or createElement templating, the component lifecycle, state, communication, routing, and translations.
 ---
 
 # Building applications with Jadis
@@ -97,7 +97,7 @@ Browsers execute neither JSX nor TypeScript. Two options:
 <script type="importmap">
   {
     "imports": {
-      "@jadis/core": "https://esm.sh/@jadis/core@1.4.2"
+      "@jadis/core": "https://esm.sh/@jadis/core@1.5.0"
     }
   }
 </script>
@@ -130,8 +130,8 @@ The emitted code imports `@jadis/core/jsx-runtime`, so the import map needs both
 ```json
 {
   "imports": {
-    "@jadis/core": "https://esm.sh/@jadis/core@1.4.2",
-    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.4.2/jsx-runtime"
+    "@jadis/core": "https://esm.sh/@jadis/core@1.5.0",
+    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.5.0/jsx-runtime"
   }
 }
 ```
@@ -324,13 +324,45 @@ router.goto('profile', { id: '42' });
 - **A URL no route matches throws.** End the routes with a catch-all such as `notFound: { page: NotFoundPage, path: '/:rest' }`.
 - **Links are not intercepted.** In history mode, `<a href="/profile/42">` reloads the page: call `router.goto(...)` from a click handler, or use hash mode with `href="#/profile/42"`.
 - Every navigation creates the page component (and its group's root component) again: their state is lost, unless the page declares `onRoute(route)`. Such a page is kept while the routes stay on it (same page and root component, even under another route name): the router updates its parameter attributes and calls `onRoute` again. The first `onRoute` comes after `onConnect`. A root component shows the page through a `<slot>`.
-- A page's `canLeave(next)` is asked before each URL change; `false` cancels a `goto`, or puts back a URL changed by a link or the back button. Keep it synchronous. Type both with `implements RoutedPage`.
+- A page's `canLeave(next)` is asked before each URL change; `false` cancels a `goto`, or puts back a URL changed by a link or the back button. It may answer later with a `Promise<boolean>` (a dialog of the app): the page and its URL stay until it resolves, `true` then goes on to the route asked, and a newer navigation meanwhile wins. Type both with `implements RoutedPage`.
 - The query is not matched: `router.currentRoute.query` (and the route given to `onRoute`) holds it as `URLSearchParams`, in hash mode too.
 - Pass `signal` in the options to stop the router following the URL.
 - Params become attributes on the page component: read `id` with `useAttributes` or `getAttribute('id')`.
 - Group routes with `defineRouteGroup('/group', { ... }, { rootComponentSelector: 'group-root' })`; names concatenate (`groupHome`).
-- `goto` throws on unknown routes and missing params — handle both deliberately.
+- `goto` checks its route name and params at compile time: a path's params are required by name, and a route without params takes no second argument. Untyped code that asks for an unknown route makes it throw.
 - Register page and root components before navigating to them.
+
+## Translations
+
+```ts
+// i18n/en.ts — the source texts: their keys and placeholders are what every translation has
+export default defineTranslations({
+  home: { title: 'Welcome', greeting: 'Hello {name}!' },
+  cart: { items: { one: '{count} item', other: '{count} items' } },
+});
+
+// i18n/fr.ts — checked against en: same keys, same placeholders
+import en from './en';
+export default defineTranslations(en, {
+  home: { title: 'Bienvenue', greeting: 'Bonjour {name} !' },
+  cart: { items: { one: '{count} article', other: '{count} articles' } },
+});
+
+// i18n/i18n.ts
+export const i18n = new Translator({ en }, { fr: () => import('./fr') });
+
+// main.ts, before mounting
+await i18n.setLocale(i18n.match()); // the best fit for navigator.languages, else the source
+
+i18n.t('home.greeting', { name: 'Ada' });
+i18n.t('cart.items', { count: 3 });
+```
+
+- Keys join groups with dots. `t` requires each placeholder by name, a numeric `count` for plural forms, and no second argument for a text without placeholders.
+- A translation missing a key or a placeholder, or writing a key, placeholder or plural form the source lacks, is a type error on that line. Texts live in `.ts` files: a `.json` import loses the strings' types.
+- Plural forms are an object of plural categories (`zero one two few many other`, `other` required), chosen with `Intl.PluralRules`; each language uses its own. Numbers in placeholders are formatted with `Intl.NumberFormat`; pass a string to keep one as written.
+- `setLocale` loads a translation once, sets `<html lang>`, and emits `change` on `i18n.bus`. Nothing re-renders: a component follows the language with `this.useTranslation(i18n, () => { … })`, called once in the constructor. The callback writes the texts with `i18n.t`; it runs at every connection (after the template, attribute callbacks and waiting changes, before the paint, so refs work) and at each `change` while connected. A text with a changing parameter goes in a method called from both `useTranslation` and the `useChange` callback. Never name that method `translate`: `HTMLElement.translate` already exists.
+- Locales are language tags (`fr`, `de-CH`); `i18n.locales` lists them, the source first.
 
 ## Testing an application
 

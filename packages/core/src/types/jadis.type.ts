@@ -1,9 +1,15 @@
 import type { JadisConstructor } from '../base-component';
+import type { Bus } from '../helpers/bus.helper';
 import type {
   KeysWithoutUndefined,
   KeysWithUndefined,
   SelectorToElementWithFallback,
 } from '../helpers/type.helper';
+
+/** What `useTranslation` follows: a translator, or anything that emits `change` on its bus when its language changes. */
+export interface TranslationSource<Locale extends string = string> {
+  readonly bus: Bus<{ change: Locale }>;
+}
 
 /** The `ref` that `useRefs` hands its callback: points at an element by a query, or at a component by its class. */
 export type UseRefsRef = {

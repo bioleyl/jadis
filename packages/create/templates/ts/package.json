@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "@jadis/core": "^1.4.2",
+    "@jadis/core": "^1.5.0",
     "typescript": "~7.0.2",
     "vite": "^8.2.2"
   },

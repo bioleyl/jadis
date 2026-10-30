@@ -63,7 +63,9 @@ router.goto('user', { id: '42' });
 | Parameter | Type | Description |
 |---|---|---|
 | `routeKey` | `string` | The route key defined in the routes map |
-| `params` | `Record<string, string>` | Optional dynamic parameter values |
+| `params` | `Record<string, string>` | The values of the path's parameters, by name: required when the path has some, refused otherwise |
+
+Both are type-checked: `router.goto('user')` is an error when the path is `/user/:id`, and so is `router.goto('home', { id: '42' })` when it is `/`.
 
 ## Route Definition
 
@@ -100,7 +102,7 @@ A page can declare `onRoute(route)`, to be kept while the routes stay on it, and
 ```typescript
 interface RoutedPage {
   onRoute?(route: ActiveRoute): void;
-  canLeave?(next: ActiveRoute): boolean;
+  canLeave?(next: ActiveRoute): boolean | Promise<boolean>; // LeaveAnswer
 }
 ```
 

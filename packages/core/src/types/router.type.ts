@@ -1,4 +1,5 @@
 import type { JadisConstructor } from '../base-component';
+import type { Merge } from '../helpers/type.helper';
 import type { ROUTER_PARAMETER_PREFIX } from '../router/router-constants';
 
 /** Remove trailing slash from a string literal */
@@ -63,9 +64,15 @@ export interface RoutedPage {
    * URL change whose route is on the same page: the router keeps the page instead of making it again.
    */
   onRoute?(route: ActiveRoute): void;
-  /** Called before the URL changes; returning false keeps the page, and puts the URL back. */
-  canLeave?(next: ActiveRoute): boolean;
+  /**
+   * Called before the URL changes; false keeps the page, and puts the URL back. A promise (the page asks the
+   * person first) keeps the page and its URL until it settles, then goes on to `next` if it resolves to true.
+   */
+  canLeave?(next: ActiveRoute): LeaveAnswer;
 }
+
+/** What a page answers when the person would leave it: at once, or once it has asked them. */
+export type LeaveAnswer = boolean | Promise<boolean>;
 
 export interface InternalRoute extends Route {
   regexp: RegExp;
@@ -93,11 +100,6 @@ export type ExtractParams<Path extends string> =
     : Path extends `${string}${typeof ROUTER_PARAMETER_PREFIX}${infer Param}`
       ? { [K in Param]: string }
       : Record<never, never>;
-
-/** Turn a union of object types into a single merged object type */
-type Merge<U> = (U extends unknown ? (k: U) => void : never) extends (k: infer I) => void
-  ? { [K in keyof I]: I[K] }
-  : never;
 
 /** Flatten a nested route tree into a single-level route map */
 export type FlattenRoutes<Tree, Prefix extends string = ''> = Merge<

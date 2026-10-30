@@ -5,7 +5,7 @@ By default, every navigation creates the page component again. A page can instea
 | Method | Called | Effect |
 |---|---|---|
 | `onRoute(route)` | Once the page is connected (after its `onConnect`), then at each URL change whose route is on the same page | The router **keeps the page** instead of creating it again |
-| `canLeave(next)` | Before each URL change | Returning `false` **keeps the person on the page**, and puts the URL back |
+| `canLeave(next)` | Before each URL change | Returning `false` (or a promise of `false`) **keeps the person on the page**, and puts the URL back |
 
 Both are typed by the `RoutedPage` interface.
 
@@ -47,8 +47,8 @@ A page without `onRoute` behaves as before: it is created again at each navigati
 export class EditorPage extends Jadis implements RoutedPage {
   static readonly selector = 'editor-page';
 
-  canLeave(): boolean {
-    return !this.isDirty() || window.confirm('Leave without saving?');
+  canLeave(): boolean | Promise<boolean> {
+    return !this.isDirty() || askToLeave(); // a dialog of the app, resolving to true for "Leave"
   }
 }
 ```
@@ -58,7 +58,15 @@ export class EditorPage extends Jadis implements RoutedPage {
 - before `router.goto()` changes the URL: when it refuses, nothing changes;
 - after the URL changed through a link, the address bar or the back button (`hashchange` or `popstate`): when it refuses, the router puts the previous URL back with `history.replaceState`.
 
-It is not asked when the URL did not change. It stays synchronous on purpose: `window.confirm` is, and an asynchronous answer would race the next navigation. For a reload or a closed tab, use the browser's `beforeunload` event.
+It is not asked when the URL did not change.
+
+### Asking first: a promise
+
+A page that asks the person in a dialog of its own answers with a `Promise<boolean>` (the type `LeaveAnswer`). While it is pending, the page stays and so does its URL: after a link, the address bar or the back button, the router puts the URL back at once. When the promise resolves to `true`, the router goes on to the route that was asked, putting its URL back first; `false`, or a promise that rejects, keeps the page.
+
+A navigation that comes while the page asks wins over it: the answer of an earlier question is then ignored, so a late "Leave" never takes the person to a page they no longer wanted. Asking twice is the page's to avoid, by giving the same pending question to both (jlib's `guardLeave()` does).
+
+For a reload or a closed tab, use the browser's `beforeunload` event: the browser asks, not the page.
 
 ## The Active Route
 

@@ -53,7 +53,7 @@ Navigating to `/hello/john`, the router will render:
 
 ## Navigation
 
-You can navigate to any defined route by using the name used as the key. If the route has parameters, you can pass them as the second argument of the `goto` method.
+You can navigate to any defined route by using the name used as the key. If the route has parameters, pass them as the second argument of the `goto` method: TypeScript requires each of them by name, and refuses a second argument for a route without parameters.
 
 ```javascript
 const routes = defineRoutes({

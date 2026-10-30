@@ -21,6 +21,7 @@ import type {
 import type {
   AttributeParser,
   ChangeOptions,
+  TranslationSource,
   UseChangeHandler,
   UseEventsHandler,
   UseRefsRef,
@@ -76,6 +77,8 @@ export abstract class Jadis extends HTMLElement {
    */
   protected onConnectActions: Array<() => void> = [];
 
+  /** Actions that run at every connection, after the ones waiting for it. */
+  private readonly _connectionActions: Array<() => void> = [];
   private _abortController = new AbortController();
   private _attributeObserver: MutationObserver | null = null;
   private _attributesInitialized = false;
@@ -178,12 +181,14 @@ export abstract class Jadis extends HTMLElement {
     this.renderTemplate();
     this._isConnected = true;
     // Attributes apply first, then the changes made before the connection,
-    // all before the browser paints. A waiting change calls back with the
-    // value current then, so an attribute set on the element still wins over
-    // a property set before it was connected, and a callback writing an
-    // attribute on the element cannot overwrite one it was written with.
+    // then the texts, all before the browser paints. A waiting change calls
+    // back with the value current then, so an attribute set on the element
+    // still wins over a property set before it was connected, and a callback
+    // writing an attribute on the element cannot overwrite one it was written
+    // with. The texts are drawn last, from values that are all settled.
     this.observeAttributes();
     this.runConnectActions();
+    this.runConnectionActions();
 
     setTimeout(() => {
       this.onConnect?.();
@@ -194,6 +199,12 @@ export abstract class Jadis extends HTMLElement {
     const actions = this.onConnectActions;
     this.onConnectActions = [];
     for (const action of actions) {
+      action();
+    }
+  }
+
+  private runConnectionActions(): void {
+    for (const action of this._connectionActions) {
       action();
     }
   }
@@ -310,6 +321,31 @@ export abstract class Jadis extends HTMLElement {
       callback,
       this.killSignal
     );
+  }
+
+  /**
+   * Draws the component's texts in the language shown: at every connection, once the template exists and before
+   * the browser paints, then at each language change while the component is connected.
+   * Call it once, in the constructor: a language changed while the component was away is drawn when it comes back.
+   * @param translator The translator whose language the texts follow
+   * @param draw Writes the texts in the DOM
+   * @example
+   * constructor() {
+   *   super();
+   *   this.useTranslation(i18n, () => {
+   *     this._refs.title.textContent = i18n.t('cart.title');
+   *   });
+   * }
+   */
+  protected useTranslation<Locale extends string>(translator: TranslationSource<Locale>, draw: () => void): void {
+    const follow = (): void => {
+      draw();
+      translator.bus.register('change', draw, this.killSignal);
+    };
+    this._connectionActions.push(follow);
+    if (this._isConnected) {
+      follow();
+    }
   }
 
   /**

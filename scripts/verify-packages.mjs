@@ -1,11 +1,16 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { rollup } from 'rollup';
 
 const rootDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const temporaryDirectory = mkdtempSync(join(tmpdir(), 'jadis-packages-'));
+
+// Each export alone must leave the others out of an application's bundle.
+const treeShakenExports = ['Jadis', 'Router', 'Translator'];
 
 function packWorkspace(workspace) {
   const output = execFileSync(
@@ -25,6 +30,30 @@ function installPackage(directory, packagePath) {
   });
 }
 
+async function bundleImportOf(directory, exportName) {
+  const entry = join(directory, `only-${exportName}.mjs`);
+  writeFileSync(entry, `export { ${exportName} } from '@jadis/core';\n`);
+  const build = await rollup({ input: entry, plugins: [nodeResolve()] });
+  const { output } = await build.generate({ format: 'es' });
+  await build.close();
+  return output[0].code;
+}
+
+async function verifyTreeShaking(directory) {
+  for (const exportName of treeShakenExports) {
+    const code = await bundleImportOf(directory, exportName);
+    const holdsClass = (name) => code.includes(`class ${name} `);
+    if (!holdsClass(exportName)) {
+      throw new Error(`The bundle of ${exportName} alone does not hold its class: the check below would prove nothing.`);
+    }
+
+    const kept = treeShakenExports.filter((other) => other !== exportName && holdsClass(other));
+    if (kept.length > 0) {
+      throw new Error(`Importing only ${exportName} from @jadis/core also bundles ${kept.join(', ')}.`);
+    }
+  }
+}
+
 try {
   const corePackage = packWorkspace('packages/core');
   const coreProject = mkdtempSync(join(temporaryDirectory, 'core-project-'));
@@ -39,6 +68,7 @@ try {
     ],
     { cwd: coreProject, stdio: 'inherit' }
   );
+  await verifyTreeShaking(coreProject);
 
   const createPackage = packWorkspace('packages/create');
   const createProject = mkdtempSync(join(temporaryDirectory, 'create-project-'));

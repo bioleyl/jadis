@@ -59,6 +59,22 @@ export type SchemaToEvents<S extends EventSchema> = {
   [K in keyof S]: EventValue<S[K]>;
 };
 
+/** Turn a union into the intersection of its members */
+export type UnionToIntersection<U> = (U extends unknown ? (k: U) => void : never) extends (k: infer I) => void
+  ? I
+  : never;
+
+/** Turn a union of object types into a single merged object type */
+export type Merge<U> = (U extends unknown ? (k: U) => void : never) extends (k: infer I) => void
+  ? { [K in keyof I]: I[K] }
+  : never;
+
+/**
+ * The parameters a call takes after its name: none when `Params` has no key, `Params` otherwise.
+ * `router.goto('home')`, `router.goto('user', { id: '42' })`
+ */
+export type ParamsArgs<Params> = keyof Params extends never ? [] : [params: Params];
+
 export type EventKey<T extends Record<string, unknown>> = Extract<keyof T, string>;
 export type HasUndefined<T> = [Extract<T, undefined>] extends [never] ? false : true;
 

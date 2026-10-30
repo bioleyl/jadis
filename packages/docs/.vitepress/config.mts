@@ -154,6 +154,19 @@ export default defineConfig({
           ],
         },
         {
+          text: 'Translations',
+          items: [
+            {
+              link: '/translation/overview',
+              text: 'Overview',
+            },
+            {
+              link: '/translation/texts',
+              text: 'Writing Texts',
+            },
+          ],
+        },
+        {
           text: 'API Reference',
           items: [
             {
@@ -183,6 +196,10 @@ export default defineConfig({
             {
               link: '/api/router-class',
               text: 'Router Class',
+            },
+            {
+              link: '/api/translator-class',
+              text: 'Translator Class',
             },
           ],
         },
