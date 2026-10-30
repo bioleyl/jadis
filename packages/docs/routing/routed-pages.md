@@ -56,17 +56,21 @@ export class EditorPage extends Jadis implements RoutedPage {
 `canLeave` receives the route the person would go to, so it can let some changes through. It is asked:
 
 - before `router.goto()` changes the URL: when it refuses, nothing changes;
-- after the URL changed through a link, the address bar or the back button (`hashchange` or `popstate`): when it refuses, the router puts the previous URL back with `history.replaceState`.
+- after the URL changed through a link, the address bar or the back or forward button (`hashchange` or `popstate`): when it refuses, the router takes the person back to the history entry of the page, so the history stays as it was: the next Back still goes where it went before.
 
 It is not asked when the URL did not change.
 
 ### Asking first: a promise
 
-A page that asks the person in a dialog of its own answers with a `Promise<boolean>` (the type `LeaveAnswer`). While it is pending, the page stays and so does its URL: after a link, the address bar or the back button, the router puts the URL back at once. When the promise resolves to `true`, the router goes on to the route that was asked, putting its URL back first; `false`, or a promise that rejects, keeps the page.
+A page that asks the person in a dialog of its own answers with a `Promise<boolean>` (the type `LeaveAnswer`). While it is pending, the page stays. After `router.goto()`, the URL changes only once the answer is yes. After a link, the address bar or the back button, the URL is left where the person went: a yes then shows that route without adding to the history, and a no (or a promise that rejects) puts the previous URL back. A page with nothing to lose should answer `true` at once rather than a promise: the router then goes on without waiting.
 
 A navigation that comes while the page asks wins over it: the answer of an earlier question is then ignored, so a late "Leave" never takes the person to a page they no longer wanted. Asking twice is the page's to avoid, by giving the same pending question to both (jlib's `guardLeave()` does).
 
 For a reload or a closed tab, use the browser's `beforeunload` event: the browser asks, not the page.
+
+### The history entries
+
+To find the page's entry again, the router numbers each history entry it shows, in `history.state` (under `jadisRouterIndex`), beside what the app keeps there. An entry it has not numbered is one a link or the address bar just added, after the page's. So an app that replaces the URL keeps the state: `history.replaceState(history.state, '', url)`, not `replaceState(null, …)`, which forgets the number. An app that follows its links with `history.pushState` then a `popstate` event needs nothing more.
 
 ## The Active Route
 

@@ -66,7 +66,8 @@ export interface RoutedPage {
   onRoute?(route: ActiveRoute): void;
   /**
    * Called before the URL changes; false keeps the page, and puts the URL back. A promise (the page asks the
-   * person first) keeps the page and its URL until it settles, then goes on to `next` if it resolves to true.
+   * person first) keeps the page until it settles, then goes on to `next` if it resolves to true; meanwhile a URL a
+   * link or the back button changed stays as it is, and is put back if the answer is no.
    */
   canLeave?(next: ActiveRoute): LeaveAnswer;
 }

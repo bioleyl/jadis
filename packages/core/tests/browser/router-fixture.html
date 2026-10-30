@@ -35,6 +35,27 @@
         }
       }
 
+      /** A page with changes not saved: it lets the person go, refuses, or asks and answers later. */
+      class BrowserEditor extends Jadis {
+        static selector = 'browser-editor';
+
+        templateHtml() {
+          const output = document.createElement('output');
+          output.textContent = 'editor';
+          return output;
+        }
+
+        canLeave() {
+          const answer = window.__leaveAnswer ?? true;
+          if (answer !== 'later') {
+            return answer;
+          }
+          return new Promise((resolve) => {
+            window.__answerLeave = resolve;
+          });
+        }
+      }
+
       class BrowserRoot extends Jadis {
         static selector = 'browser-root';
 
@@ -47,11 +68,13 @@
       BrowserHome.register();
       BrowserDetails.register();
       BrowserRoot.register();
+      BrowserEditor.register();
 
       const routes = defineRoutes({
         base: { page: BrowserBase, path: '/' },
         home: { page: BrowserHome, path: '/home' },
         details: { page: BrowserDetails, path: '/details/:id' },
+        editor: { page: BrowserEditor, path: '/editor' },
         group: defineRouteGroup(
           '/group',
           { home: { page: BrowserHome, path: '/home' } },

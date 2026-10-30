@@ -54,6 +54,67 @@ test.describe('Jadis router', () => {
     await expect(page.locator('#router-app browser-home')).toBeVisible();
   });
 
+  test.describe('a page that refuses to be left', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.evaluate(() => window.startRouter('history'));
+      await page.evaluate(() => window.__jadisRouter?.goto('home'));
+      await page.evaluate(() => window.__jadisRouter?.goto('editor'));
+      await expect(page.locator('#router-app browser-editor')).toBeVisible();
+    });
+
+    test('keeps the earlier entry when it refuses the back button', async ({ page }) => {
+      await page.evaluate(() => {
+        window.__leaveAnswer = false;
+      });
+
+      await page.goBack();
+      await expect(page).toHaveURL(/\/editor$/);
+      await expect(page.locator('#router-app browser-editor')).toBeVisible();
+
+      await page.evaluate(() => {
+        window.__leaveAnswer = true;
+      });
+      await page.goBack();
+      await expect(page).toHaveURL(/\/home$/);
+      await expect(page.locator('#router-app browser-home')).toBeVisible();
+    });
+
+    test('leaves no entry behind when it refuses a link', async ({ page }) => {
+      await page.evaluate(() => {
+        window.__leaveAnswer = false;
+        window.history.pushState({}, '', '/details/9');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      });
+      await expect(page).toHaveURL(/\/editor$/);
+
+      await page.evaluate(() => {
+        window.__leaveAnswer = true;
+      });
+      await page.goBack();
+      await expect(page).toHaveURL(/\/home$/);
+      await expect(page.locator('#router-app browser-home')).toBeVisible();
+    });
+
+    test('waits for an answer that comes later, then stays or goes back', async ({ page }) => {
+      await page.evaluate(() => {
+        window.__leaveAnswer = 'later';
+      });
+
+      await page.goBack();
+      await expect(page).toHaveURL(/\/home$/);
+      await expect(page.locator('#router-app browser-editor')).toBeVisible();
+      await page.evaluate(() => window.__answerLeave?.(false));
+      await expect(page).toHaveURL(/\/editor$/);
+      await expect(page.locator('#router-app browser-editor')).toBeVisible();
+
+      await page.goBack();
+      await expect(page).toHaveURL(/\/home$/);
+      await page.evaluate(() => window.__answerLeave?.(true));
+      await expect(page.locator('#router-app browser-home')).toBeVisible();
+      await expect(page).toHaveURL(/\/home$/);
+    });
+  });
+
   test('rejects unknown routes', async ({ page }) => {
     await page.evaluate(() => window.startRouter('history'));
 
@@ -68,6 +129,8 @@ declare global {
     __jadisRouter?: {
       goto(name: string, params?: Record<string, string>): void;
     };
+    __leaveAnswer?: boolean | 'later';
+    __answerLeave?: (leave: boolean) => void;
     __jadisRouterReady?: boolean;
     startRouter(mode: 'hash' | 'history'): void;
   }
