@@ -34,10 +34,24 @@ class PlainPage extends Jadis {
   static readonly selector = 'plain-page';
 }
 
+/** A page that asks the person before letting them go: its answer comes later, as a dialog's would. */
+class AskingPage extends Jadis {
+  static readonly selector = 'asking-page';
+  readonly questions: Array<{ next: ActiveRoute; answer: (leave: boolean) => void; fail: () => void }> = [];
+
+  canLeave(next: ActiveRoute): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.questions.push({ answer: resolve, fail: () => reject(new Error('The question was closed')), next });
+    });
+  }
+}
+
 ItemsPage.register();
 PlainPage.register();
+AskingPage.register();
 
 const routes = defineRoutes({
+  asking: { page: AskingPage, path: '/asking' },
   item: { page: ItemsPage, path: '/items/:itemId' },
   items: { page: ItemsPage, path: '/items' },
   plain: { page: PlainPage, path: '/plain/:id' },
@@ -201,6 +215,75 @@ describe('Router with routed pages', () => {
       window.dispatchEvent(new HashChangeEvent('hashchange'));
 
       expect(page<ItemsPage>('items-page').leaveAsked).toHaveLength(0);
+    });
+  });
+
+  describe('canLeave answered later', () => {
+    const askingPage = async () => {
+      const router = start();
+      router.goto('asking');
+      await nextTask();
+      return { asking: page<AskingPage>('asking-page'), router };
+    };
+
+    it('keeps the page and its URL while it asks, then goes on when it lets the person go', async () => {
+      const { asking, router } = await askingPage();
+
+      router.goto('plain', { id: '3' });
+
+      expect(window.location.pathname).toBe('/asking');
+      expect(page('asking-page')).toBe(asking);
+      asking.questions[0]?.answer(true);
+      await vi.waitFor(() => expect(container.querySelector('plain-page')).toBeTruthy());
+      expect(window.location.pathname).toBe('/plain/3');
+      expect(router.currentRoute.params).toEqual({ id: '3' });
+    });
+
+    it('stays when the answer is no', async () => {
+      const { asking, router } = await askingPage();
+
+      router.goto('plain', { id: '3' });
+      asking.questions[0]?.answer(false);
+      await nextTask();
+
+      expect(window.location.pathname).toBe('/asking');
+      expect(page('asking-page')).toBe(asking);
+    });
+
+    it('stays when the question fails', async () => {
+      const { asking, router } = await askingPage();
+
+      router.goto('plain', { id: '3' });
+      asking.questions[0]?.fail();
+      await nextTask();
+
+      expect(page('asking-page')).toBe(asking);
+    });
+
+    it('puts the URL back while it asks after the back button, then goes where the person went', async () => {
+      const { asking } = await askingPage();
+
+      window.history.pushState({}, '', '/plain/7');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+
+      expect(window.location.pathname).toBe('/asking');
+      asking.questions[0]?.answer(true);
+      await vi.waitFor(() => expect(container.querySelector('plain-page')).toBeTruthy());
+      expect(window.location.pathname).toBe('/plain/7');
+    });
+
+    it('follows the newer navigation when a former answer comes late', async () => {
+      const { asking, router } = await askingPage();
+
+      router.goto('plain', { id: '1' });
+      router.goto('plain', { id: '2' });
+      asking.questions[0]?.answer(true);
+      await nextTask();
+
+      expect(page('asking-page')).toBe(asking);
+      asking.questions[1]?.answer(true);
+      await vi.waitFor(() => expect(container.querySelector('plain-page')).toBeTruthy());
+      expect(router.currentRoute.params).toEqual({ id: '2' });
     });
   });
 

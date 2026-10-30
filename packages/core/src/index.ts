@@ -27,6 +27,7 @@ export type {
 } from './types/jadis.type';
 export type {
   ActiveRoute,
+  LeaveAnswer,
   Route,
   RouteDefinition,
   RoutedPage,

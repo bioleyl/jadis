@@ -100,7 +100,7 @@ A page can declare `onRoute(route)`, to be kept while the routes stay on it, and
 ```typescript
 interface RoutedPage {
   onRoute?(route: ActiveRoute): void;
-  canLeave?(next: ActiveRoute): boolean;
+  canLeave?(next: ActiveRoute): boolean | Promise<boolean>; // LeaveAnswer
 }
 ```
 
