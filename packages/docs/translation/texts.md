@@ -14,6 +14,8 @@ export default defineTranslations({
 i18n.t('cart.summary.title');
 ```
 
+A key itself never holds a dot: `t` reads a dot as a group and its key. `defineTranslations({ 'cart.title': … })` is refused; write the group, `{ cart: { title: … } }`.
+
 ## Placeholders
 
 A name between braces is a placeholder: `t` must give it a value, by its name.
@@ -24,7 +26,16 @@ greeting: 'Hello {name}, you have {count} messages',
 i18n.t('home.greeting', { name: 'Ada', count: 3 });
 ```
 
-A value is a string or a number. A number is written the way the language shown writes it: `1234.5` is `1,234.5` in English and `1 234,5` in French. Give a string to keep a number as it is written, such as an identifier: `{ id: '007' }`.
+A value is a string or a number. A number is written the way the language shown writes it: `1234.5` is `1,234.5` in English and `1 234,5` in French.
+
+A number that is an identifier, such as an order number, must not be written that way: `{ order: 1234 }` shows "#1,234" in English and "#1’234" in Swiss German. Give it as a string to keep it as it is written:
+
+```typescript
+orderTitle: 'Order #{order}',
+
+i18n.t('orders.orderTitle', { order: 1234 });         // 'Order #1,234'
+i18n.t('orders.orderTitle', { order: String(1234) }); // 'Order #1234'
+```
 
 Empty braces, `{}`, are text.
 

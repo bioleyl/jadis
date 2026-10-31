@@ -80,19 +80,24 @@ export class Translator<
   }
 
   /**
-   * Shows the texts of a locale: loads them the first time, sets the page's `lang`, and emits `change`.
-   * When it is called again before its texts are loaded, the locale asked last wins.
+   * Shows the texts of a locale: loads them the first time, sets the page's `lang` (for the locale already shown
+   * too), and emits `change` when the locale changes. When it is called again before its texts are loaded, the
+   * locale asked last wins.
    * @param {Locale} locale The locale to show
    */
   async setLocale(locale: Locale<Source, Others>): Promise<void> {
     this._wanted = locale;
     const texts = await this.loadTexts(locale);
-    if (this._wanted !== locale || this._active.locale === locale) {
+    if (this._wanted !== locale) {
+      return;
+    }
+
+    document.documentElement.lang = locale;
+    if (this._active.locale === locale) {
       return;
     }
 
     this._active = this.activate(locale, texts);
-    document.documentElement.lang = locale;
     this.bus.emit('change', locale);
   }
 

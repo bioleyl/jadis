@@ -358,7 +358,7 @@ i18n.t('home.greeting', { name: 'Ada' });
 i18n.t('cart.items', { count: 3 });
 ```
 
-- Keys join groups with dots. `t` requires each placeholder by name, a numeric `count` for plural forms, and no second argument for a text without placeholders.
+- Keys join groups with dots, and a key never holds one (`defineTranslations` refuses `'account.title'`: write the group). `t` requires each placeholder by name, a numeric `count` for plural forms, and no second argument for a text without placeholders.
 - A translation missing a key or a placeholder, or writing a key, placeholder or plural form the source lacks, is a type error on that line. Texts live in `.ts` files: a `.json` import loses the strings' types.
 - Plural forms are an object of plural categories (`zero one two few many other`, `other` required), chosen with `Intl.PluralRules`; each language uses its own. Numbers in placeholders are formatted with `Intl.NumberFormat`; pass a string to keep one as written.
 - `setLocale` loads a translation once, sets `<html lang>`, and emits `change` on `i18n.bus`. Nothing re-renders: a component follows the language with `this.useTranslation(i18n, () => { … })`, called once in the constructor. The callback writes the texts with `i18n.t`; it runs at every connection (after the template, attribute callbacks and waiting changes, before the paint, so refs work) and at each `change` while connected. A text with a changing parameter goes in a method called from both `useTranslation` and the `useChange` callback. Never name that method `translate`: `HTMLElement.translate` already exists.

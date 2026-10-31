@@ -178,3 +178,16 @@ void key;
 void wrongKey;
 void locale;
 void matched;
+
+// A key holding a dot is refused: `t` would read it as a group and its key, and never find the text.
+defineTranslations({
+  // @ts-expect-error Write the group: { account: { title } }.
+  'account.title': 'My account',
+  home: { title: 'Home' },
+});
+
+// Nor is it a key of texts given without defineTranslations.
+const flat = new Translator({ en: { 'account.title': 'My account', home: 'Home' } }, {});
+flat.t('home');
+// @ts-expect-error Not a key: a dot joins a group and its key.
+flat.t('account.title');

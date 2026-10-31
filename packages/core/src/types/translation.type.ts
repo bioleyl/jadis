@@ -32,14 +32,30 @@ export type Placeholders<Text extends string> = Text extends `${string}{${infer 
 
 type MessagePlaceholders<M> = M extends string ? Placeholders<M> : Placeholders<M[keyof M] & string>;
 
-/** Every text's key, its groups joined by dots: `'home.title' | 'cart.items'` */
+/** A key holding a dot, which `t` would read as a group and its key. */
+type DottedKey = `${string}.${string}`;
+
+/** Every text's key, its groups joined by dots: `'home.title' | 'cart.items'`. A key holding a dot is none. */
 export type TranslationKey<Tree> = {
-  [K in keyof Tree & string]: Tree[K] extends string
-    ? K
-    : IsPlural<Tree[K]> extends true
+  [K in keyof Tree & string]: K extends DottedKey
+    ? never
+    : Tree[K] extends string
       ? K
-      : `${K}.${TranslationKey<Tree[K]>}`;
+      : IsPlural<Tree[K]> extends true
+        ? K
+        : `${K}.${TranslationKey<Tree[K]>}`;
 }[keyof Tree & string];
+
+/** Refuses a key holding a dot: `t` reads a dot as a group and its key, so it would never find the text. */
+export type GroupedKeys<Tree> = {
+  readonly [K in keyof Tree]: K extends DottedKey
+    ? { readonly 'A dot joins a group and its key: write the group': K }
+    : Tree[K] extends string
+      ? Tree[K]
+      : IsPlural<Tree[K]> extends true
+        ? Tree[K]
+        : GroupedKeys<Tree[K]>;
+};
 
 /** The message under a dotted key. */
 export type MessageAt<Tree, Key extends string> = Key extends keyof Tree

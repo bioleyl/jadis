@@ -132,7 +132,7 @@ describe('Translator', () => {
     expect(onChange).toHaveBeenCalledExactlyOnceWith('fr');
   });
 
-  it('emits nothing when the locale is already shown', async () => {
+  it('emits nothing when the locale is already shown, and still sets the page language', async () => {
     const translator = new Translator({ en }, { fr });
     const onChange = vi.fn();
     translator.bus.register('change', onChange, new AbortController().signal);
@@ -140,7 +140,7 @@ describe('Translator', () => {
     await translator.setLocale('en');
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(document.documentElement.lang).toBe('');
+    expect(document.documentElement.lang).toBe('en');
   });
 
   it('shows the locale asked last when an earlier one loads after it', async () => {
