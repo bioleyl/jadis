@@ -193,7 +193,8 @@ export class Router<T extends Record<string, RouteDefinition>> {
   match(path: string): ActiveRoute | undefined {
     const [urlPath, query] = this.splitPathAndQuery(path);
     const normalized = normalizePath(urlPath);
-    return this.getRouteByPath(normalized) ? this.matchPath(normalized, query) : undefined;
+    const route = this.getRouteByPath(normalized);
+    return route ? this.activeRoute(route, normalized, query) : undefined;
   }
 
   private pathOf(name: keyof T, params?: Record<string, string>): string {
@@ -526,6 +527,10 @@ export class Router<T extends Record<string, RouteDefinition>> {
   private matchPath(urlPath: string, query: URLSearchParams): ActiveRoute {
     const route = this.getRouteByPath(urlPath);
     assert(route, `No route found for path: ${urlPath}`);
+    return this.activeRoute(route, urlPath, query);
+  }
+
+  private activeRoute(route: InternalRoute, urlPath: string, query: URLSearchParams): ActiveRoute {
     const { componentSelector, name, path } = route;
     return { componentSelector, name, params: this.getRouteParameters({ ...route, urlPath }), path, query };
   }
