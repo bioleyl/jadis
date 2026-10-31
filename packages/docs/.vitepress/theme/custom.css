@@ -1,0 +1,8 @@
+/* The benchmark page (pageClass: benchmark): each row's best result, written in bold, is in green. */
+.benchmark td:has(> strong) {
+  background-color: var(--vp-c-green-soft);
+}
+
+.benchmark td strong {
+  color: var(--vp-c-green-1);
+}
