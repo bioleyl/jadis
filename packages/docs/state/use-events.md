@@ -85,7 +85,17 @@ this.events.register('dataLoaded', (detail) => {
 
 ## Automatic cleanup
 
-`useEvents()` listeners are bound to the `killSignal` of the component that emits the events, and are removed when it disconnects. A parent listening to a child registers in its own `onConnect()`, so the listener is added again after each reconnection.
+`useEvents()` listeners are bound to the `killSignal` of the component that emits the events, and are removed when it disconnects; a move is not a disconnection. A parent listening to a child registers in its own `onConnect()`, so the listener is added again after each reconnection.
+
+## In JSX
+
+A component written by its class takes each event of its `events` field as a prop, `on` and the event's name: `onChanged` for `changed`, `onValueChange` for `valueChange`. The callback receives the detail, as with `register`, and TypeScript checks it:
+
+```tsx
+<MyComponent onChanged={(value) => console.log('changed to', value)} />
+```
+
+The listener lasts as long as the element, so it suits elements made in a list. An event whose name starts with a capital has no prop.
 
 ## Best practices
 

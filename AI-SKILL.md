@@ -281,7 +281,7 @@ class SearchBox extends Jadis {
 this._refs.search.events.register('submit', (query) => { ... });
 ```
 
-`emit` dispatches a `CustomEvent` on the child itself that neither bubbles nor crosses shadow roots: only listeners registered on that element hear it, and they receive the payload (the event's `detail`) directly. `register` binds the listener to the **child's** kill signal, so the parent registers again in its own `onConnect`.
+`emit` dispatches a `CustomEvent` on the child itself that neither bubbles nor crosses shadow roots: only listeners registered on that element hear it, and they receive the payload (the event's `detail`) directly. `register` binds the listener to the **child's** kill signal, so the parent registers again in its own `onConnect`. In JSX, a child written by its class takes its events as props, `onSubmit={(query) => …}` (`onValueChange` for `valueChange`), the callback given the detail; that listener lasts as long as the element: the way for rows a parent creates in a list.
 
 **Cross-component / services**: `Bus`. Unrelated components share a bus instance:
 

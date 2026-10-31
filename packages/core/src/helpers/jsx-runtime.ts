@@ -1,7 +1,7 @@
 import { applyElementAttributes, applyElementProperty } from './element.helper';
 
 import type { Jadis, JadisConstructor } from '../base-component';
-import type { AppendableElement, SafeElementValues } from './type.helper';
+import type { AppendableElement, Callable, ComponentEventProps, SafeElementValues } from './type.helper';
 
 // ---------------------------------------------------------------------------
 // Fragment
@@ -103,7 +103,7 @@ export type IntrinsicElements = {
   [elementName: `${string}-${string}`]: JadisProps;
 };
 
-type ComponentProps<T extends Jadis> = Omit<SafeElementValues<T>, 'children'> & BaseProps;
+type ComponentProps<T extends Jadis> = Omit<SafeElementValues<T>, 'children'> & BaseProps & ComponentEventProps<T>;
 
 /**
  * Common JSX type definitions for Jadis components.
@@ -187,6 +187,23 @@ declare global {
 // jsx / jsxs / h — runtime
 // ---------------------------------------------------------------------------
 
+/**
+ * The listener of a component's `on…` prop: a component's own events (`useEvents`) are custom events, whose handler
+ * gets the detail, as `events.register` gives it; any other event is given as it is.
+ * It is added without the kill signal, so it lasts as long as the element.
+ */
+function detailListener(handler: Callable): EventListener {
+  return (event) => handler(event instanceof CustomEvent ? event.detail : event);
+}
+
+/**
+ * The event a component's `on…` prop listens to: its name with the first letter in lower case, the rest as written,
+ * so `onValueChange` hears `valueChange`, and the DOM property `onclick` still hears `click`.
+ */
+function componentEventName(prop: string): string {
+  return `${prop.charAt(2).toLowerCase()}${prop.slice(3)}`;
+}
+
 function createJsxNode(
   type: string | JadisConstructor,
   props: JadisProps | null | undefined,
@@ -248,8 +265,11 @@ function createJsxNode(
     }
 
     if (typeof value === 'function' && key.startsWith('on')) {
-      const eventName = key.slice(2).toLowerCase();
-      el.addEventListener(eventName, value as EventListener);
+      if (typeof type === 'string') {
+        el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
+      } else {
+        el.addEventListener(componentEventName(key), detailListener(value as Callable));
+      }
       continue;
     }
 
@@ -414,8 +434,7 @@ function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
           instance.setAttribute('class', toClassName(String(value)));
         }
       } else if (typeof value === 'function' && key.startsWith('on')) {
-        const eventName = key.slice(2).toLowerCase();
-        instance.addEventListener(eventName, value as EventListener);
+        instance.addEventListener(componentEventName(key), detailListener(value as Callable));
       } else if (!RESERVED_PROPS.has(key)) {
         (instance as unknown as Record<string, unknown>)[key] = value;
       }
