@@ -90,6 +90,8 @@ The JavaScript heap after a garbage collection, median of 5.
 | With 1,000 rows | 3.74 MB | 3.29 MB | **1.33 MB** |
 | After 5 creations and clearings of 1,000 rows | 2.37 MB | 1.61 MB | **1.41 MB** |
 
+The last line is no leak. Each library ends a little above its start once its code has run many times: the browser keeps the code it optimized, and its caches. The heap then stays flat: measured again over 100 creations and clearings of 1,000 rows, Jadis's heap stopped growing after the first 5, at 1.33 MB, with as many DOM elements and event listeners as when the page was ready. React and Vue keep an object for each row (fibers, virtual nodes), which is why their middle line is the highest; Jadis's rows are DOM elements, outside the JavaScript heap, so its middle line is barely above its first, and below its last.
+
 ## Size and start
 
 | | React 19 | Vue 3.5 | Jadis 1.6 |
