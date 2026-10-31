@@ -4,14 +4,22 @@ import {
   TRANSLATION_PLACEHOLDER_PATTERN,
 } from '../translation/translation-constants';
 
-import type { Message, PlaceholderValue, TranslationOf, TranslationTree } from '../types/translation.type';
+import type {
+  GroupedKeys,
+  Message,
+  PlaceholderValue,
+  TranslationOf,
+  TranslationTree,
+} from '../types/translation.type';
 
 /**
  * Defines the source texts: the keys and the placeholders every translation has.
  * @param source The texts, grouped by key: `{ home: { greeting: 'Hello {name}!' } }`.
  * @returns The texts, their exact strings kept in their type.
  */
-export function defineTranslations<const Source extends TranslationTree>(source: Source): Source;
+export function defineTranslations<const Source extends TranslationTree>(
+  source: Source & GroupedKeys<Source>
+): Source;
 /**
  * Defines a translation of the source texts: the same keys, and the same placeholders in each text.
  * @param source The source texts, as `defineTranslations` returned them.

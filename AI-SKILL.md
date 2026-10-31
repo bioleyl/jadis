@@ -15,13 +15,13 @@ Verified against `base-component.ts`:
 
 1. **Constructor** — the shadow root is attached. Nothing is rendered yet. Field initializers (`useRefs`, `useChange`, `useEvents`, `useAttributes`) run here; reading a ref now throws, as the template does not exist yet.
 2. **First connection** — `templateHtml()` and `templateCss()` run **once** and are appended to the shadow root. The `useChange` values set before the connection and the attribute callbacks are applied right away, during `appendChild`. Then `onConnect()` runs **asynchronously**, on the next task — not synchronously during `appendChild`.
-3. **Disconnection** — the internal kill signal aborts. Every listener registered with `on()`, `useEvents().register()`, or `onBus()` is removed automatically. The rendered DOM is **kept**.
-4. **Reconnection** — `onConnect()` runs **again**, attribute callbacks re-fire for currently set attributes, and the **same DOM** is reused. The template is never re-rendered.
+3. **Disconnection** — a microtask after the removal, the internal kill signal aborts. Every listener registered with `on()`, `useEvents().register()`, or `onBus()` is removed automatically. The rendered DOM is **kept**. A **move** (`append`, `insertBefore`, `replaceChildren`, `moveBefore` of an element in the page) is not a disconnection: the element stays as it was, listeners and kill signal included, and neither `onDisconnect()` nor `onConnect()` runs.
+4. **Reconnection** (after a removal) — `onConnect()` runs **again**, attribute callbacks re-fire for currently set attributes, and the **same DOM** is reused. The template is never re-rendered.
 
 Consequences:
 
 - Wire **all** listeners inside `onConnect()`. Cleanup is automatic; manual `removeEventListener` is a smell.
-- Never assume a single connection: `onConnect()` runs again on the same DOM after every reconnection (moving an element counts). Make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds rather than a "connected once" flag.
+- Never assume a single connection: `onConnect()` runs again on the same DOM after every reconnection (a removal, then putting it back in a later task; a move doesn't count). Make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds rather than a "connected once" flag.
 - Stop what outlives the component: pass `this.killSignal` to `fetch` and to listeners on `window` or `document` (`this.on(window, 'resize', …)` and `this.on(document, …)` do it for you), clear timers in `onDisconnect()`. After an `await` in `onConnect()`, check `this.isConnected` before touching the DOM.
 - In tests, what `useChange` and attribute callbacks render is there right after `appendChild`; what `onConnect()` does needs a task (Playwright's auto-waiting or `waitForFunction` handles this).
 - `useChange` updates made before connection are applied **synchronously** while the component connects, once per handler with the latest value, after attribute callbacks and before the browser paints. `onConnect()` still runs a task later.
@@ -97,7 +97,7 @@ Browsers execute neither JSX nor TypeScript. Two options:
 <script type="importmap">
   {
     "imports": {
-      "@jadis/core": "https://esm.sh/@jadis/core@1.5.1"
+      "@jadis/core": "https://esm.sh/@jadis/core@1.6.0"
     }
   }
 </script>
@@ -130,8 +130,8 @@ The emitted code imports `@jadis/core/jsx-runtime`, so the import map needs both
 ```json
 {
   "imports": {
-    "@jadis/core": "https://esm.sh/@jadis/core@1.5.1",
-    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.5.1/jsx-runtime"
+    "@jadis/core": "https://esm.sh/@jadis/core@1.6.0",
+    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.6.0/jsx-runtime"
   }
 }
 ```
@@ -281,7 +281,7 @@ class SearchBox extends Jadis {
 this._refs.search.events.register('submit', (query) => { ... });
 ```
 
-`emit` dispatches a `CustomEvent` on the child itself that neither bubbles nor crosses shadow roots: only listeners registered on that element hear it, and they receive the payload (the event's `detail`) directly. `register` binds the listener to the **child's** kill signal, so the parent registers again in its own `onConnect`.
+`emit` dispatches a `CustomEvent` on the child itself that neither bubbles nor crosses shadow roots: only listeners registered on that element hear it, and they receive the payload (the event's `detail`) directly. `register` binds the listener to the **child's** kill signal, so the parent registers again in its own `onConnect`. In JSX, a child written by its class takes its events as props, `onSubmit={(query) => …}` (`onValueChange` for `valueChange`), the callback given the detail; that listener lasts as long as the element: the way for rows a parent creates in a list.
 
 **Cross-component / services**: `Bus`. Unrelated components share a bus instance:
 
@@ -322,7 +322,8 @@ router.goto('profile', { id: '42' });
 - `mountOn` takes an `HTMLElement`; use `getElementById`, not `querySelector` (which returns `Element`).
 - **The first route that matches wins**, and a `:param` matches across `/` (`/user/:id` also matches `/user/1/edit`): list specific routes first.
 - **A URL no route matches throws.** End the routes with a catch-all such as `notFound: { page: NotFoundPage, path: '/:rest' }`.
-- **Links are not intercepted.** In history mode, `<a href="/profile/42">` reloads the page: call `router.goto(...)` from a click handler, or use hash mode with `href="#/profile/42"`.
+- **Links are followed with `links: true`** (history mode): the router follows same-origin links to its routes, in shadow roots too, and leaves modified clicks, `target`, `download`, `rel="external"` and paths no route matches to the browser (with a catch-all route, mark links to files and the server `rel="external"`). Without it, `<a href>` reloads the page; in hash mode write `href="#/profile/42"`.
+- Navigate by name with `goto`, by path with `gotoPath('/profile/42?tab=posts')` (an address only known at run time); `replace`/`replacePath` write in place of the history entry (a page that only redirects). `match(path)` gives a path's route or `undefined`. `router.bus` emits `change` with the route once shown. `mountOn(el, { show: (next, current) => … })` lets the app put each new page in the document (keep the current one until the next has its data).
 - Every navigation creates the page component (and its group's root component) again: their state is lost, unless the page declares `onRoute(route)`. Such a page is kept while the routes stay on it (same page and root component, even under another route name): the router updates its parameter attributes and calls `onRoute` again. The first `onRoute` comes after `onConnect`. A root component shows the page through a `<slot>`.
 - A page's `canLeave(next)` is asked before each URL change; `false` cancels a `goto`, or puts back a URL changed by a link or the back button. It may answer later with a `Promise<boolean>` (a dialog of the app): the page stays until it resolves, `true` then shows the route asked and `false` puts the URL back; answer `true` at once when nothing would be lost. A newer navigation meanwhile wins. A refusal after the back button or a link goes back to the page's history entry, numbered in `history.state`: replace the URL with `history.replaceState(history.state, '', url)` to keep that number. Type both with `implements RoutedPage`.
 - The query is not matched: `router.currentRoute.query` (and the route given to `onRoute`) holds it as `URLSearchParams`, in hash mode too.
@@ -358,7 +359,7 @@ i18n.t('home.greeting', { name: 'Ada' });
 i18n.t('cart.items', { count: 3 });
 ```
 
-- Keys join groups with dots. `t` requires each placeholder by name, a numeric `count` for plural forms, and no second argument for a text without placeholders.
+- Keys join groups with dots, and a key never holds one (`defineTranslations` refuses `'account.title'`: write the group). `t` requires each placeholder by name, a numeric `count` for plural forms, and no second argument for a text without placeholders.
 - A translation missing a key or a placeholder, or writing a key, placeholder or plural form the source lacks, is a type error on that line. Texts live in `.ts` files: a `.json` import loses the strings' types.
 - Plural forms are an object of plural categories (`zero one two few many other`, `other` required), chosen with `Intl.PluralRules`; each language uses its own. Numbers in placeholders are formatted with `Intl.NumberFormat`; pass a string to keep one as written.
 - `setLocale` loads a translation once, sets `<html lang>`, and emits `change` on `i18n.bus`. Nothing re-renders: a component follows the language with `this.useTranslation(i18n, () => { … })`, called once in the constructor. The callback writes the texts with `i18n.t`; it runs at every connection (after the template, attribute callbacks and waiting changes, before the paint, so refs work) and at each `change` while connected. A text with a changing parameter goes in a method called from both `useTranslation` and the `useChange` callback. Never name that method `translate`: `HTMLElement.translate` already exists.

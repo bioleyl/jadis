@@ -31,12 +31,16 @@ function isChangeHandlerLike(value: unknown): value is ChangeHandlerLike {
 
 export function applyElementAttributes(element: HTMLElement, attrs: Record<string, unknown>): void {
   for (const [key, value] of Object.entries(attrs)) {
-    if (value === undefined) {
-      continue;
-    }
-
-    element.setAttribute(toKebabCase(key), String(value));
+    setElementAttribute(element, key, value);
   }
+}
+
+/** Sets one attribute, its name in kebab case; an undefined value sets nothing. */
+export function setElementAttribute(element: HTMLElement, key: string, value: unknown): void {
+  if (value === undefined) {
+    return;
+  }
+  element.setAttribute(toKebabCase(key), String(value));
 }
 
 export function applyElementProperty(element: HTMLElement, key: string, value: unknown): void {

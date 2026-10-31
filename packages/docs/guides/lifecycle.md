@@ -6,7 +6,7 @@ Every Jadis component follows the [Custom Elements lifecycle](https://developer.
 
 ### `onConnect()`
 
-Called on the task after the component is connected, once its template has been rendered. This is the place to set up event listeners, fetch data, or perform connection-specific setup. It runs again each time the component reconnects (moving it in the DOM counts), on the same DOM: make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds.
+Called on the task after the component is connected, once its template has been rendered. This is the place to set up event listeners, fetch data, or perform connection-specific setup. It runs again each time the component is connected again after it was removed, on the same DOM: make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds. Moving the component is not removing it: see [Moves](#moves).
 
 ```typescript
 class MyComponent extends Jadis {
@@ -19,7 +19,7 @@ class MyComponent extends Jadis {
 
 ### `onDisconnect()`
 
-Called when the component is removed from the DOM. Use this for cleanup that is not tied to `killSignal`, such as canceling timers or stopping external work. Listeners registered through Jadis helpers are cleaned up automatically.
+Called a microtask after the component is removed from the DOM. Use this for cleanup that is not tied to `killSignal`, such as canceling timers or stopping external work. Listeners registered through Jadis helpers are cleaned up automatically.
 
 ```typescript
 class MyComponent extends Jadis {
@@ -71,13 +71,23 @@ Constructor → connectedCallback (render template) → onConnect → ... → di
 2. **`connectedCallback()`** — Runs when the component is connected. On the first connection it renders `templateHtml()` and `templateCss()`; the rendered DOM is reused on reconnection. It then applies the `useChange` values set before the connection, then the attribute callbacks, all synchronously, before scheduling `onConnect()`.
 3. **`onConnect()`** — Runs asynchronously after the component is connected. It runs again after each reconnection.
 4. **Active** — The component is in the DOM and responding to user interaction.
-5. **`disconnectedCallback()` / `onDisconnect()`** — The callback aborts `killSignal` and then calls `onDisconnect()` when the component is removed.
+5. **`disconnectedCallback()` / `onDisconnect()`** — A microtask after the component is removed, `killSignal` is aborted and `onDisconnect()` runs, unless the component was put back meanwhile: it was moved.
+
+## Moves
+
+Moving a component keeps it as it is, whether it is moved with `append()`, `insertBefore()`, `replaceChildren()` or `moveBefore()`: its listeners, its `killSignal` and its state go through the move, and neither `onDisconnect()` nor `onConnect()` runs. A list can re-order the rows it keeps:
+
+```typescript
+this._refs.list.replaceChildren(...todos.map((todo) => this._rows.get(todo.id) ?? this.createRow(todo)));
+```
+
+The browser disconnects a moved element and connects it again in the same call: Jadis waits a microtask before disconnecting, and a connection meanwhile is a move. A component removed and put back later, in another task, was disconnected: it connects again, and `onConnect()` runs.
 
 ## Important Notes
 
 - Templates render only on the first connection; reconnection reuses the existing DOM.
 - `onConnect()` runs on a later task, not synchronously inside `appendChild()`. The template and the values set before the connection are already in place when `appendChild()` returns.
-- The `killSignal` is automatically aborted on disconnect, canceling listeners registered via `this.on()`, `useEvents()`, and `onBus()`.
+- The `killSignal` is automatically aborted on disconnect, a microtask after the removal, canceling listeners registered via `this.on()`, `useEvents()`, and `onBus()`.
 - Avoid heavy work in the constructor. Defer connection-specific work to `onConnect()`.
 
 ## See Also

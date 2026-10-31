@@ -31,6 +31,8 @@ export type {
 export type {
   ActiveRoute,
   LeaveAnswer,
+  MountOptions,
+  PageShow,
   Route,
   RouteDefinition,
   RoutedPage,

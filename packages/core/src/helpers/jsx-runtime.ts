@@ -1,7 +1,7 @@
-import { applyElementAttributes, applyElementProperty } from './element.helper';
+import { applyElementAttributes, applyElementProperty, setElementAttribute } from './element.helper';
 
 import type { Jadis, JadisConstructor } from '../base-component';
-import type { AppendableElement, SafeElementValues } from './type.helper';
+import type { AppendableElement, Callable, ComponentEventProps, SafeElementValues } from './type.helper';
 
 // ---------------------------------------------------------------------------
 // Fragment
@@ -19,33 +19,28 @@ function toClassName(value: string | number | boolean): string {
 }
 
 /**
- * Resolve JSX children into DOM nodes or text nodes.
- * Handles null, boolean, string, number, Node, Node[], and nested arrays.
+ * Appends a JSX child to its parent: a node, a string or a number as text, or an array of them, flattened in order;
+ * null, undefined and booleans add nothing. Nothing is collected on the way, as each element of a list is made.
  */
-function resolveChildren(children: unknown[]): Array<Node | string | number> {
-  const result: Array<Node | string | number> = [];
-
-  for (const child of children) {
-    if (child == null || typeof child === 'boolean') {
-      continue;
-    }
-
-    if (typeof child === 'string' || typeof child === 'number') {
-      result.push(document.createTextNode(String(child)));
-    } else if (child instanceof Node) {
-      result.push(child);
-    } else if (Array.isArray(child)) {
-      for (const item of child) {
-        const resolved = resolveChildren([item]);
-        result.push(...resolved);
-      }
+function appendChild(parent: Node, child: unknown): void {
+  if (child == null || typeof child === 'boolean') {
+    return;
+  }
+  if (typeof child === 'string' || typeof child === 'number') {
+    parent.appendChild(document.createTextNode(String(child)));
+    return;
+  }
+  if (child instanceof Node) {
+    parent.appendChild(child);
+    return;
+  }
+  if (Array.isArray(child)) {
+    for (const item of child) {
+      appendChild(parent, item);
     }
   }
-
-  return result;
 }
 
-/** Reserved prop keys that are not set directly on the element. */
 const RESERVED_PROPS = new Set(['key', 'class', 'className', 'attrs', 'props', 'children']);
 
 // ---------------------------------------------------------------------------
@@ -103,7 +98,7 @@ export type IntrinsicElements = {
   [elementName: `${string}-${string}`]: JadisProps;
 };
 
-type ComponentProps<T extends Jadis> = Omit<SafeElementValues<T>, 'children'> & BaseProps;
+type ComponentProps<T extends Jadis> = Omit<SafeElementValues<T>, 'children'> & BaseProps & ComponentEventProps<T>;
 
 /**
  * Common JSX type definitions for Jadis components.
@@ -187,86 +182,93 @@ declare global {
 // jsx / jsxs / h — runtime
 // ---------------------------------------------------------------------------
 
+/**
+ * The listener of a component's `on…` prop: a component's own events (`useEvents`) are custom events, whose handler
+ * gets the detail, as `events.register` gives it; any other event is given as it is.
+ * It is added without the kill signal, so it lasts as long as the element.
+ */
+function detailListener(handler: Callable): EventListener {
+  return (event) => handler(event instanceof CustomEvent ? event.detail : event);
+}
+
+/**
+ * The event a component's `on…` prop listens to: its name with the first letter in lower case, the rest as written,
+ * so `onValueChange` hears `valueChange`, and the DOM property `onclick` still hears `click`.
+ */
+function componentEventName(prop: string): string {
+  return `${prop.charAt(2).toLowerCase()}${prop.slice(3)}`;
+}
+
 function createJsxNode(
   type: string | JadisConstructor,
   props: JadisProps | null | undefined,
   children: unknown[]
 ): Node {
-  const normalizedChildren =
-    children.length > 0 ? children : props?.children === undefined ? [] : [props.children];
+  const content = children.length > 0 ? children : props?.children;
 
-  const resolved = resolveChildren(normalizedChildren);
-
-  // Fragment: return a DocumentFragment with all resolved children
   if (Object.is(type, Fragment)) {
-    const frag = document.createDocumentFragment();
-    for (const child of resolved) {
-      if (child instanceof Node) {
-        frag.appendChild(child);
-      }
-    }
-    return frag;
+    const fragment = document.createDocumentFragment();
+    appendChild(fragment, content);
+    return fragment;
   }
 
-  // Create element or component instance
-  let el: HTMLElement | Jadis;
-  if (typeof type === 'string') {
-    el = document.createElement(type);
-  } else {
-    el = new type();
+  const isComponent = typeof type !== 'string';
+  const el: HTMLElement | Jadis = isComponent ? new type() : document.createElement(type);
+  if (props) {
+    applyProps(el, props, isComponent);
   }
-
-  // Set attrs
-  applyElementAttributes(el, props?.attrs ?? {});
-
-  // Separate reserved vs direct props
-  const directProps: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(props ?? {})) {
-    if (!RESERVED_PROPS.has(key)) {
-      directProps[key] = value;
-    }
-  }
-
-  // Set className / class → class attribute
-  if (props?.className) {
-    el.setAttribute('class', toClassName(props.className));
-  } else if (props?.class) {
-    el.setAttribute('class', toClassName(props.class));
-  }
-
-  // Merge direct props with explicit props object
-  const ownProps = { ...directProps, ...(props?.props ?? {}) };
-
-  for (const [key, value] of Object.entries(ownProps)) {
-    if (value === undefined) {
-      continue;
-    }
-
-    if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
-      applyElementAttributes(el, { [key]: value });
-      continue;
-    }
-
-    if (typeof value === 'function' && key.startsWith('on')) {
-      const eventName = key.slice(2).toLowerCase();
-      el.addEventListener(eventName, value as EventListener);
-      continue;
-    }
-
-    applyElementProperty(el, key, value);
-  }
-
-  // Append children
-  for (const child of resolved) {
-    if (child instanceof Node) {
-      el.appendChild(child);
-    } else if (typeof child === 'string' || typeof child === 'number') {
-      const textNode = document.createTextNode(String(child));
-      el.appendChild(textNode);
-    }
-  }
-
+  appendChild(el, content);
   return el;
+}
+
+/**
+ * Applies an element's JSX props: its attributes, its class, then each other prop, a key given in `props={…}` too
+ * taking that value, once.
+ */
+function applyProps(el: HTMLElement, props: JadisProps, isComponent: boolean): void {
+  if (props.attrs) {
+    applyElementAttributes(el, props.attrs);
+  }
+  const className = props.className || props.class;
+  if (className) {
+    el.setAttribute('class', toClassName(className));
+  }
+
+  const explicit = props.props;
+  for (const key of Object.keys(props)) {
+    if (RESERVED_PROPS.has(key)) {
+      continue;
+    }
+    applyProp(el, key, explicit && Object.hasOwn(explicit, key) ? explicit[key] : props[key], isComponent);
+  }
+  if (!explicit) {
+    return;
+  }
+  for (const key of Object.keys(explicit)) {
+    if (RESERVED_PROPS.has(key) || !Object.hasOwn(props, key)) {
+      applyProp(el, key, explicit[key], isComponent);
+    }
+  }
+}
+
+/** Applies one prop: a hyphenated name as an attribute, `on…` as a listener, any other as a property. */
+function applyProp(el: HTMLElement, key: string, value: unknown, isComponent: boolean): void {
+  if (value === undefined) {
+    return;
+  }
+  if (key.includes('-')) {
+    setElementAttribute(el, key, value);
+    return;
+  }
+  if (typeof value === 'function' && key.startsWith('on')) {
+    if (isComponent) {
+      el.addEventListener(componentEventName(key), detailListener(value as Callable));
+    } else {
+      el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
+    }
+    return;
+  }
+  applyElementProperty(el, key, value);
 }
 
 /**
@@ -414,8 +416,7 @@ function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
           instance.setAttribute('class', toClassName(String(value)));
         }
       } else if (typeof value === 'function' && key.startsWith('on')) {
-        const eventName = key.slice(2).toLowerCase();
-        instance.addEventListener(eventName, value as EventListener);
+        instance.addEventListener(componentEventName(key), detailListener(value as Callable));
       } else if (!RESERVED_PROPS.has(key)) {
         (instance as unknown as Record<string, unknown>)[key] = value;
       }

@@ -84,6 +84,8 @@ export abstract class Jadis extends HTMLElement {
   private _attributesInitialized = false;
   private _isConnected = false;
   private _hasRendered = false;
+  /** A disconnection waiting a microtask: a connection before it ends means the element was moved. */
+  private _leaving = false;
 
   /**
    * Callback invoked when the component is connected to the DOM.
@@ -174,6 +176,12 @@ export abstract class Jadis extends HTMLElement {
   }
 
   connectedCallback(): void {
+    if (this._leaving) {
+      // Moved: disconnected and connected again in one go, the element stays as it was.
+      this._leaving = false;
+      return;
+    }
+
     if (this._abortController.signal.aborted) {
       this._abortController = new AbortController();
     }
@@ -210,6 +218,24 @@ export abstract class Jadis extends HTMLElement {
   }
 
   disconnectedCallback(): void {
+    // A move (append, insertBefore, replaceChildren of an element already in the page) disconnects the element and
+    // connects it again in the same call: the disconnection waits a microtask, and a connection before it cancels
+    // it, so listeners, the kill signal and the state go through a move untouched.
+    this._leaving = true;
+    queueMicrotask(() => this.leave());
+  }
+
+  /** Moved with `moveBefore()`: the element stays connected, as it was. */
+  connectedMoveCallback(): void {
+    // Nothing changes: the browser calls neither disconnectedCallback nor connectedCallback.
+  }
+
+  private leave(): void {
+    if (!this._leaving) {
+      return;
+    }
+
+    this._leaving = false;
     this._isConnected = false;
     this._attributeObserver?.disconnect();
     this._attributeObserver = null;

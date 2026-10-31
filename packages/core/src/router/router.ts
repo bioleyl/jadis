@@ -1,22 +1,29 @@
 import { assert } from '../helpers/assert.helper';
+import { Bus } from '../helpers/bus.helper';
 import { applyElementAttributes, createElement } from '../helpers/element.helper';
 import { normalizePath } from '../helpers/router.helper';
 import { toKebabCase } from '../helpers/string.helper';
 import {
   COMPONENT_SELECTOR_SEPARATOR,
+  EXTERNAL_LINK_REL,
   HISTORY_INDEX_KEY,
+  MAIN_BUTTON,
   QUERY_SEPARATOR,
   ROUTER_PARAMETER_PREFIX,
+  SELF_TARGET,
 } from './router-constants';
 
 import type { ParamsArgs } from '../helpers/type.helper';
 import type {
   ActiveRoute,
   ExtractParams,
+  HistoryWrite,
   InternalRoute,
   LeaveAnswer,
   MatchedRoute,
   MountedPage,
+  MountOptions,
+  PageShow,
   RouteDefinition,
   RouterConfig,
   RouterMode,
@@ -25,6 +32,7 @@ import type {
 
 const defaultOptions: RouterConfig = {
   baseUrl: '/',
+  links: false,
   mode: 'history',
 };
 
@@ -32,6 +40,29 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 
 /** Whether a page's answer to leaving is still to come: it asks the person first. */
 const isPending = (answer: LeaveAnswer | undefined): answer is Promise<boolean> => answer instanceof Promise;
+
+/** A click the browser handles itself: with a modifier key, another button, or already handled. */
+const isOwnClick = (event: MouseEvent): boolean =>
+  event.defaultPrevented
+  || event.button !== MAIN_BUTTON
+  || event.metaKey
+  || event.ctrlKey
+  || event.shiftKey
+  || event.altKey;
+
+/** A link the browser follows itself: in another browsing context, a download, or marked external. */
+const isOwnLink = (link: HTMLAnchorElement): boolean =>
+  (link.target !== '' && link.target !== SELF_TARGET)
+  || link.hasAttribute('download')
+  || link.relList.contains(EXTERNAL_LINK_REL);
+
+/** The link a click is on, found through the shadow roots it crossed. */
+const linkOf = (event: MouseEvent): HTMLAnchorElement | undefined =>
+  event
+    .composedPath()
+    .find(
+      (target): target is HTMLAnchorElement => target instanceof HTMLAnchorElement && target.hasAttribute('href')
+    );
 
 /**
  * Router class for managing navigation and routing in a web application.
@@ -41,9 +72,13 @@ const isPending = (answer: LeaveAnswer | undefined): answer is Promise<boolean> 
  * can keep the person on it (see RoutedPage).
  */
 export class Router<T extends Record<string, RouteDefinition>> {
+  /** Emits `change` with the route, once its page is shown. */
+  readonly bus = new Bus<{ change: ActiveRoute }>();
   private readonly _routes: Array<InternalRoute> = [];
   private readonly _mode: RouterMode;
   private readonly _baseUrl: string;
+  private readonly _links: boolean;
+  private _show: PageShow = (next) => this.mountPoint.replaceChildren(next);
   private readonly _parametersRegexp = new RegExp(`${ROUTER_PARAMETER_PREFIX}\\w+`, 'g');
   private _mount?: HTMLElement;
   private _currentRoute?: ActiveRoute;
@@ -60,6 +95,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
   constructor(routes: T, options?: RouterOptions) {
     this._mode = options?.mode ?? defaultOptions.mode;
     this._baseUrl = options?.baseUrl ?? defaultOptions.baseUrl;
+    this._links = options?.links ?? defaultOptions.links;
     this._routes = Object.entries(routes).map(([name, def]) => this.toInternalRoute(name, def));
 
     window.addEventListener(
@@ -70,6 +106,9 @@ export class Router<T extends Record<string, RouteDefinition>> {
       },
       { signal: options?.signal }
     );
+    if (this._links && this._mode === 'history') {
+      document.addEventListener('click', (event) => this.followLink(event), { signal: options?.signal });
+    }
   }
 
   /**
@@ -79,6 +118,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
   get config(): RouterConfig {
     return {
       baseUrl: this._baseUrl,
+      links: this._links,
       mode: this._mode,
     };
   }
@@ -96,9 +136,11 @@ export class Router<T extends Record<string, RouteDefinition>> {
   /**
    * Mounts the router on a specific HTML element.
    * @param {HTMLElement} el The element to mount the router on
+   * @param {MountOptions} [options] How the pages are shown: `show` puts each new page in the document
    */
-  mountOn(el: HTMLElement) {
+  mountOn(el: HTMLElement, options?: MountOptions) {
     this._mount = el;
+    this._show = options?.show ?? this._show;
     this.markEntry(this.entryIndex() ?? 0);
     this.showRoute(this.matchCurrentUrl());
   }
@@ -110,15 +152,95 @@ export class Router<T extends Record<string, RouteDefinition>> {
    */
   goto<K extends keyof T>(name: K, ...params: ParamsArgs<ExtractParams<T[K]['path']>>): void;
   goto(name: keyof T, params?: Record<string, string>) {
+    this.navigate(this.pathOf(name, params), 'push');
+  }
+
+  /**
+   * Navigates to a route by its name in place of the current history entry, so back skips the page left: for a page
+   * that only sends on to another.
+   * @param {string} name The name of the route to navigate to
+   * @param {Record<string, string>} [params] The parameters to include with the route
+   */
+  replace<K extends keyof T>(name: K, ...params: ParamsArgs<ExtractParams<T[K]['path']>>): void;
+  replace(name: keyof T, params?: Record<string, string>) {
+    this.navigate(this.pathOf(name, params), 'replace');
+  }
+
+  /**
+   * Navigates to a path of the app, its query included (`'/orders/42?tab=lines'`), unless the current page refuses to
+   * be left: for an address a link or a menu carries.
+   * @param {string} path The path, without the base URL
+   * @throws When no route matches the path
+   */
+  gotoPath(path: string): void {
+    this.navigate(path, 'push');
+  }
+
+  /**
+   * Navigates to a path of the app in place of the current history entry.
+   * @param {string} path The path, without the base URL
+   * @throws When no route matches the path
+   */
+  replacePath(path: string): void {
+    this.navigate(path, 'replace');
+  }
+
+  /**
+   * Finds the route of a path of the app, with its parameters and its query, as the router matches it.
+   * @param {string} path The path, without the base URL: `'/orders/42?tab=lines'`
+   * @returns {ActiveRoute | undefined} The route, or undefined when none matches
+   */
+  match(path: string): ActiveRoute | undefined {
+    const [urlPath, query] = this.splitPathAndQuery(path);
+    const normalized = normalizePath(urlPath);
+    const route = this.getRouteByPath(normalized);
+    return route ? this.activeRoute(route, normalized, query) : undefined;
+  }
+
+  private pathOf(name: keyof T, params?: Record<string, string>): string {
     const route = this.getRouteByName(String(name));
     assert(route, `No route found for name: ${String(name)}`);
+    return this.buildPath(route.path, params);
+  }
 
-    const path = this.buildPath(route.path, params);
-    const next = this.matchPath(path, new URLSearchParams());
+  /** Goes to the route of a path, written in the history as asked, unless the current page refuses to be left. */
+  private navigate(path: string, write: HistoryWrite) {
+    const next = this.match(path);
+    assert(next, `No route found for path: ${path}`);
     this.leaveFor(next, () => {
-      this.pushUrl(path);
+      this.writeUrl(path, write);
       this.showRoute(next);
     });
+  }
+
+  /** Follows a click on a link to one of the routes, leaving every other click to the browser. */
+  private followLink(event: MouseEvent) {
+    const link = linkOf(event);
+    if (!link || isOwnClick(event) || isOwnLink(link)) {
+      return;
+    }
+    const url = new URL(link.href);
+    if (
+      url.origin !== window.location.origin
+      || !url.pathname.startsWith(this.baseUrl)
+      || this.isAnchorOnPage(url)
+    ) {
+      return;
+    }
+    const path = `${this.stripBaseUrl(url.pathname)}${url.search}`;
+    if (!this.match(path)) {
+      return;
+    }
+    event.preventDefault();
+    if (url.href !== window.location.href) {
+      this.gotoPath(path);
+    }
+  }
+
+  /** Whether a link goes to a place on the page shown: the same path and query, another hash. */
+  private isAnchorOnPage(url: URL): boolean {
+    const { pathname, search } = window.location;
+    return url.hash !== '' && url.pathname === pathname && url.search === search;
   }
 
   private get baseUrl(): string {
@@ -182,9 +304,20 @@ export class Router<T extends Record<string, RouteDefinition>> {
       : [text.slice(0, index), new URLSearchParams(text.slice(index))];
   }
 
-  private pushUrl(path: string) {
+  /** Writes the URL of a path in the history: as a new entry, or in place of the current one. */
+  private writeUrl(path: string, write: HistoryWrite) {
     const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    this.pushEntry(normalizePath(`${this.baseUrl}/${urlPath}`));
+    const url = normalizePath(`${this.baseUrl}/${urlPath}`);
+    const writes: Record<HistoryWrite, (to: string) => void> = {
+      push: (to) => this.pushEntry(to),
+      replace: (to) => this.replaceEntry(to),
+    };
+    writes[write](url);
+  }
+
+  /** Writes a URL in place of the current history entry, which keeps its number. */
+  private replaceEntry(url: string) {
+    window.history.replaceState({ [HISTORY_INDEX_KEY]: this.currentEntryIndex() }, '', url);
   }
 
   /**
@@ -317,6 +450,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
     this.markEntry(this._shownIndex);
     this._shownUrl = window.location.href;
     this.sendRouteToPage(this.reuseMountedPage(next) ?? this.mountPage(next));
+    this.bus.emit('change', next);
   }
 
   /** The page mounted, with the new parameters, when it is the route's page and follows routes itself. */
@@ -357,8 +491,9 @@ export class Router<T extends Record<string, RouteDefinition>> {
       page: elements.at(-1) ?? rootElement,
       params,
     };
+    const current = this._mountedPage?.elements[0];
     this._mountedPage = mounted;
-    this.mountPoint.replaceChildren(rootElement);
+    this._show(rootElement, current);
     this.sendRouteOnceConnected(mounted);
     return mounted;
   }
@@ -392,6 +527,10 @@ export class Router<T extends Record<string, RouteDefinition>> {
   private matchPath(urlPath: string, query: URLSearchParams): ActiveRoute {
     const route = this.getRouteByPath(urlPath);
     assert(route, `No route found for path: ${urlPath}`);
+    return this.activeRoute(route, urlPath, query);
+  }
+
+  private activeRoute(route: InternalRoute, urlPath: string, query: URLSearchParams): ActiveRoute {
     const { componentSelector, name, path } = route;
     return { componentSelector, name, params: this.getRouteParameters({ ...route, urlPath }), path, query };
   }

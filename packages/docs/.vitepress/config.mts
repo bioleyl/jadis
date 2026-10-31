@@ -22,6 +22,10 @@ export default defineConfig({
         link: '/guides/examples',
         text: 'Examples',
       },
+      {
+        link: '/guides/benchmark',
+        text: 'Benchmark',
+      },
     ],
 
     sidebar: {
@@ -36,6 +40,10 @@ export default defineConfig({
             {
               link: '/guides/first-component',
               text: 'Your First Component',
+            },
+            {
+              link: '/guides/benchmark',
+              text: 'Benchmark',
             },
           ],
         },

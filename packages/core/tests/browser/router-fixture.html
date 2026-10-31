@@ -83,9 +83,9 @@
         ),
       });
 
-      window.startRouter = (mode) => {
+      window.startRouter = (mode, options = {}) => {
         window.history.replaceState({}, '', '/');
-        const router = new Router(routes, { mode });
+        const router = new Router(routes, { mode, ...options });
         router.mountOn(document.querySelector('#router-app'));
         window.__jadisRouter = router;
       };

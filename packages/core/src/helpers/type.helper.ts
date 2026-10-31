@@ -1,3 +1,4 @@
+import type { UseEventsHandler } from '../types/jadis.type';
 import type { ChangeHandler } from './change.helper';
 
 export type Constructor<T> = new (...args: unknown[]) => T;
@@ -104,4 +105,17 @@ export type SafeElementValues<T extends HTMLElement> = RemoveIndexSignature<Elem
  */
 export type ComponentJsxProps<T extends HTMLElement> = Omit<SafeElementValues<T>, 'children'> & {
   children?: unknown;
-};
+} & ComponentEventProps<T>;
+
+/**
+ * The events a component emits with its `events` field (`useEvents`), as JSX props: `onPress` for `press`,
+ * `onValueChange` for `valueChange`, the handler given the event's detail. An event whose name starts with a capital
+ * has none: the prop's name gives the event's with its first letter in lower case.
+ */
+export type ComponentEventProps<T> = T extends { readonly events: Readonly<UseEventsHandler<infer Events>> }
+  ? {
+      [Name in keyof Events & string as Name extends Uncapitalize<Name> ? `on${Capitalize<Name>}` : never]?: (
+        detail: Events[Name]
+      ) => void;
+    }
+  : Record<never, never>;
