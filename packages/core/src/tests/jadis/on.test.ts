@@ -49,7 +49,7 @@ describe('Jadis — on', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('listens on the window and the document until the component disconnects', () => {
+  it('listens on the window and the document until the component disconnects', async () => {
     const el = createElement(TestComponent, {}, document.body);
     const onWindow = vi.fn();
     const onDocument = vi.fn();
@@ -62,6 +62,7 @@ describe('Jadis — on', () => {
     expect(onDocument).toHaveBeenCalledTimes(1);
 
     document.body.removeChild(el);
+    await Promise.resolve();
     window.dispatchEvent(new Event('resize'));
     document.dispatchEvent(new KeyboardEvent('keydown'));
 

@@ -47,6 +47,44 @@ test.describe('Jadis browser lifecycle', () => {
 
     await expect(component.locator('output').first()).toHaveText('reconnected');
   });
+
+  test('keeps a moved component as it was, moved with insertBefore or moveBefore', async ({ page }) => {
+    const moved = await page.evaluate(async () => {
+      const { Jadis } = await import('/packages/core/dist/esm/index.mjs');
+      class MovedRow extends Jadis {
+        static readonly selector = 'browser-moved-row';
+        readonly events = this.useEvents();
+        connects = 0;
+        templateHtml() {
+          return document.createElement('span');
+        }
+        onConnect() {
+          this.connects += 1;
+        }
+      }
+      MovedRow.register();
+
+      const tick = () => new Promise((resolve) => setTimeout(resolve));
+      const [first, second] = [document.createElement('ul'), document.createElement('ul')];
+      document.body.append(first, second);
+      const row = first.appendChild(new MovedRow());
+      await tick();
+      const presses = { count: 0 };
+      row.events.register('press', () => {
+        presses.count += 1;
+      });
+
+      second.append(row);
+      first.insertBefore(row, null);
+      second.moveBefore(row, null);
+      await tick();
+      row.events.emit('press');
+
+      return { aborted: row.killSignal.aborted, connects: row.connects, presses: presses.count };
+    });
+
+    expect(moved).toEqual({ aborted: false, connects: 1, presses: 1 });
+  });
 });
 
 declare global {

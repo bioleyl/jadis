@@ -167,9 +167,10 @@ describe('Jadis — useChange', () => {
     });
   });
 
-  it('queues changes made while disconnected until the next connection', () => {
+  it('queues changes made while disconnected until the next connection', async () => {
     const el = createElement(LabelComponent, {}, document.body);
     document.body.removeChild(el);
+    await Promise.resolve();
     el.label.set('while away');
     expect(shownLabel(el)).toBe('initial');
 

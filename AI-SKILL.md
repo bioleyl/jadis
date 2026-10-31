@@ -15,13 +15,13 @@ Verified against `base-component.ts`:
 
 1. **Constructor** — the shadow root is attached. Nothing is rendered yet. Field initializers (`useRefs`, `useChange`, `useEvents`, `useAttributes`) run here; reading a ref now throws, as the template does not exist yet.
 2. **First connection** — `templateHtml()` and `templateCss()` run **once** and are appended to the shadow root. The `useChange` values set before the connection and the attribute callbacks are applied right away, during `appendChild`. Then `onConnect()` runs **asynchronously**, on the next task — not synchronously during `appendChild`.
-3. **Disconnection** — the internal kill signal aborts. Every listener registered with `on()`, `useEvents().register()`, or `onBus()` is removed automatically. The rendered DOM is **kept**.
-4. **Reconnection** — `onConnect()` runs **again**, attribute callbacks re-fire for currently set attributes, and the **same DOM** is reused. The template is never re-rendered.
+3. **Disconnection** — a microtask after the removal, the internal kill signal aborts. Every listener registered with `on()`, `useEvents().register()`, or `onBus()` is removed automatically. The rendered DOM is **kept**. A **move** (`append`, `insertBefore`, `replaceChildren`, `moveBefore` of an element in the page) is not a disconnection: the element stays as it was, listeners and kill signal included, and neither `onDisconnect()` nor `onConnect()` runs.
+4. **Reconnection** (after a removal) — `onConnect()` runs **again**, attribute callbacks re-fire for currently set attributes, and the **same DOM** is reused. The template is never re-rendered.
 
 Consequences:
 
 - Wire **all** listeners inside `onConnect()`. Cleanup is automatic; manual `removeEventListener` is a smell.
-- Never assume a single connection: `onConnect()` runs again on the same DOM after every reconnection (moving an element counts). Make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds rather than a "connected once" flag.
+- Never assume a single connection: `onConnect()` runs again on the same DOM after every reconnection (a removal, then putting it back in a later task; a move doesn't count). Make it safe to repeat, and guard one-time work (filling a list, a first fetch) by what the DOM already holds rather than a "connected once" flag.
 - Stop what outlives the component: pass `this.killSignal` to `fetch` and to listeners on `window` or `document` (`this.on(window, 'resize', …)` and `this.on(document, …)` do it for you), clear timers in `onDisconnect()`. After an `await` in `onConnect()`, check `this.isConnected` before touching the DOM.
 - In tests, what `useChange` and attribute callbacks render is there right after `appendChild`; what `onConnect()` does needs a task (Playwright's auto-waiting or `waitForFunction` handles this).
 - `useChange` updates made before connection are applied **synchronously** while the component connects, once per handler with the latest value, after attribute callbacks and before the browser paints. `onConnect()` still runs a task later.
