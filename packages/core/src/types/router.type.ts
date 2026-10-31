@@ -26,8 +26,29 @@ export interface RouterOptions {
   mode?: RouterMode;
   /** The base URL for the router, defaults to '/'. */
   baseUrl?: string;
-  /** Stops the router from following the URL once aborted. */
+  /** Stops the router from following the URL, and the links, once aborted. */
   signal?: AbortSignal;
+  /**
+   * In history mode, follows the clicks on links to the router's routes instead of loading the page again. Links with
+   * a `target`, a `download`, `rel="external"`, to another origin or to a path no route matches are left to the
+   * browser, as are clicks with a modifier key.
+   */
+  links?: boolean;
+}
+
+/** How a navigation is written in the history: as a new entry, or in place of the current one. */
+export type HistoryWrite = 'push' | 'replace';
+
+/** Puts a new page in the document: the root element of the next page, and the one shown until then. */
+export type PageShow = (next: HTMLElement, current: HTMLElement | undefined) => void;
+
+/** How the router shows its pages. */
+export interface MountOptions {
+  /**
+   * Puts each new page in the document, in place of replacing the mount point's children with it. It puts `next` in
+   * the document at once; when `current` goes is the app's choice, such as once `next` has its data.
+   */
+  show?: PageShow;
 }
 
 /** The router's configuration, as `config` gives it back. */

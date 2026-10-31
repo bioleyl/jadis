@@ -69,6 +69,15 @@ myRouter.goto('inv', { id: 'abcd' });
 
 This will navigate `/invoice/abcd`
 
+An address only known at run time, carried by a link or a menu, goes through `gotoPath`, its query included; `match` gives the route of a path without going there, or `undefined`:
+
+```javascript
+myRouter.gotoPath('/invoice/abcd?tab=lines');
+myRouter.match('/invoice/abcd'); // { name: 'inv', params: { id: 'abcd' }, … }
+```
+
+`replace(name, params)` and `replacePath(path)` navigate in place of the current history entry, so back skips the page left: for a page that only sends on to another.
+
 ## Use a Root Component
 
 You can specify a root component (for example, a layout or wrapper) into which the route component will be injected. This is useful for shared layouts, navigation bars, or page wrappers.

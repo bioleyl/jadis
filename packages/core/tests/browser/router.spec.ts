@@ -140,6 +140,37 @@ test.describe('Jadis router', () => {
     await expect(page.locator('#router-app browser-home')).toBeVisible();
   });
 
+  test('follows a link inside a shadow root, without loading the page again', async ({ page }) => {
+    await page.evaluate(() => {
+      window.startRouter('history', { links: true });
+      window.__notReloaded = true;
+      const host = document.body.appendChild(document.createElement('div'));
+      const link = document.createElement('a');
+      link.href = '/details/5';
+      link.textContent = 'Order 5';
+      host.attachShadow({ mode: 'open' }).append(link);
+    });
+
+    await page.getByRole('link', { name: 'Order 5' }).click();
+
+    await expect(page).toHaveURL(/\/details\/5$/);
+    await expect(page.locator('#router-app browser-details output')).toHaveText('details:5');
+    expect(await page.evaluate(() => window.__notReloaded)).toBe(true);
+  });
+
+  test('replaces the history entry, so back skips the page left', async ({ page }) => {
+    await page.evaluate(() => window.startRouter('history'));
+    await page.evaluate(() => window.__jadisRouter.goto('home'));
+    await expect(page).toHaveURL(/\/home$/);
+
+    await page.evaluate(() => window.__jadisRouter.replace('details', { id: '2' }));
+    await expect(page.locator('#router-app browser-details output')).toHaveText('details:2');
+    await page.goBack();
+
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator('#router-app browser-base')).toBeVisible();
+  });
+
   test('rejects unknown routes', async ({ page }) => {
     await page.evaluate(() => window.startRouter('history'));
 
@@ -153,11 +184,13 @@ declare global {
   interface Window {
     __jadisRouter?: {
       goto(name: string, params?: Record<string, string>): void;
+      replace(name: string, params?: Record<string, string>): void;
     };
+    __notReloaded?: boolean;
     __leaveAnswer?: boolean | 'later';
     __leaveAsked?: number;
     __answerLeave?: (leave: boolean) => void;
     __jadisRouterReady?: boolean;
-    startRouter(mode: 'hash' | 'history'): void;
+    startRouter(mode: 'hash' | 'history', options?: { links?: boolean }): void;
   }
 }

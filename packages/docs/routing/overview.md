@@ -8,7 +8,7 @@ Jadis includes a built-in, lightweight router for component-based navigation. It
 |---|---|
 | **Route** | A mapping between a URL path and a Jadis component (the "page"). |
 | **Route Group** | A collection of routes sharing a common prefix and optional shared layout. |
-| **Navigation** | Changing the current route via `router.goto()`. |
+| **Navigation** | Changing the current route: `router.goto()` by name, `router.gotoPath()` by path, `replace()` and `replacePath()` in place of the history entry, links with `links: true`. |
 | **Mount Point** | The DOM element where route components are rendered. |
 
 ## Quick Start
@@ -83,9 +83,38 @@ This wraps the page component inside the specified layout component, which shows
 
 - **The first matching route wins**, and a `:param` matches across `/`: `/user/:id` also matches `/user/42/edit`. List specific routes before general ones.
 - **A URL that no route matches throws.** End your routes with a catch-all, such as `notFound: { path: '/:rest', page: NotFoundPage }`.
-- **Links are not intercepted.** In history mode, `<a href="/about">` reloads the whole page. Call `router.goto()` from a click handler, or use hash mode with `href="#/about"`.
+- **Links are followed when asked.** In history mode, `<a href="/about">` reloads the whole page unless the router is made with `links: true`: it then follows the links to its routes, in shadow roots too, and leaves to the browser a click with a modifier key, a link with a `target`, a `download` or `rel="external"`, to another origin, or to a path no route matches. With a catch-all route every path matches: mark the links to files and to the server with `rel="external"`. In hash mode, write `href="#/about"`.
 - **Every navigation creates the page component again**, and its root component too: state kept in them is lost. A page that declares `onRoute` is kept while the routes stay on it, and one that declares `canLeave` can hold the person back: see [Routed Pages](./routed-pages.md). Keep what must outlive a page in a service or a [Bus](../api/bus-class.md).
 - Register the page and root components before navigating to them.
+
+## Following Route Changes
+
+`router.bus` emits `change` with the route, once its page is shown, the first one included: a frame marks its current place, or writes the tab's title.
+
+```typescript
+router.bus.register('change', (route) => {
+  document.title = titles[route.name];
+}, signal);
+```
+
+## Showing Pages Your Way
+
+The router replaces the mount point's children with each new page. To keep the page shown until the next one has its data, give `mountOn` a `show` function: it puts the next page in the document at once, and removes the current one when it wants.
+
+```typescript
+router.mountOn(outlet, {
+  show: (next, current) => {
+    next.hidden = true;
+    outlet.append(next);
+    whenLoaded(next).then(() => {
+      current?.remove();
+      next.hidden = false;
+    });
+  },
+});
+```
+
+The new page is the router's from then on: it is asked `canLeave`, and gets `onRoute`.
 
 ## See Also
 
