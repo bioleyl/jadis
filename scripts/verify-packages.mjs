@@ -81,6 +81,13 @@ try {
     { cwd: createProject, stdio: 'inherit' }
   );
 
+  // npm publishes no file named .gitignore: a project gets the one its template holds under another name.
+  execFileSync(process.execPath, [join(createProject, 'node_modules/@jadis/create/index.js'), 'ts', 'generated-ts'], {
+    cwd: createProject,
+    stdio: 'ignore',
+  });
+  statSync(join(createProject, 'generated-ts/.gitignore'));
+
   const generatedIndex = join(createProject, 'generated/index.html');
   statSync(generatedIndex);
   const generatedSource = readFileSync(generatedIndex, 'utf8');

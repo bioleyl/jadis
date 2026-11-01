@@ -60,6 +60,14 @@ const updates = [
       return data;
     },
   },
+  {
+    path: 'packages/create/templates/ssr/package.json',
+    update: (data) => {
+      data.dependencies['@jadis/core'] = `^${newCoreVersion}`;
+      data.dependencies['@jadis/fastify'] = `^${newCoreVersion}`;
+      return data;
+    },
+  },
   // Vanilla template - the CDN version the create CLI writes into the import map
   {
     path: 'packages/create/templates/vanilla/package.json',

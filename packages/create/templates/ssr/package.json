@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "@jadis/core": "^1.7.0",
+    "@jadis/fastify": "^1.7.0",
+    "fastify": "^5.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "name": "jadis-ssr",
+  "private": true,
+  "scripts": {
+    "build": "tsc && vite build && vite build --ssr src/entry-server.ts",
+    "dev": "node server/main.ts --dev",
+    "start": "node server/main.ts"
+  },
+  "type": "module",
+  "version": "0.0.0"
+}

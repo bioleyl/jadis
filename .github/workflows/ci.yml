@@ -55,6 +55,9 @@ jobs:
       - name: Build generated TypeScript template
         run: npm run build --workspace=jadis-ts
 
+      - name: Build generated server rendering template
+        run: npm run build --workspace=jadis-ssr
+
       - name: Verify packed packages
         run: npm run verify:packages
 
