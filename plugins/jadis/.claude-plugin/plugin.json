@@ -1,0 +1,17 @@
+{
+  "name": "jadis",
+  "version": "1.6.0",
+  "description": "Build apps with Jadis: setup with or without a bundler, the lifecycle, JSX, state, communication, routing, translations, tests, and where the installed version's API is.",
+  "author": {
+    "name": "Leal Bioley"
+  },
+  "homepage": "https://bioleyl.github.io/jadis/guides/vibe-coding",
+  "repository": "https://github.com/bioleyl/jadis",
+  "license": "MIT",
+  "keywords": [
+    "jadis",
+    "web-components",
+    "custom-elements",
+    "frontend"
+  ]
+}

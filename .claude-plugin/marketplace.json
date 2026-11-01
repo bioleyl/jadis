@@ -1,0 +1,22 @@
+{
+  "name": "jadis",
+  "description": "Jadis for Claude Code: the jadis plugin teaches Claude to build web apps on native Web Components with @jadis/core.",
+  "owner": {
+    "name": "Leal Bioley",
+    "url": "https://bioleyl.github.io/jadis/"
+  },
+  "plugins": [
+    {
+      "name": "jadis",
+      "source": "./plugins/jadis",
+      "description": "Build apps with Jadis: setup with or without a bundler, the lifecycle, JSX, state, communication, routing, translations, tests, and where the installed version's API is.",
+      "category": "development",
+      "tags": [
+        "web-components",
+        "custom-elements",
+        "jadis",
+        "frontend"
+      ]
+    }
+  ]
+}

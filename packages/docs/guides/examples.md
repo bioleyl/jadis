@@ -24,6 +24,18 @@ A fully playable Minesweeper game demonstrating:
 - **Source code:** [github.com/bioleyl/jadis-examples/minesweeper](https://github.com/bioleyl/jadis-examples/tree/main/packages/minesweeper)
 - **Live demo:** [bioleyl.github.io/jadis-examples/minesweeper](https://bioleyl.github.io/jadis-examples/minesweeper/)
 
+## jlib
+
+A component library built on *Jadis*, organised in atomic design, showing:
+
+- Components that work as plain HTML tags and as typed classes in JSX
+- Form fields that submit like native ones
+- Theming through CSS custom properties, light and dark
+- A documentation site, itself a *Jadis* app, with a live playground for each component
+
+- **Source code:** [github.com/bioleyl/jlib](https://github.com/bioleyl/jlib)
+- **Documentation:** [bioleyl.github.io/jlib](https://bioleyl.github.io/jlib/)
+
 ## Getting Started
 
 Ready to build your own? Follow the [Installation Guide](./installation.md) to get up and running in minutes.
