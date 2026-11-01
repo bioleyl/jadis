@@ -42,7 +42,8 @@ async function bundleImportOf(directory, exportName) {
 async function verifyTreeShaking(directory) {
   for (const exportName of treeShakenExports) {
     const code = await bundleImportOf(directory, exportName);
-    const holdsClass = (name) => code.includes(`class ${name} `);
+    // A class as written (`class Jadis extends`), or as Rolldown writes a module's classes (`var Jadis = class`).
+    const holdsClass = (name) => new RegExp(`\\bclass ${name}\\b|\\b${name} = class\\b`).test(code);
     if (!holdsClass(exportName)) {
       throw new Error(`The bundle of ${exportName} alone does not hold its class: the check below would prove nothing.`);
     }
