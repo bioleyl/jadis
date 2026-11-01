@@ -177,6 +177,7 @@ Conventions:
 - `static readonly selector` must be a valid custom-element name containing a hyphen. `createSelector('my-card')` validates it at startup.
 - `templateHtml()` must return a real `Node` (element or `DocumentFragment`), not an HTML string.
 - `templateCss()` returns a CSS string injected as one `<style>` into the shadow root. Use the `css` tagged-template helper when interpolating values.
+- A component's styles live in a `.css` file beside it, imported with `?inline` (`import styles from './greeting-card.css?inline'`) and returned by `templateCss()`: Vite processes it and minifies it in the build. Not `?raw`, which keeps the CSS as written, comments and indentation included: no bundler minifies what is inside a string. A library built with `build.minify: false` also sets `build.cssMinify: 'lightningcss'`, or its CSS stays as written.
 - Register each component once; `register()` is idempotent but importing the module once is cleaner. A **second class with a selector already taken is silently ignored**: keep selectors unique.
 - Register child components before a parent renders them (importing the child's module is enough). A property set on an element that is not upgraded yet is shadowed by the class field once it upgrades.
 - Custom elements are `display: inline` by default: give the host a display (`:host { display: block; }`) almost always.
@@ -374,7 +375,7 @@ i18n.t('cart.items', { count: 3 });
 
 ## Testing an application
 
-- **Unit (Vitest + jsdom)**: pure logic, helpers, failure paths.
+- **Unit (Vitest + jsdom)**: pure logic, helpers, failure paths. Vitest leaves CSS imports empty, `?inline` included, unless its config sets `test: { css: true }`.
 - **Browser (Playwright)**: things jsdom can't reproduce faithfully — connection/reconnection timing, shadow DOM and slots, `MutationObserver` delivery, custom events, bus cleanup, history/hash navigation, keyboard interaction.
 - In Playwright, rely on `expect(locator).toHaveText(...)` auto-waiting instead of sleeping; it correctly handles the asynchronous `onConnect`.
 - Test empty, error, and disconnected states, not only the happy path.
