@@ -1,0 +1,3 @@
+# The package build; the test fixture holds a built app of its own.
+/dist
+!/test/fixture/dist/

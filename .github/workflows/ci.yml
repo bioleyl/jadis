@@ -37,6 +37,9 @@ jobs:
       - name: Build core package
         run: npm run build --workspace=@jadis/core
 
+      - name: Build the Fastify plugin
+        run: npm run build --workspace=@jadis/fastify
+
       - name: Check JSX types
         run: npm run test:types --workspace=@jadis/core
 

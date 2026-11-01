@@ -68,6 +68,15 @@ const updates = [
       return data;
     },
   },
+  // Fastify plugin - versioned with core, whose server rendering it hosts
+  {
+    path: 'packages/fastify/package.json',
+    update: (data) => {
+      data.version = newCoreVersion;
+      data.peerDependencies['@jadis/core'] = `^${newCoreVersion}`;
+      return data;
+    },
+  },
   // Claude plugin - Claude Code gives its users a new copy only when its version changes
   {
     path: 'plugins/jadis/.claude-plugin/plugin.json',

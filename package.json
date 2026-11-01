@@ -16,6 +16,7 @@
     "docs:preview": "npm run preview --workspace=@jadis/docs",
     "publish:core": "npm publish --workspace=packages/core --access public",
     "publish:create": "npm publish --workspace=packages/create --access public",
+    "publish:fastify": "npm publish --workspace=packages/fastify --access public",
     "test": "npm run test --workspaces --if-present",
     "test:plugin": "node --test tests/claude-plugin.test.mjs",
     "verify:packages": "node scripts/verify-packages.mjs",

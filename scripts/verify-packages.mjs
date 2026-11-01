@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -88,6 +88,36 @@ try {
   if (!generatedSource.includes(`@jadis/core@${coreVersion}"`)) {
     throw new Error(`The generated vanilla project does not load @jadis/core@${coreVersion}.`);
   }
+
+  // The Fastify plugin: its package holds the worker it starts by path, and it registers on an app.
+  const fastifyPackage = packWorkspace('packages/fastify');
+  const fastifyProject = mkdtempSync(join(temporaryDirectory, 'fastify-project-'));
+  // In one install: the plugin's peer, @jadis/core, comes from its package here, not from the registry.
+  execFileSync('npm', ['init', '-y'], { cwd: fastifyProject, stdio: 'ignore' });
+  execFileSync('npm', ['install', '--ignore-scripts', '--no-save', fastifyPackage, corePackage, 'fastify@5'], {
+    cwd: fastifyProject,
+    stdio: 'inherit',
+  });
+  statSync(join(fastifyProject, 'node_modules/@jadis/fastify/dist/render-worker.js'));
+  // The app's server build is an ES module, as Vite writes it for a package of type module.
+  const projectFile = join(fastifyProject, 'package.json');
+  writeFileSync(projectFile, JSON.stringify({ ...JSON.parse(readFileSync(projectFile, 'utf8')), type: 'module' }));
+  mkdirSync(join(fastifyProject, 'dist/client'), { recursive: true });
+  mkdirSync(join(fastifyProject, 'dist/server'), { recursive: true });
+  writeFileSync(join(fastifyProject, 'dist/client/index.html'), '<main><!--app-body--></main>');
+  writeFileSync(
+    join(fastifyProject, 'dist/server/entry-server.js'),
+    "export const render = async (url) => ({ body: `<p>${document.createElement('p').tagName} ${url}</p>` });"
+  );
+  execFileSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      "const { default: Fastify } = await import('fastify'); const { default: jadis } = await import('@jadis/fastify'); const app = Fastify(); await app.register(jadis, { entry: 'src/entry-server.ts', root: process.cwd(), workers: 1 }); const response = await app.inject('/smoke'); await app.close(); if (!response.body.includes('<main><p>P /smoke</p></main>')) { console.error(response.body); process.exit(1); }",
+    ],
+    { cwd: fastifyProject, stdio: 'inherit' }
+  );
 
   console.log('Package smoke tests passed.');
 } finally {
