@@ -6,7 +6,7 @@ pageClass: benchmark
 
 How Jadis compares with React and Vue on the operations of the [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark): creating, updating and removing the rows of a table, the memory it takes, the time to start, and the size of what the browser downloads.
 
-In short, on this machine: Jadis 1.6 and Vue 3.5 are both well ahead of React 19. Jadis is the fastest on 6 of the 9 operations at full speed, and on 7 with the CPU slowed; Vue on the others, creating 1,000 rows at full speed first among them. With 1,000 rows Jadis takes less than half the memory of either, it starts first, and it ships 6 times less code than Vue and 19 times less than React.
+In short, on this machine: Jadis 1.7 and Vue 3.5 are both well ahead of React 19. Jadis is the fastest on 6 of the 9 operations at full speed, and on 7 with the CPU slowed; Vue on the others, creating 1,000 rows at full speed first among them. With 1,000 rows Jadis takes less than half the memory of either, it starts first, and it ships 6 times less code than Vue and 18 times less than React.
 
 ## The three apps
 
@@ -36,7 +36,7 @@ function update() {
 }
 ```
 
-**Jadis 1.6**: one component renders its template once, creates each row's elements with JSX, and from then on changes them in place. One listener on the table handles the clicks of every row.
+**Jadis 1.7**: one component renders its template once, creates each row's elements with JSX, and from then on changes them in place. One listener on the table handles the clicks of every row.
 
 ```tsx
 private update(): void {
@@ -52,7 +52,7 @@ The three use one generator for the labels, seeded, so they draw the same rows.
 
 From the click to the next frame painted, median of 15 runs. The fastest of each operation is in green.
 
-| Operation | React 19 | Vue 3.5 | Jadis 1.6 |
+| Operation | React 19 | Vue 3.5 | Jadis 1.7 |
 |---|---|---|---|
 | Create 1,000 rows | 44.2 ms | **38.4 ms** | 43.6 ms |
 | Replace all 1,000 rows | 68.1 ms | 38.2 ms | **38.0 ms** |
@@ -66,7 +66,7 @@ From the click to the next frame painted, median of 15 runs. The fastest of each
 
 With the CPU slowed 4 times, as the js-framework-benchmark does to tell small operations apart, median of 10 runs:
 
-| Operation | React 19 | Vue 3.5 | Jadis 1.6 |
+| Operation | React 19 | Vue 3.5 | Jadis 1.7 |
 |---|---|---|---|
 | Create 1,000 rows | 222.8 ms | 204.6 ms | **192.7 ms** |
 | Replace all 1,000 rows | 228.1 ms | 185.0 ms | **178.5 ms** |
@@ -84,7 +84,7 @@ Vue creates 1,000 rows first at full speed, Jadis with the CPU slowed. Creating 
 
 The JavaScript heap after a garbage collection, median of 5.
 
-| Moment | React 19 | Vue 3.5 | Jadis 1.6 |
+| Moment | React 19 | Vue 3.5 | Jadis 1.7 |
 |---|---|---|---|
 | Page ready | 1.55 MB | 1.30 MB | **1.12 MB** |
 | With 1,000 rows | 3.74 MB | 3.29 MB | **1.33 MB** |
@@ -94,9 +94,9 @@ The last line is no leak. Each library ends a little above its start once its co
 
 ## Size and start
 
-| | React 19 | Vue 3.5 | Jadis 1.6 |
+| | React 19 | Vue 3.5 | Jadis 1.7 |
 |---|---|---|---|
-| The app's bundle, minified and gzipped | 70.1 kB | 23.0 kB | **3.7 kB** |
+| The app's bundle, minified and gzipped | 70.2 kB | 23.1 kB | **4.0 kB** |
 | Page load to the app's first frame | 67.5 ms | 31.6 ms | **26.6 ms** |
 | The same, CPU slowed 4 times | 147.8 ms | 67.0 ms | **42.6 ms** |
 
@@ -120,7 +120,7 @@ The last line is no leak. Each library ends a little above its start once its co
 
 **Start**: from the start of the page load to the first frame painted after the app's first render, timed by the page itself.
 
-**Size**: each bundle, minified, compressed with gzip at level 9.
+**Size**: each bundle, minified, compressed with gzip at level 9; a kB is 1,000 bytes. Measured again on 1 November 2026, the three bundles with one method: Jadis's holds the code that takes over a page rendered on the server, new in 1.7 (0.2 kB: 1.6's bundle was 3.8 kB).
 
 ## Reading it fairly
 
@@ -129,6 +129,7 @@ The last line is no leak. Each library ends a little above its start once its co
 - The Jadis component sets `:host { display: block; }`, as the [Styles](../templating/css.md) page advises: without it, a custom element is inline, and laying out a table inside an inline element made selecting a row slower than in React.
 - A first series of runs measured all operations of one framework before the next; the machine slowed down along the way and the results came out unequal. The runs above measure each operation for the three frameworks back to back.
 - One browser, one machine. Other browsers, and server rendering, are not measured.
+- The speed, the memory and the start above were measured with Jadis 1.6. Measured again on 1 November 2026 against 1.7, 25 runs of each operation, both stayed within what separates two copies of the same 1.6 bundle measured side by side (up to 12% on an operation), and took the same memory to the byte.
 
 ## See Also
 

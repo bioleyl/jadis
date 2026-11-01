@@ -40,6 +40,7 @@ Consequences:
 ```bash
 npx @jadis/create ts my-app        # TypeScript + Vite + JSX
 npx @jadis/create js my-app        # checked JavaScript + Vite + JSX
+npx @jadis/create ssr my-app       # TypeScript + JSX, rendered on the server by Fastify (@jadis/fastify)
 npx @jadis/create vanilla my-app   # no bundler, no JSX, CDN import map
 ```
 
@@ -372,6 +373,17 @@ i18n.t('cart.items', { count: 3 });
 - Plural forms are an object of plural categories (`zero one two few many other`, `other` required), chosen with `Intl.PluralRules`; each language uses its own. Numbers in placeholders are formatted with `Intl.NumberFormat`; pass a string to keep one as written.
 - `setLocale` loads a translation once, sets `<html lang>`, and emits `change` on `i18n.bus`. Nothing re-renders: a component follows the language with `this.useTranslation(i18n, () => { … })`, called once in the constructor. The callback writes the texts with `i18n.t`; it runs at every connection (after the template, attribute callbacks and waiting changes, before the paint, so refs work) and at each `change` while connected. A text with a changing parameter goes in a method called from both `useTranslation` and the `useChange` callback. Never name that method `translate`: `HTMLElement.translate` already exists.
 - Locales are language tags (`fr`, `de-CH`); `i18n.locales` lists them, the source first.
+
+## Server rendering
+
+`@jadis/core/server` renders components on a server, in a server-side DOM (happy-dom); `@jadis/fastify` hosts it on Fastify. Guide: `server-rendering/overview.md` in the docs. In short:
+
+- **One route table.** The browser's `Router` follows it; the server entry renders from it with `renderRoute(routes, url, { prepare })`, which creates the same elements the router would (root component, then page, params as attributes).
+- **Each shadow root goes out as declarative shadow DOM** (`<template shadowrootmode="open">`): the page paints before any script. When a definition loads, the component's shadow root is emptied and rendered again from its attributes, in the same task.
+- **State travels in attributes.** Values set in code on `useChange(…, { attribute })` fields are written as those attributes (JSON for lists and objects, when `parse` reads them back the same). A page keeps its data in such a field (`data`), filled by a `load(route, api)` that the server calls in `prepare` and the page calls in `onRoute` when it has none.
+- **The router takes over** the server's page on its first `mountOn()` when the mount point holds that route's elements; it makes every next page itself.
+- **What no attribute holds** (functions, listeners) is set again in the same task as the definition: load that code and the definitions as one module graph. Register what components read as they render (icons, texts) before importing them.
+- **On the server:** never `fetch` from a component (refused during a render), never keep per-visitor state in a module, never bind a secret to an attribute, and send a visitor's pages with `cache-control: private, no-store`. Names an element already has (`title`, `hidden`) are not page methods: `pageTitle()`, `httpStatus()`.
 
 ## Testing an application
 
