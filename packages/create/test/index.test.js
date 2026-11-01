@@ -40,8 +40,34 @@ test('creates the TypeScript template', () => {
   assert.equal(fs.existsSync(path.join(directory, 'example', 'src/main.ts')), true);
   assert.match(
     fs.readFileSync(path.join(directory, 'example', 'package.json'), 'utf8'),
-    /"@jadis\/core": "\^1\.6\.0"/
+    /"@jadis\/core": "\^1\.7\.0"/
   );
+});
+
+test('creates the server rendering template', () => {
+  const directory = createTempDirectory();
+  const result = runCli(directory, 'ssr', 'example');
+  const projectDirectory = path.join(directory, 'example');
+  const manifest = fs.readFileSync(path.join(projectDirectory, 'package.json'), 'utf8');
+
+  assert.equal(result.status, 0);
+  for (const file of ['server/main.ts', 'src/entry-server.ts', 'src/entry-client.ts', 'src/routes.ts']) {
+    assert.equal(fs.existsSync(path.join(projectDirectory, file)), true, file);
+  }
+  assert.match(manifest, /"@jadis\/core": "\^1\.7\.0"/);
+  assert.match(manifest, /"@jadis\/fastify": "\^1\.7\.0"/);
+});
+
+test('gives a project its .gitignore, which the published templates hold as _gitignore', () => {
+  for (const template of ['js', 'ts', 'ssr']) {
+    const directory = createTempDirectory();
+    const result = runCli(directory, template, 'example');
+    const projectDirectory = path.join(directory, 'example');
+
+    assert.equal(result.status, 0);
+    assert.match(fs.readFileSync(path.join(projectDirectory, '.gitignore'), 'utf8'), /^node_modules$/m, template);
+    assert.equal(fs.existsSync(path.join(projectDirectory, '_gitignore')), false, template);
+  }
 });
 
 test('creates the vanilla template without a package manager setup', () => {
@@ -82,5 +108,5 @@ test('rejects an unsupported template', () => {
   const result = runCli(directory, 'unknown', 'example');
 
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /"js", "ts", "vanilla"/);
+  assert.match(result.stderr, /"js", "ts", "ssr", "vanilla"/);
 });

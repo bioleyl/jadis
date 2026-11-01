@@ -70,10 +70,6 @@ export default defineConfig({
               link: '/guides/shadow-dom',
               text: 'Shadow DOM',
             },
-            {
-              link: '/guides/server-rendering',
-              text: 'Server Rendering',
-            },
           ],
         },
         {
@@ -98,6 +94,10 @@ export default defineConfig({
             {
               link: '/templating/to-template',
               text: 'toTemplate()',
+            },
+            {
+              link: '/templating/vnodes',
+              text: 'VNodes',
             },
           ],
         },
@@ -183,6 +183,35 @@ export default defineConfig({
           ],
         },
         {
+          text: 'Server Rendering',
+          items: [
+            {
+              link: '/server-rendering/overview',
+              text: 'Overview',
+            },
+            {
+              link: '/server-rendering/fastify',
+              text: 'An App on Fastify',
+            },
+            {
+              link: '/server-rendering/data',
+              text: 'Data and Responses',
+            },
+            {
+              link: '/server-rendering/takeover',
+              text: 'Taking Over',
+            },
+            {
+              link: '/server-rendering/without-fastify',
+              text: 'Without Fastify',
+            },
+            {
+              link: '/server-rendering/limits',
+              text: 'Limits and Troubleshooting',
+            },
+          ],
+        },
+        {
           text: 'API Reference',
           items: [
             {
@@ -216,6 +245,14 @@ export default defineConfig({
             {
               link: '/api/translator-class',
               text: 'Translator Class',
+            },
+            {
+              link: '/api/server',
+              text: '@jadis/core/server',
+            },
+            {
+              link: '/api/fastify',
+              text: '@jadis/fastify',
             },
           ],
         },

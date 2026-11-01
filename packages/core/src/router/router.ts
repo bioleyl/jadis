@@ -1,7 +1,7 @@
 import { assert } from '../helpers/assert.helper';
 import { Bus } from '../helpers/bus.helper';
-import { applyElementAttributes, createElement } from '../helpers/element.helper';
-import { normalizePath } from '../helpers/router.helper';
+import { applyElementAttributes } from '../helpers/element.helper';
+import { createRouteElements, normalizePath } from '../helpers/router.helper';
 import { toKebabCase } from '../helpers/string.helper';
 import {
   COMPONENT_SELECTOR_SEPARATOR,
@@ -449,8 +449,47 @@ export class Router<T extends Record<string, RouteDefinition>> {
     this._shownIndex = this.currentEntryIndex();
     this.markEntry(this._shownIndex);
     this._shownUrl = window.location.href;
-    this.sendRouteToPage(this.reuseMountedPage(next) ?? this.mountPage(next));
+    this.sendRouteToPage(this.reuseMountedPage(next) ?? this.takeOverRenderedPage(next) ?? this.mountPage(next));
     this.bus.emit('change', next);
+  }
+
+  /**
+   * The route's elements a server rendered in the mount point, taken over as the mounted page on the first show: they
+   * upgrade in place, with the state the server wrote on them, instead of being made again empty.
+   */
+  private takeOverRenderedPage(next: ActiveRoute): MountedPage | undefined {
+    if (this._mountedPage) {
+      return undefined;
+    }
+    const elements = this.renderedPageElements(next.componentSelector);
+    const page = elements?.at(-1);
+    if (!elements || !page) {
+      return undefined;
+    }
+    const mounted: MountedPage = {
+      componentSelector: next.componentSelector,
+      connected: false,
+      elements,
+      page,
+      params: next.params,
+    };
+    this._mountedPage = mounted;
+    this.sendRouteOnceConnected(mounted);
+    return mounted;
+  }
+
+  /** The elements of a page in the mount point, from the root component down, or undefined when one is missing. */
+  private renderedPageElements(componentSelector: string): Array<HTMLElement> | undefined {
+    const elements: Array<HTMLElement> = [];
+    for (const selector of componentSelector.split(COMPONENT_SELECTOR_SEPARATOR)) {
+      const parent = elements.at(-1) ?? this.mountPoint;
+      const element = Array.from(parent.children).find((child) => child.localName === selector);
+      if (!(element instanceof HTMLElement)) {
+        return undefined;
+      }
+      elements.push(element);
+    }
+    return elements;
   }
 
   /** The page mounted, with the new parameters, when it is the route's page and follows routes itself. */
@@ -482,7 +521,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
 
   private mountPage(next: ActiveRoute): MountedPage {
     const { componentSelector, params } = next;
-    const elements = this.createPageElements(componentSelector, params);
+    const elements = createRouteElements(componentSelector, params);
     const [rootElement] = elements;
     const mounted: MountedPage = {
       componentSelector,
@@ -496,16 +535,6 @@ export class Router<T extends Record<string, RouteDefinition>> {
     this._show(rootElement, current);
     this.sendRouteOnceConnected(mounted);
     return mounted;
-  }
-
-  /** Creates the page's elements, from the root component down, each nested in the previous one. */
-  private createPageElements(componentSelector: string, params: Record<string, string>): Array<HTMLElement> {
-    const [rootComponent, ...childComponents] = componentSelector.split(COMPONENT_SELECTOR_SEPARATOR);
-    const elements = [createElement(rootComponent, { attrs: params })];
-    for (const selector of childComponents) {
-      elements.push(createElement(selector, { attrs: params }, elements.at(-1)));
-    }
-    return elements;
   }
 
   private sendRouteOnceConnected(mounted: MountedPage) {

@@ -1,0 +1,12 @@
+/* The page around the components: they style themselves, in their shadow roots. */
+body {
+  margin: 0;
+  background: #0f1020;
+  color: #e8e8f0;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: #9ab4ff;
+}

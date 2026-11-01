@@ -1,3 +1,6 @@
+import { COMPONENT_SELECTOR_SEPARATOR } from '../router/router-constants';
+import { createElement } from './element.helper';
+
 import type {
   FlattenRouteGroup,
   FlattenRoutes,
@@ -90,4 +93,23 @@ export function defineRouteGroup<const Prefix extends Path, const Tree extends R
         : [key, defineRouteGroup(normalizedPrefix, value, options)];
     })
   );
+}
+
+/**
+ * Creates the elements of a route's page, from the root component down, each nested in the previous one and given
+ * the route's parameters as attributes: what the router mounts, and what a server render writes.
+ * @param componentSelector The route's component selector: the root component's and the page's
+ * @param params The route's parameters
+ * @returns The elements, the root component first and the page last
+ */
+export function createRouteElements(
+  componentSelector: string,
+  params: Record<string, string>
+): Array<HTMLElement> {
+  const [rootComponent, ...childComponents] = componentSelector.split(COMPONENT_SELECTOR_SEPARATOR);
+  const elements = [createElement(rootComponent, { attrs: params })];
+  for (const selector of childComponents) {
+    elements.push(createElement(selector, { attrs: params }, elements.at(-1)));
+  }
+  return elements;
 }

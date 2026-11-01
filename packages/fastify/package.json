@@ -1,0 +1,60 @@
+{
+  "author": "Leal Bioley <lb@syware.ch>",
+  "bugs": {
+    "url": "https://github.com/bioleyl/jadis/issues"
+  },
+  "dependencies": {
+    "@fastify/middie": "^9.3.6",
+    "@fastify/static": "^10.1.8",
+    "@happy-dom/global-registrator": "^21.0.4",
+    "fastify-plugin": "^6.0.1",
+    "happy-dom": "^21.0.4"
+  },
+  "description": "Renders the pages of a Jadis app on a Fastify server: declarative shadow DOM from the app's own routes, rendered in worker threads, taken over in the browser.",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "fastify": "^5.12.7",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "homepage": "https://bioleyl.github.io/jadis/server-rendering/overview",
+  "keywords": [
+    "jadis",
+    "fastify",
+    "fastify-plugin",
+    "ssr",
+    "server rendering",
+    "declarative shadow dom",
+    "web components",
+    "custom elements"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "name": "@jadis/fastify",
+  "peerDependencies": {
+    "@jadis/core": "^1.7.0",
+    "fastify": "^5.0.0"
+  },
+  "repository": {
+    "directory": "packages/fastify",
+    "type": "git",
+    "url": "git+https://github.com/bioleyl/jadis.git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build",
+    "test": "npm run build && node --test \"test/**/*.test.mjs\""
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "1.7.0"
+}

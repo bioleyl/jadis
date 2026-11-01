@@ -251,21 +251,25 @@ function applyProps(el: HTMLElement, props: JadisProps, isComponent: boolean): v
   }
 }
 
-/** Applies one prop: a hyphenated name as an attribute, `on…` as a listener, any other as a property. */
+/** Whether a prop is a listener: a function given to `on…`, never an attribute, a hyphenated name included. */
+const isListenerProp = (key: string, value: unknown): boolean =>
+  typeof value === 'function' && key.startsWith('on');
+
+/** Applies one prop: `on…` as a listener, a hyphenated name as an attribute, any other as a property. */
 function applyProp(el: HTMLElement, key: string, value: unknown, isComponent: boolean): void {
   if (value === undefined) {
     return;
   }
-  if (key.includes('-')) {
-    setElementAttribute(el, key, value);
-    return;
-  }
-  if (typeof value === 'function' && key.startsWith('on')) {
+  if (isListenerProp(key, value)) {
     if (isComponent) {
       el.addEventListener(componentEventName(key), detailListener(value as Callable));
     } else {
       el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
     }
+    return;
+  }
+  if (key.includes('-')) {
+    setElementAttribute(el, key, value);
     return;
   }
   applyElementProperty(el, key, value);
@@ -389,11 +393,10 @@ function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
       if (value == null) {
         continue;
       }
-      if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
+      if (isListenerProp(key, value)) {
+        el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
+      } else if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
         el.setAttribute(key, String(value));
-      } else if (typeof value === 'function' && key.startsWith('on')) {
-        const eventName = key.slice(2).toLowerCase();
-        el.addEventListener(eventName, value as EventListener);
       } else {
         (el as unknown as Record<string, unknown>)[key] = value;
       }
@@ -423,158 +426,5 @@ function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
     }
     mountVNodes(instance, children);
     parent.appendChild(instance);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// SSR helpers
-// ---------------------------------------------------------------------------
-
-function escapeHtml(value: string | number | boolean): string {
-  const str = String(value ?? '');
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function attrName(key: string): string {
-  return key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
-}
-
-function fragmentToString(fragment: Node): string {
-  const template = document.createElement('template');
-  template.content.appendChild(fragment.cloneNode(true));
-  return template.innerHTML;
-}
-
-/**
- * Render a VNode tree into an HTML string. Used by SSR only.
- *
- * For custom components with shadow DOM, outputs:
- *   `<component-tag props...></component-tag>`
- *   `<template shadowrootmode="open" shadowrootserializable="true">...</template>`
- *
- * The browser parses the template content into a real ShadowRoot during hydration.
- */
-export function renderToString(vnodes: Array<Node | VNode | string | number>): string {
-  const parts: string[] = [];
-  for (const child of vnodes) {
-    if (child instanceof Node) {
-      continue;
-    }
-    if (typeof child === 'string' || typeof child === 'number') {
-      parts.push(escapeHtml(child));
-    } else {
-      renderVNodeToString(parts, child);
-    }
-  }
-  return parts.join('');
-}
-
-function renderVNodeToString(out: string[], vnode: VNode): void {
-  const { tag, props, children } = vnode;
-
-  if (typeof tag === 'string') {
-    // Intrinsic element
-    out.push(`<${tag}`);
-    for (const [key, value] of Object.entries(props)) {
-      if (value == null) {
-        continue;
-      }
-      const attr = attrName(key);
-      if (typeof value === 'boolean') {
-        if (value) {
-          out.push(` ${attr}`);
-        }
-      } else {
-        out.push(` ${attr}="${escapeHtml(String(value))}"`);
-      }
-    }
-    const voidElements = new Set(['br', 'hr', 'img', 'input', 'meta', 'link']);
-    if (voidElements.has(tag)) {
-      out.push('/>');
-      return;
-    }
-    out.push('>');
-    for (const child of children) {
-      if (child instanceof Node) {
-        continue;
-      }
-      if (typeof child === 'string' || typeof child === 'number') {
-        out.push(escapeHtml(child));
-      } else {
-        renderVNodeToString(out, child);
-      }
-    }
-    out.push(`</${tag}>`);
-  } else {
-    // Jadis component
-    const Component = tag;
-    const selector =
-      (Component.prototype.constructor as JadisConstructor).selector
-      ?? (Component as JadisConstructor).selector
-      ?? 'jadis-component';
-    out.push(`<${selector}`);
-    for (const [key, value] of Object.entries(props)) {
-      if (value == null) {
-        continue;
-      }
-      const attr = attrName(key);
-      if (typeof value === 'boolean') {
-        if (value) {
-          out.push(` ${attr}`);
-        }
-      } else {
-        out.push(` ${attr}="${escapeHtml(String(value))}"`);
-      }
-    }
-    const voidElements = new Set(['input', 'br', 'hr']);
-    if (voidElements.has(selector)) {
-      out.push('/>');
-      return;
-    }
-    out.push('>');
-    // Render shadow DOM content
-    const instance = new Component();
-    for (const [key, value] of Object.entries(props)) {
-      if (value == null) {
-        continue;
-      }
-      if (!['key', 'class', 'className'].includes(key)) {
-        (instance as unknown as Record<string, unknown>)[key] = value;
-      }
-    }
-    const fragment = instance.templateHtml?.();
-    if (fragment) {
-      out.push('<template shadowrootmode="open" shadowrootserializable="true">');
-      out.push(fragmentToString(fragment));
-      out.push('</template>');
-    }
-    out.push(`</${selector}>`);
-  }
-}
-
-/**
- * Hydrate SSR-rendered components.
- *
- * For each custom element that contains a <template shadowrootmode="open">
- * child, calls attachShadow() and the browser automatically moves the template
- * content into the new ShadowRoot (it disappears from light DOM).
- *
- * @param root - The document or element to search within.
- */
-export function hydrateSSR(root: Document | Element = globalThis.document as Document): void {
-  const templates = Array.from(root.querySelectorAll('template[shadowrootmode]'));
-  for (const tmpl of templates) {
-    const hostEl = tmpl.parentElement;
-    if (!hostEl || !(hostEl instanceof HTMLElement)) {
-      continue;
-    }
-    if (hostEl.shadowRoot !== null) {
-      continue;
-    }
-    try {
-      hostEl.attachShadow({ mode: 'open' });
-    } catch {
-      // Shadow DOM may already be attached by another hydrator
-    }
   }
 }

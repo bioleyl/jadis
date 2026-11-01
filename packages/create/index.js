@@ -5,7 +5,7 @@ const cwd = process.cwd();
 const path = require('node:path');
 
 const VANILLA_TEMPLATE = 'vanilla';
-const supportedTemplates = ['js', 'ts', VANILLA_TEMPLATE];
+const supportedTemplates = ['js', 'ts', 'ssr', VANILLA_TEMPLATE];
 const [template, projectName] = process.argv.slice(2);
 
 if (!supportedTemplates.includes(template)) {
@@ -28,6 +28,10 @@ const TEMPLATE_MANIFEST = 'package.json';
 const VANILLA_ENTRY = 'index.html';
 const CDN_VERSION_PLACEHOLDER = '__JADIS_VERSION__';
 
+// npm never publishes a file named .gitignore: the templates hold theirs under another name, which the project gets
+// back as .gitignore.
+const PROJECT_FILE_NAMES = new Map([['_gitignore', '.gitignore']]);
+
 const createProject = (templatePath, projectPath, excludedFiles = []) => {
   // Create project directory
   fs.mkdirSync(projectPath, { recursive: true });
@@ -37,7 +41,7 @@ const createProject = (templatePath, projectPath, excludedFiles = []) => {
   // Copy template files to project directory
   templateFiles.forEach((file) => {
     const srcFile = path.join(templatePath, file);
-    const destFile = path.join(projectPath, file);
+    const destFile = path.join(projectPath, PROJECT_FILE_NAMES.get(file) ?? file);
 
     if (fs.lstatSync(srcFile).isDirectory()) {
       createProject(srcFile, destFile);

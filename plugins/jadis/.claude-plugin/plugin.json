@@ -1,6 +1,6 @@
 {
   "name": "jadis",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Build apps with Jadis: setup with or without a bundler, the lifecycle, JSX, state, communication, routing, translations, tests, and where the installed version's API is.",
   "author": {
     "name": "Leal Bioley"

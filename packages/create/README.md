@@ -16,6 +16,12 @@ npx @jadis/create ts my-app
 
 This will create a new directory called `my-app` with a minimal and ready-to-code *Jadis* setup.
 
+For an app rendered on the server by [Fastify](https://fastify.dev), then taken over in the browser:
+
+```bash
+npx @jadis/create ssr my-app
+```
+
 For a no-bundler project:
 
 ```bash
@@ -30,7 +36,7 @@ npm install
 npm run dev
 ```
 
-This will start a local dev server with instant reload. The vanilla template instead uses a static HTTP server:
+This will start a local dev server with instant reload; the `ssr` template's runs Fastify, with Vite inside it (`npm run build && npm start` for the build). The vanilla template instead uses a static HTTP server:
 
 ```bash
 cd my-app

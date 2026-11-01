@@ -2,6 +2,12 @@ import { assert } from './assert.helper';
 
 import type { AttributeParser } from '../types/jadis.type';
 
+/**
+ * The method a server render asks a component for its attribute-bound fields: it writes their values set in code as
+ * those attributes (`@jadis/core/server`). Only the server imports what does it, so a browser's bundle carries none of it.
+ */
+export const ATTRIBUTE_BINDINGS = Symbol('jadis.attributeBindings');
+
 type ParserFactory = (fallback: never) => AttributeParser<unknown>;
 
 // A blank attribute is not 0, as Number('') would have it.

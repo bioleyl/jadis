@@ -78,4 +78,4 @@ for (const [name, component] of Object.entries(pluginComponents)) {
 ## See also
 
 - [`createSelector()`](./create-selector.md) — the throwing form.
-- [VNodes and server rendering](../guides/server-rendering.md) — `createVNode()`, `renderToString()` and `hydrateSSR()`.
+- [VNodes](../templating/vnodes.md) — `createVNode()`, `createComponentVNode()` and `mountVNodes()`.

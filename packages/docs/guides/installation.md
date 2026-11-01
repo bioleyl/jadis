@@ -8,6 +8,7 @@ The easiest way to start a project is with a pre-made boilerplate.
 
 - **JS Boilerplate**
 - **TS Boilerplate**
+- **Server Rendering**: TypeScript, rendered on the server by Fastify
 
 Create a new project using:
 
@@ -21,7 +22,13 @@ npx @jadis/create js my-project
 npx @jadis/create ts my-project
 ```
 
+```bash [Server Rendering]
+npx @jadis/create ssr my-project
+```
+
 :::
+
+The `ssr` boilerplate is an app that [Fastify](https://fastify.dev) renders on the server, then *Jadis* takes over in the browser: see [Server Rendering](../server-rendering/overview.md).
 
 ## Installing from NPM
 
@@ -72,7 +79,7 @@ Then in your HTML:
 
 ## Using a CDN
 
-You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@1.6.0). This example uses DOM APIs directly so it can run without a JSX transform:
+You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/core@1.7.0). This example uses DOM APIs directly so it can run without a JSX transform:
 
 ```html
 <!DOCTYPE html>
@@ -87,7 +94,7 @@ You can also use *Jadis* directly from a CDN like [esm](https://esm.sh/@jadis/co
     <script type="importmap">
       {
         "imports": {
-          "@jadis/core": "https://esm.sh/@jadis/core@1.6.0"
+          "@jadis/core": "https://esm.sh/@jadis/core@1.7.0"
         }
       }
     </script>

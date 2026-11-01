@@ -57,6 +57,16 @@ export type UseChangeHandler<StateType> = Readonly<{
 /** Turns an attribute's value, null when the attribute is absent, into the value of a `useChange` field. */
 export type AttributeParser<T> = (value: string | null) => T;
 
+/** A `useChange` field bound to an attribute: what a server render needs to write the field's value back. */
+export interface AttributeBinding<T = unknown> {
+  attribute: string;
+  handler: UseChangeHandler<T>;
+  parse: AttributeParser<T>;
+}
+
+/** The attributes that give components their state back, by name: `null` removes one. */
+export type StateAttributes = Map<string, string | null>;
+
 type IsExactly<T, U> = [T, U] extends [U, T] ? true : false;
 
 /** Strings, numbers and booleans come with a parser; any other type brings its own. */
