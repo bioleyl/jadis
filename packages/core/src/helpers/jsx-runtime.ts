@@ -251,21 +251,25 @@ function applyProps(el: HTMLElement, props: JadisProps, isComponent: boolean): v
   }
 }
 
-/** Applies one prop: a hyphenated name as an attribute, `on…` as a listener, any other as a property. */
+/** Whether a prop is a listener: a function given to `on…`, never an attribute, a hyphenated name included. */
+const isListenerProp = (key: string, value: unknown): boolean =>
+  typeof value === 'function' && key.startsWith('on');
+
+/** Applies one prop: `on…` as a listener, a hyphenated name as an attribute, any other as a property. */
 function applyProp(el: HTMLElement, key: string, value: unknown, isComponent: boolean): void {
   if (value === undefined) {
     return;
   }
-  if (key.includes('-')) {
-    setElementAttribute(el, key, value);
-    return;
-  }
-  if (typeof value === 'function' && key.startsWith('on')) {
+  if (isListenerProp(key, value)) {
     if (isComponent) {
       el.addEventListener(componentEventName(key), detailListener(value as Callable));
     } else {
       el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
     }
+    return;
+  }
+  if (key.includes('-')) {
+    setElementAttribute(el, key, value);
     return;
   }
   applyElementProperty(el, key, value);
@@ -389,11 +393,10 @@ function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
       if (value == null) {
         continue;
       }
-      if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
+      if (isListenerProp(key, value)) {
+        el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
+      } else if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
         el.setAttribute(key, String(value));
-      } else if (typeof value === 'function' && key.startsWith('on')) {
-        const eventName = key.slice(2).toLowerCase();
-        el.addEventListener(eventName, value as EventListener);
       } else {
         (el as unknown as Record<string, unknown>)[key] = value;
       }

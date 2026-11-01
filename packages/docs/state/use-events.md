@@ -89,13 +89,13 @@ this.events.register('dataLoaded', (detail) => {
 
 ## In JSX
 
-A component written by its class takes each event of its `events` field as a prop, `on` and the event's name: `onChanged` for `changed`, `onValueChange` for `valueChange`. The callback receives the detail, as with `register`, and TypeScript checks it:
+A component written by its class takes each event of its `events` field as a prop, `on` and the event's name: `onChanged` for `changed`, `onValueChange` for `valueChange`, `onPlay-source` for `play-source`. The callback receives the detail, as with `register`, and TypeScript checks it:
 
 ```tsx
 <MyComponent onChanged={(value) => console.log('changed to', value)} />
 ```
 
-The listener lasts as long as the element, so it suits elements made in a list. An event whose name starts with a capital has no prop.
+The listener lasts as long as the element, so it suits elements made in a list. An event whose name starts with a capital has no prop. A function given to an `on…` prop is always a listener, a hyphen in its name included: it is never written as an attribute. On an element written by its tag (`<my-list onItem-added={…} />`), the callback receives the event itself.
 
 ## Best practices
 

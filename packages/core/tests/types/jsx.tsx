@@ -30,7 +30,13 @@ const invalidButton = <button doesNotExist="invalid" />;
 class TodoRow extends Jadis {
   static readonly selector = 'todo-row';
 
-  readonly events = this.useEvents<{ change: string; delete: undefined; valueChange: number; Archived: undefined }>();
+  readonly events = this.useEvents<{
+    change: string;
+    delete: undefined;
+    valueChange: number;
+    Archived: undefined;
+    'play-source': string;
+  }>();
 }
 
 // A component's own events are props: `onDelete` for `delete`, its handler given the event's detail.
@@ -49,6 +55,10 @@ const rowWithWrongDetail = <TodoRow onChange={(count: number) => count} />;
 const rowWithUnknownEvent = <TodoRow onArchive={() => undefined} />;
 // An event named in camel case keeps its case: onValueChange hears valueChange.
 const rowWithCamelCaseEvent = <TodoRow onValueChange={(value) => value.toFixed()} />;
+// An event named with a hyphen has its prop, given the event's detail.
+const rowWithHyphenatedEvent = <TodoRow onPlay-source={(path) => path.toUpperCase()} />;
+// @ts-expect-error The detail of play-source is a string.
+const rowWithWrongHyphenatedDetail = <TodoRow onPlay-source={(count: number) => count} />;
 // @ts-expect-error An event whose name starts with a capital has no prop: onArchived would hear archived.
 const rowWithCapitalEvent = <TodoRow onArchived={() => undefined} />;
 // @ts-expect-error A component without events has no event props.
@@ -64,5 +74,7 @@ void rowWithEvents;
 void rowWithWrongDetail;
 void rowWithUnknownEvent;
 void rowWithCamelCaseEvent;
+void rowWithHyphenatedEvent;
+void rowWithWrongHyphenatedDetail;
 void rowWithCapitalEvent;
 void cardWithEvent;
