@@ -1,9 +1,10 @@
 /** biome-ignore-all lint/complexity/noThisInStatic: I explicitly need to refer to "this" and not Jadis for code hint when creating components */
 
 import { assert } from './helpers/assert.helper';
-import { defaultAttributeParser } from './helpers/attribute.helper';
+import { ATTRIBUTE_BINDINGS, defaultAttributeParser } from './helpers/attribute.helper';
 import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
+import { removeServerTemplate, TEMPLATE_START } from './helpers/template.helper';
 
 import type { Bus } from './helpers/bus.helper';
 import type {
@@ -19,6 +20,7 @@ import type {
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
 import type {
+  AttributeBinding,
   AttributeParser,
   ChangeOptions,
   TranslationSource,
@@ -70,6 +72,8 @@ export abstract class Jadis extends HTMLElement {
 
   readonly shadowRoot: ShadowRoot | null = null;
   protected readonly attributesCallback: Partial<Record<string, AttributeCallback>> = {};
+  /** The `useChange` fields bound to attributes, for a server render to write their values back. */
+  private readonly _bindings: AttributeBinding[] = [];
 
   /**
    * Actions waiting for the component to connect. They run during the
@@ -84,6 +88,8 @@ export abstract class Jadis extends HTMLElement {
   private _attributesInitialized = false;
   private _isConnected = false;
   private _hasRendered = false;
+  /** The first node of the template, for a component without shadow root: where a server render marks it. */
+  private _templateStart: Node | null = null;
   /** A disconnection waiting a microtask: a connection before it ends means the element was moved. */
   private _leaving = false;
 
@@ -561,7 +567,17 @@ export abstract class Jadis extends HTMLElement {
   }
 
   private bindAttribute<T>(attribute: string, handler: ChangeHandler<T>, parse: AttributeParser<T>): void {
+    this._bindings.push({ attribute, handler, parse } as AttributeBinding);
     this.useAttributes({ [attribute]: (value: string | null) => handler.set(parse(value)) });
+  }
+
+  /**
+   * The `useChange` fields bound to attributes, for a server render to write the values set in code (a table's rows,
+   * a page's data) as those attributes, so the browser's upgrade starts from the state the server drew.
+   * @returns The bindings; none before the first connection, when the fields have not read their attributes yet
+   */
+  [ATTRIBUTE_BINDINGS](): readonly AttributeBinding[] {
+    return this._hasRendered ? this._bindings : [];
   }
 
   private renderTemplate(): void {
@@ -569,8 +585,22 @@ export abstract class Jadis extends HTMLElement {
       return;
     }
     const template = this.buildTemplate();
+    if (!this.shadowRoot) {
+      // A server's markup holds the template already: it goes, the component's own render replaces it.
+      removeServerTemplate(this);
+      this._templateStart = template.firstChild;
+    }
     (this.shadowRoot ?? this).appendChild(template);
     this._hasRendered = true;
+  }
+
+  /**
+   * The first node of the template of a component without shadow root, which a server render marks so that the
+   * browser's upgrade replaces the template instead of adding a second one.
+   * @returns The node, or null with a shadow root or before the first connection
+   */
+  [TEMPLATE_START](): Node | null {
+    return this._templateStart;
   }
 
   private buildTemplate(): DocumentFragment {

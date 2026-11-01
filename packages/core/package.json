@@ -37,6 +37,11 @@
       "types": "./dist/dts/helpers/jsx-dev-runtime.d.ts",
       "import": "./dist/esm/jsx-dev-runtime.mjs",
       "require": "./dist/cjs/jsx-dev-runtime.js"
+    },
+    "./server": {
+      "types": "./dist/dts/server/index.d.ts",
+      "import": "./dist/esm/server.mjs",
+      "require": "./dist/cjs/server.js"
     }
   },
   "files": [

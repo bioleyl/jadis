@@ -8,6 +8,7 @@ const entries = [
   { input: 'src/index.ts', name: 'index' },
   { input: 'src/helpers/jsx-runtime.ts', name: 'jsx-runtime' },
   { input: 'src/helpers/jsx-dev-runtime.ts', name: 'jsx-dev-runtime' },
+  { input: 'src/server/index.ts', name: 'server' },
 ];
 
 export default entries.flatMap(({ input, name }) => [

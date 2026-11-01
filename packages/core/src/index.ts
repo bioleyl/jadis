@@ -8,11 +8,9 @@ export {
   createVNode,
   Fragment,
   h,
-  hydrateSSR,
   jsx,
   jsxs,
   mountVNodes,
-  renderToString,
   type VNode,
 } from './helpers/jsx-runtime';
 export { defineRouteGroup, defineRoutes } from './helpers/router.helper';
