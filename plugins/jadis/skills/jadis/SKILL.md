@@ -1,13 +1,20 @@
 ---
-name: jadis-app
-description: Build TypeScript web applications with Jadis, a thin layer over native Web Components. Covers project setup with or without a bundler, JSX or createElement templating, the component lifecycle, state, communication, routing, and translations.
+name: jadis
+description: Build web applications with Jadis (`@jadis/core`), a thin layer over native Web Components — no virtual DOM, no reactivity, no framework runtime. Covers project setup with or without a bundler, JSX or createElement templating, the component lifecycle, state, communication, routing, translations and tests. Load before writing or changing code that imports `@jadis/core`, extends `Jadis`, uses `useRefs`/`useChange`/`useEvents`/`useAttributes`/`onBus`/`Router`/`Translator`, or sets `jsxImportSource: "@jadis/core"`, and before starting an app on Jadis.
 ---
 
 # Building applications with Jadis
 
 Jadis is a thin layer over native Web Components: no virtual DOM, no framework runtime, no reactivity system. You define custom elements, render real DOM once, and update it yourself. Never add React, Vue, or a second component model on top.
 
-Official documentation: <https://bioleyl.github.io/jadis/>
+Official documentation: <https://bioleyl.github.io/jadis/> · Source: <https://github.com/bioleyl/jadis>
+
+## Where the API is
+
+- The installed version is `version` in `node_modules/@jadis/core/package.json`. Its declarations, commented, are in `node_modules/@jadis/core/dist/dts/` (`base-component.d.ts` for the `Jadis` class, `helpers/`, `router/`, `translation/`).
+- The documentation at that version is a folder of Markdown files in the repository: `https://raw.githubusercontent.com/bioleyl/jadis/core-v<version>/packages/docs/<section>/<page>.md`, the page's address on the site (`/routing/routed-pages` → `routing/routed-pages.md`). The site's pages are the same text, at the latest version.
+- This file follows the latest release. An API it names that the installed version lacks is newer: see whether to update (`npm view @jadis/core version`), or do without.
+- An app on [jlib](https://github.com/bioleyl/jlib) (`@syware/jlib`, SyWare's `jl-*` components on Jadis) loads the `jlib` skill too, from the plugin of that name.
 
 ## The lifecycle model (read this first)
 
@@ -371,3 +378,12 @@ i18n.t('cart.items', { count: 3 });
 - **Browser (Playwright)**: things jsdom can't reproduce faithfully — connection/reconnection timing, shadow DOM and slots, `MutationObserver` delivery, custom events, bus cleanup, history/hash navigation, keyboard interaction.
 - In Playwright, rely on `expect(locator).toHaveText(...)` auto-waiting instead of sleeping; it correctly handles the asynchronous `onConnect`.
 - Test empty, error, and disconnected states, not only the happy path.
+
+## What Jadis lacks or gets wrong: an issue
+
+A bug in Jadis, or something every app has to work around, is fixed once in Jadis for all of them. When the app meets one:
+
+- Look for an issue about it first, among [Jadis's issues](https://github.com/bioleyl/jadis/issues) (`gh issue list --repo bioleyl/jadis --search "…"`).
+- Write the issue: what the app needed, what Jadis does instead (its version, a few lines that show it, what the console says), and what would solve it. One issue per problem.
+- Show it to the person, who files it, or file it with `gh issue create --repo bioleyl/jadis` once they agree: the issue is public.
+- Meanwhile, keep the app's way around it small and in one place, with a comment linking the issue, so that it goes once Jadis has the fix.

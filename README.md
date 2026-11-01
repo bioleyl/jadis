@@ -8,7 +8,18 @@
 
 You can find the full documentation on [github pages](https://bioleyl.github.io/jadis/).
 
-For AI-assisted development, see the [AI-SKILL.md](AI-SKILL.md) guide.
+Looking for ready-made components? [jlib](https://github.com/bioleyl/jlib) (`@syware/jlib`) is a component library built on *Jadis*, with its own [documentation site](https://bioleyl.github.io/jlib/).
+
+## Vibe coding
+
+The repository is also a Claude Code plugin marketplace: the `jadis` plugin teaches Claude the lifecycle, JSX, state, communication, routing, translations and tests, and where the API of the installed version is. In Claude Code:
+
+```
+/plugin marketplace add bioleyl/jadis
+/plugin install jadis@jadis
+```
+
+How a project's repository gives it to everyone working on it, and how to ask Claude well: the documentation's [Vibe Coding](https://bioleyl.github.io/jadis/guides/vibe-coding) page. The plugin is in [plugins/](plugins); its skill, [SKILL.md](plugins/jadis/skills/jadis/SKILL.md), also works as the instructions of other assistants.
 
 ## Why *Jadis*?
 

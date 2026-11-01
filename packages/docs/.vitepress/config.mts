@@ -26,6 +26,10 @@ export default defineConfig({
         link: '/guides/benchmark',
         text: 'Benchmark',
       },
+      {
+        link: 'https://bioleyl.github.io/jlib/',
+        text: 'jlib',
+      },
     ],
 
     sidebar: {
@@ -40,6 +44,10 @@ export default defineConfig({
             {
               link: '/guides/first-component',
               text: 'Your First Component',
+            },
+            {
+              link: '/guides/vibe-coding',
+              text: 'Vibe Coding',
             },
             {
               link: '/guides/benchmark',

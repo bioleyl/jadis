@@ -68,6 +68,14 @@ const updates = [
       return data;
     },
   },
+  // Claude plugin - Claude Code gives its users a new copy only when its version changes
+  {
+    path: 'plugins/jadis/.claude-plugin/plugin.json',
+    update: (data) => {
+      data.version = newCoreVersion;
+      return data;
+    },
+  },
   // Create package version - bump minor, reset patch to 0
   {
     path: 'packages/create/package.json',
@@ -94,7 +102,7 @@ const testedDependency = (version) => `\\^${escapeDots(version)}`;
 
 const textUpdates = [
   { path: 'packages/docs/guides/installation.md', reference: cdnReference },
-  { path: 'AI-SKILL.md', reference: cdnReference },
+  { path: 'plugins/jadis/skills/jadis/SKILL.md', reference: cdnReference },
   { path: 'packages/create/test/index.test.js', reference: testedDependency },
 ];
 
