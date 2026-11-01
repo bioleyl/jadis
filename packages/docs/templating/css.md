@@ -72,7 +72,9 @@ class ClickButton extends Jadis {
 See [documentation about toggling classes in components](./classes.md).
 
 :::info
-**?inline** is Vite-specific and loads CSS as plain text in a variable.
+**?inline** is Vite-specific and loads CSS as plain text in a variable, minified in the build. Prefer it to `?raw`,
+which keeps the CSS as written: its comments and indentation would reach your users, since no bundler minifies what
+is inside a string.
 :::
 
 ::: tip
