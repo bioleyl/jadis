@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { Jadis } from '../../base-component';
-import { Fragment, jsx, jsxs } from '../../helpers/jsx-runtime';
+import { createComponentVNode, createVNode, Fragment, jsx, jsxs, mountVNodes } from '../../helpers/jsx-runtime';
+
+import type { VNode } from '../../helpers/jsx-runtime';
 
 /** A component with a useChange input and a plain field, to see how JSX props reach them. */
 class Labelled extends Jadis {
@@ -108,6 +110,46 @@ describe('JSX runtime', () => {
       node.dispatchEvent(new KeyboardEvent('keydown'));
 
       expect(onKeyDown).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('VNodes', () => {
+    const mount = (vnode: VNode): Element => {
+      const parent = document.createElement('div');
+      mountVNodes(parent, [vnode]);
+      return parent.firstElementChild as Element;
+    };
+
+    it('apply props as JSX does: the class, attrs, hyphenated attributes and properties, without the key', () => {
+      const props = {
+        attrs: { ariaLabel: 'name' },
+        class: 'a',
+        className: 'b',
+        'data-userId': 7,
+        key: 'k',
+        title: 'set',
+      };
+
+      const mounted = html(mount(createVNode('p', { props })));
+
+      expect(mounted).toBe('<p aria-label="name" class="b" data-user-id="7" title="set"></p>');
+      expect(mounted).toBe(html(jsx('p', props)));
+    });
+
+    it("set a component's useChange input through its handler, and a plain field directly", () => {
+      const node = mount(createComponentVNode(Labelled, { props: { label: 'Ada', note: 'kept' } })) as Labelled;
+
+      expect(node.label.get()).toBe('Ada');
+      expect(node.note).toBe('kept');
+    });
+
+    it('mount their children inside the element made with its props', () => {
+      const vnode = createVNode('ul', {
+        children: [createVNode('li', { children: ['a'], props: { class: 'first' } }), 'b'],
+        props: { class: 'list' },
+      });
+
+      expect(html(mount(vnode))).toBe('<ul class="list"><li class="first">a</li>b</ul>');
     });
   });
 });
