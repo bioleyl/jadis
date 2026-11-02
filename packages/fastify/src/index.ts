@@ -5,12 +5,21 @@ import fastifyPlugin from 'fastify-plugin';
 import { builtAssets } from './built-assets.js';
 import { devAssets } from './dev-assets.js';
 import { pageHtml } from './page-shell.js';
-import { ASSETS_PREFIX, DEFAULT_OUT_DIR, HTML_TYPE, STATUS_OK } from './plugin-constants.js';
+import {
+  ASSETS_PREFIX,
+  CSS_TYPE,
+  DEFAULT_OUT_DIR,
+  HTML_TYPE,
+  IMMUTABLE_CACHE,
+  STATUS_OK,
+  STYLES_PREFIX,
+} from './plugin-constants.js';
 import { RenderPool } from './render-pool.js';
+import { stylePreloads } from './style-files.js';
 
 import type { AddressInfo } from 'node:net';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import type { JadisPluginOptions, PageAssets } from './types/plugin.type.js';
+import type { JadisPluginOptions, PageAssets, StyleRoute } from './types/plugin.type.js';
 
 export type {
   JadisPluginOptions,
@@ -75,13 +84,27 @@ async function jadis(fastify: FastifyInstance, options: JadisPluginOptions): Pro
     await assets.close();
   });
 
+  // The stylesheets renders linked to, by address: kept before the page that links to one is sent.
+  const styleFiles = new Map<string, string>();
+  fastify.get<StyleRoute>(`${STYLES_PREFIX}:file`, async (request, reply) => {
+    const css = styleFiles.get(`${STYLES_PREFIX}${request.params.file}`);
+    if (css === undefined) {
+      return reply.callNotFound();
+    }
+    return reply.type(CSS_TYPE).header('cache-control', IMMUTABLE_CACHE).send(css);
+  });
+
   fastify.get('/*', { preHandler: options.preHandler }, async (request: FastifyRequest, reply: FastifyReply) => {
     if (request.url.startsWith(ASSETS_PREFIX) || !pool.current) {
       return reply.callNotFound();
     }
     const job = { origin: originOf(fastify), request: options.requestData?.(request), url: request.url };
-    const response = await pool.current.render(job);
-    const html = pageHtml(await assets.shell(request.url), response);
+    const { response, styles } = await pool.current.render(job);
+    for (const [address, css] of Object.entries(styles)) {
+      styleFiles.set(address, css);
+    }
+    const head = `${response.head ?? ''}${stylePreloads(Object.keys(styles))}`;
+    const html = pageHtml(await assets.shell(request.url), { ...response, head });
     return reply
       .code(response.status ?? STATUS_OK)
       .headers(response.headers ?? {})

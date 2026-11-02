@@ -158,6 +158,21 @@ export const render: RenderPage = async (url, _request, server) => {
 
 `renderRoute` matches the URL in the route table with the router's own matching, creates what the router would (`<site-root slug="pancakes"><recipe-page slug="pancakes">`), lets `prepare` give the page its data, renders, and writes it. [Data and Responses](./data.md) covers `load`, the status and the title.
 
+### Stylesheets as files
+
+Each shadow root of the page carries its component's CSS by default. Given `server.styles`, it links to a file instead:
+
+```ts
+const rendered = await renderRoute(routes, url, {
+  prepare: async (page, route) => (loads(page) ? page.load(route, api) : undefined),
+  styles: server.styles,
+});
+```
+
+The plugin keeps each distinct stylesheet, serves it at `/_jadis/styles/<hash>.css`, cached a year by the browser (a change of the CSS makes a new address), and preloads the page's stylesheets in its head. The browser downloads each file once for the whole site, instead of the same CSS in every root of every page.
+
+The files stay in the server's memory as long as it runs: one per component, when each returns the same CSS for every instance ([One stylesheet for every instance](../templating/css.md#one-stylesheet-for-every-instance)). On a first visit, before the files are cached, Firefox paints the page unstyled until they arrive ([what each browser paints](../api/server.md#stylesheets-shared-between-roots-and-pages)): keep the default for pages seen once.
+
 ## The browser's entry: `src/entry-client.ts`
 
 ```ts

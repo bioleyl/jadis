@@ -29,6 +29,9 @@ await app.register(jadis, {
   rebuilt on every change. Fresh workers take the next render.
 - **Takes care of happy-dom's gaps:** a `part` token list, a `fetch` that refuses to run during a render (a
   component's data comes from the page's loader, before the render), and caches let go after each render.
+- **Serves the stylesheets as files**, when the render passes `styles: server.styles` to `renderRoute`: each shadow
+  root links to its component's stylesheet, served once at `/_jadis/styles/<hash>.css` and preloaded in the head,
+  instead of carrying its CSS.
 
 ## The server entry
 

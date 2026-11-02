@@ -15,9 +15,17 @@ async function fromApi(server) {
   return (await response.json()).message;
 }
 
+/** A page whose shadow root links to its stylesheet, as `renderRoute` writes it given `server.styles`. */
+const styledPage = (server) => ({
+  body: `<styled-card><template shadowrootmode="open"><link rel="stylesheet" href="${server.styles('p { color: red; }')}"><p>styled</p></template></styled-card>`,
+});
+
 export const render = async (url, request, server) => {
   if (url === '/boom') {
     throw new Error('the render failed');
+  }
+  if (url === '/styled') {
+    return styledPage(server);
   }
   const paragraph = document.createElement('p');
   paragraph.textContent = `${url} for ${request?.user ?? 'nobody'}`;

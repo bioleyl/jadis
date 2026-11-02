@@ -111,7 +111,7 @@ interface SerializeOptions {
 
 A component's `templateCss()` becomes one stylesheet, which every instance adopts (see [Add Style](../templating/css.md)). Inline, each shadow root of the markup still carries its own copy. With `styles`, each distinct stylesheet becomes a file every root links to: the browser downloads it once for the whole site.
 
-The server keeps each file before it sends the page that links to it, or the browser asks for a file that does not exist yet:
+With [`@jadis/fastify`](../server-rendering/fastify.md#stylesheets-as-files), pass `server.styles`: the plugin serves the files and preloads them. A server of its own keeps each file before it sends the page that links to it, or the browser asks for a file that does not exist yet:
 
 ```ts
 const files = new Map<string, string>(); // address → CSS, which the server answers before the page is sent
