@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+// Brings the packages' and the templates' dependencies to their latest versions on npm, each range keeping its prefix:
+// core and the docs pin theirs, @jadis/fastify takes `^` for what its users install with it, the templates `^` (`~`
+// for TypeScript, whose minor versions can break). The Jadis packages are left to set-version.mjs, which writes the
+// version being released, not yet on npm.
+
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +12,18 @@ import { execFileSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
+
+const PACKAGE_PATHS = [
+  'packages/core/package.json',
+  'packages/docs/package.json',
+  'packages/fastify/package.json',
+  'packages/create/templates/ts/package.json',
+  'packages/create/templates/js/package.json',
+  'packages/create/templates/ssr/package.json',
+];
+const DEPENDENCY_FIELDS = ['dependencies', 'devDependencies'];
+const OWN_SCOPE = '@jadis/';
+const RANGE_PREFIX = /^[\^~>=<]*/;
 
 // --- Fetch latest version via npm view ---
 function getLatest(pkgName) {
@@ -18,94 +35,42 @@ function getLatest(pkgName) {
   }
 }
 
-// --- Parse version string (strip ^, ~, etc.) ---
-function stripPrefix(v) {
-  return v.replace(/^[\^~>=<]+/, '');
-}
-
-// --- Update core package (locked, no prefix) ---
-const corePath = join(root, 'packages/core/package.json');
-const corePkg = JSON.parse(readFileSync(corePath, 'utf8'));
-
-console.log('\nChecking @jadis/core devDependencies...\n');
-
-let updated = false;
-for (const [pkg, current] of Object.entries(corePkg.devDependencies)) {
-  const latest = getLatest(pkg);
-  const currentClean = stripPrefix(current);
-  if (latest && latest !== currentClean) {
-    corePkg.devDependencies[pkg] = latest;
-    console.log(`  ${pkg}: ${currentClean} → ${latest}`);
-    updated = true;
-  } else {
-    console.log(`  ${pkg}: up to date`);
+/** Updates one dependency's range in place, keeping its prefix; returns whether it changed. */
+function updateDependency(dependencies, name) {
+  const current = dependencies[name];
+  const [prefix] = current.match(RANGE_PREFIX);
+  const currentVersion = current.slice(prefix.length);
+  const latest = getLatest(name);
+  if (!latest || latest === currentVersion) {
+    console.log(`  ${name}: up to date`);
+    return false;
   }
+  dependencies[name] = `${prefix}${latest}`;
+  console.log(`  ${name}: ${current} → ${prefix}${latest}`);
+  return true;
 }
 
-if (updated) {
-  writeFileSync(corePath, JSON.stringify(corePkg, null, 2) + '\n', 'utf8');
-  console.log('\n✓ Updated packages/core/package.json');
-} else {
-  console.log('\nAll core dependencies are up to date.');
-}
+function updatePackage(relPath) {
+  const path = join(root, relPath);
+  const pkg = JSON.parse(readFileSync(path, 'utf8'));
 
-// --- Update docs package (locked, no prefix) ---
-const docsPath = join(root, 'packages/docs/package.json');
-const docsPkg = JSON.parse(readFileSync(docsPath, 'utf8'));
+  console.log(`\nChecking ${relPath}...\n`);
 
-console.log(`\nChecking ${docsPath.replace(root + '/', '')} devDependencies...\n`);
-
-let updatedDocs = false;
-for (const [pkg, current] of Object.entries(docsPkg.devDependencies)) {
-  const latest = getLatest(pkg);
-  const currentClean = stripPrefix(current);
-  if (latest && latest !== currentClean) {
-    docsPkg.devDependencies[pkg] = latest;
-    console.log(`  ${pkg}: ${currentClean} → ${latest}`);
-    updatedDocs = true;
-  } else {
-    console.log(`  ${pkg}: up to date`);
+  const changes = DEPENDENCY_FIELDS.flatMap((field) =>
+    Object.keys(pkg[field] ?? {})
+      .filter((name) => !name.startsWith(OWN_SCOPE))
+      .map((name) => updateDependency(pkg[field], name))
+  );
+  if (!changes.includes(true)) {
+    console.log(`\nAll ${relPath} dependencies are up to date.`);
+    return;
   }
+  writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+  console.log(`\n✓ Updated ${relPath}`);
 }
 
-if (updatedDocs) {
-  writeFileSync(docsPath, JSON.stringify(docsPkg, null, 2) + '\n', 'utf8');
-  console.log(`\n✓ Updated packages/docs/package.json`);
-} else {
-  console.log('\nAll docs dependencies are up to date.');
-}
-
-// --- Update create templates (keep ^ prefix) ---
-const templatePaths = [
-  join(root, 'packages/create/templates/ts/package.json'),
-  join(root, 'packages/create/templates/js/package.json'),
-];
-
-for (const tPath of templatePaths) {
-  const tPkg = JSON.parse(readFileSync(tPath, 'utf8'));
-  const relPath = tPath.replace(root + '/', '');
-
-  console.log(`\nChecking ${relPath} devDependencies...\n`);
-
-  let updatedTemplate = false;
-  for (const [pkg, current] of Object.entries(tPkg.devDependencies)) {
-    const latest = getLatest(pkg);
-    const currentClean = stripPrefix(current);
-    if (latest && latest !== currentClean) {
-      tPkg.devDependencies[pkg] = `^${latest}`;
-      console.log(`  ${pkg}: ^${currentClean} → ^${latest}`);
-      updatedTemplate = true;
-    } else {
-      console.log(`  ${pkg}: up to date`);
-    }
-  }
-
-  if (updatedTemplate) {
-    writeFileSync(tPath, JSON.stringify(tPkg, null, 2) + '\n', 'utf8');
-    console.log(`\n✓ Updated ${relPath}`);
-  } else {
-    console.log(`\nAll template dependencies are up to date.`);
-  }
+for (const relPath of PACKAGE_PATHS) {
+  updatePackage(relPath);
 }
 
 console.log();
