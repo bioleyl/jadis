@@ -40,7 +40,7 @@ test('creates the TypeScript template', () => {
   assert.equal(fs.existsSync(path.join(directory, 'example', 'src/main.ts')), true);
   assert.match(
     fs.readFileSync(path.join(directory, 'example', 'package.json'), 'utf8'),
-    /"@jadis\/core": "\^1\.7\.0"/
+    /"@jadis\/core": "\^1\.8\.0"/
   );
 });
 
@@ -54,8 +54,8 @@ test('creates the server rendering template', () => {
   for (const file of ['server/main.ts', 'src/entry-server.ts', 'src/entry-client.ts', 'src/routes.ts']) {
     assert.equal(fs.existsSync(path.join(projectDirectory, file)), true, file);
   }
-  assert.match(manifest, /"@jadis\/core": "\^1\.7\.0"/);
-  assert.match(manifest, /"@jadis\/fastify": "\^1\.7\.0"/);
+  assert.match(manifest, /"@jadis\/core": "\^1\.8\.0"/);
+  assert.match(manifest, /"@jadis\/fastify": "\^1\.8\.0"/);
 });
 
 test('gives a project its .gitignore, which the published templates hold as _gitignore', () => {
