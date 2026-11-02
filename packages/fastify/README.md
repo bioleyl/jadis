@@ -20,7 +20,8 @@ await app.register(jadis, {
 
 - **Renders in worker threads.** Each worker has happy-dom as its DOM and its own copy of the app's modules.
   Fastify's thread never sees a `window`. Renders use several cores, and one request's render never shares a
-  document or a module's state with another thread's. A worker that fails is replaced.
+  document or a module's state with another thread's. A worker that fails is replaced, and every render ends: a
+  render that takes longer than `renderTimeout`, or that its worker drops, answers a 500.
 - **Fills the page's shell.** `index.html` holds `<!--app-head-->` and `<!--app-body-->`. The render's `head` and
   `body` go there, with its `status` and `headers`.
 - **In production**, it serves the build: `dist/client` (each file a route, the shell excepted) and the server entry
@@ -66,5 +67,6 @@ over instead of making the page again.
 | `dev` | `{ vite }`: the app's Vite module, for development |
 | `outDir` | `{ client, server }`, from `root`: `dist/client` and `dist/server` by default |
 | `workers` | How many renders run at once: one per core but one by default, one in development |
+| `renderTimeout` | How long a render may take, in milliseconds, before its page answers a 500: 30 seconds by default |
 | `preHandler` | The page route's `preHandler` hook |
 | `requestData` | What a render gets of the request: data only, as it crosses to a worker |

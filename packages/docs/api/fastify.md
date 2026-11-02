@@ -21,6 +21,7 @@ await app.register(jadis, {
 | `dev` | `{ vite }` | Development: the app's Vite module (`await import('vite')`). Vite serves the browser's modules with hot reload; the server entry is rebuilt on every change |
 | `outDir` | `{ client?, server? }` | The builds, from `root`: `dist/client` and `dist/server` by default |
 | `workers` | `number` | How many renders run at once, each in a worker thread: one per core but one by default, one in development |
+| `renderTimeout` | `number` | How long a render may take, in milliseconds, from the request to the worker's answer, before its page answers a 500: 30 seconds by default |
 | `preHandler` | Fastify hook | The page route's `preHandler`: a hook that sends a visitor without a session to the login page |
 | `requestData` | `(request) => RequestData` | What a render gets of the request: the cookie, the user. Data only: it crosses to a worker thread |
 
@@ -62,7 +63,7 @@ interface PageResponse {
 
 ## What the plugin takes care of
 
-- **Worker threads.** Each worker has happy-dom as its DOM and its own copy of the app's modules: Fastify's thread never sees a `window`, renders use several cores, and one request's render never shares a document or a module's state with another thread's. A worker that fails is replaced; one that cannot load the server entry fails the renders with its error.
+- **Worker threads.** Each worker has happy-dom as its DOM and its own copy of the app's modules: Fastify's thread never sees a `window`, renders use several cores, and one request's render never shares a document or a module's state with another thread's. A worker that fails is replaced; one that cannot load the server entry fails the renders with its error. Every render ends: one that takes longer than `renderTimeout`, that its worker drops, or that the server's closing (or a rebuild in development) interrupts answers a 500.
 - **The shell.** `index.html` holds `<!--app-head-->` and `<!--app-body-->`; the plugin fills them. In development, Vite transforms the shell (its client, the modules' addresses).
 - **The build's files.** In production, each file of `dist/client` is a route, the shell excepted; a path under `/assets/` that no file answers is a 404, not a page.
 - **happy-dom's gaps.** A `part` token list on elements; a global `fetch` that refuses to run during a render; the document's query caches let go after each render.

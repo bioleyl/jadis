@@ -67,6 +67,11 @@ export interface JadisPluginOptions<RequestData = unknown> {
   /** How many renders run at once, each in a worker thread. One per core but one by default, one in development. */
   workers?: number;
   /**
+   * How long a render may take, in milliseconds, from the request to the worker's answer, before its page answers a
+   * 500: 30 seconds by default.
+   */
+  renderTimeout?: number;
+  /**
    * Runs before a page renders, as the page route's `preHandler`: a hook that sends a visitor without a session to the
    * login page. The API's routes and the build's files keep their own hooks.
    */

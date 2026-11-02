@@ -25,3 +25,6 @@ export const HTML_TYPE = 'text/html; charset=utf-8';
 export const CSS_TYPE = 'text/css; charset=utf-8';
 
 export const STATUS_OK = 200;
+
+/** How long a render may take by default, in milliseconds, before its page answers a 500. */
+export const DEFAULT_RENDER_TIMEOUT_MS = 30_000;
