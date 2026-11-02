@@ -13,7 +13,7 @@ class MyComponent extends Jadis {
 }
 ```
 
-The template returned by `templateHtml()` and the styles from `templateCss()` are injected into this shadow root.
+The template returned by `templateHtml()` is injected into this shadow root, which adopts the stylesheet made from `templateCss()`: one stylesheet, shared by every instance of the component.
 
 ## Disabling Shadow DOM
 

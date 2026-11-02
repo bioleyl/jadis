@@ -63,7 +63,7 @@ export const browserApi = createApi((path) => fetch(path));
 export const serverApi = (server: ServerTools) => createApi((path) => server.fetch(`${server.origin}${path}`));
 ```
 
-`server` is what the plugin gives `render`: `server.fetch` is Node's own fetch, and `server.origin` the server's address. The global `fetch` is refused during a render: a component that fetched on its own would fetch without the visitor's credentials, from a relative address the server cannot resolve. The error says so, rather than rendering an empty page.
+`server` is what the plugin gives `render`: `server.fetch` is Node's own fetch, `server.origin` the server's address, and `server.styles` the files it serves the stylesheets from ([Stylesheets as files](./fastify.md#stylesheets-as-files)). The global `fetch` is refused during a render: a component that fetched on its own would fetch without the visitor's credentials, from a relative address the server cannot resolve. The error says so, rather than rendering an empty page.
 
 A server entry may also call the data layer directly (a database client) instead of going through HTTP: `load` only needs an `api` that answers.
 

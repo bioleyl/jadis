@@ -101,6 +101,25 @@ describe('@jadis/fastify', () => {
     assert.match(next.html, /\/after for nobody/);
   });
 
+  it('serves the stylesheets a render links to, and preloads them in its head', async () => {
+    const { html } = await page('/styled');
+    const [, address] = html.match(/<link rel="stylesheet" href="([^"]+)">/) ?? [];
+    const sheet = await fetch(`${base}${address}`);
+
+    assert.match(address, /^\/_jadis\/styles\/[\w-]{16}\.css$/);
+    assert.ok(html.includes(`<link rel="preload" as="style" href="${address}">`));
+    assert.equal(sheet.status, 200);
+    assert.match(sheet.headers.get('content-type'), /^text\/css/);
+    assert.match(sheet.headers.get('cache-control'), /immutable/);
+    assert.equal(await sheet.text(), 'p { color: red; }');
+  });
+
+  it('answers a stylesheet no render linked to with a 404', async () => {
+    const response = await fetch(`${base}/_jadis/styles/unknown.css`);
+
+    assert.equal(response.status, 404);
+  });
+
   it('renders many pages at once across its workers, each with its own request', async () => {
     const users = Array.from({ length: CONCURRENT_PAGES }, (_, index) => `user-${index}`);
     const pages = await Promise.all(users.map((user) => page('/hello', { 'x-user': user })));

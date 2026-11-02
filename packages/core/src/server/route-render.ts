@@ -3,10 +3,11 @@ import { Router } from '../router/router';
 import { renderToHtml } from './server-render';
 
 import type { ActiveRoute, RouteDefinition } from '../types/router.type';
+import type { SerializeOptions } from './html-writer';
 
 type Routes = Record<string, RouteDefinition>;
 
-export interface RouteRenderOptions {
+export interface RouteRenderOptions extends SerializeOptions {
   /**
    * Gives the route's page what it shows before the render: the app's loader, with the request's credentials. The
    * page is created, not yet connected; values set on its attribute-bound fields go out in the markup, so the page
@@ -43,7 +44,7 @@ function matcherOf(routes: Routes): Router<Routes> {
  * mount point, the browser's router takes these elements over instead of making the page again.
  * @param routes The app's routes, as given to its `Router`
  * @param path The path asked, its query included, without the base URL
- * @param options How the page gets its data before the render
+ * @param options How the page gets its data before the render, and where adopted stylesheets go
  * @returns The route and its HTML, or undefined when no route matches the path
  * @example
  * const rendered = await renderRoute(routes, request.url, {
@@ -62,5 +63,5 @@ export async function renderRoute(
   const elements = createRouteElements(route.componentSelector, route.params);
   const page = elements.at(-1) ?? elements[0];
   await options.prepare?.(page, route);
-  return { body: await renderToHtml(elements[0]), page, route };
+  return { body: await renderToHtml(elements[0], { styles: options.styles }), page, route };
 }

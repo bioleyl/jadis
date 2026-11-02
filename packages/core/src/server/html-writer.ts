@@ -1,4 +1,5 @@
 import { ATTRIBUTE_BINDINGS } from '../helpers/attribute.helper';
+import { styleSheetText } from '../helpers/style.helper';
 import { LIGHT_TEMPLATE_MARK, TEMPLATE_START } from '../helpers/template.helper';
 import {
   CHECKABLE_TYPES,
@@ -12,17 +13,33 @@ import { stateAttributes } from './state-attributes';
 
 import type { AttributeBinding, StateAttributes } from '../types/jadis.type';
 
-type NodeWriter = (node: Node, out: string[]) => void;
+type NodeWriter = (node: Node, writer: Writer) => void;
+
+/** How a server render writes what the DOM holds outside its nodes. */
+export interface SerializeOptions {
+  /**
+   * Where a shadow root's adopted stylesheet goes: the address of a file that holds `css`, written as a `<link>`, so
+   * that every root of a page, and every page, shares one cached file; or undefined, the default, to write the CSS
+   * inline as a `<style>`.
+   */
+  styles?: (css: string) => string | undefined;
+}
+
+/** The HTML written so far, and how to write it. */
+interface Writer {
+  out: string[];
+  options: SerializeOptions;
+}
 type StateHolder = Element & { [ATTRIBUTE_BINDINGS](): readonly AttributeBinding[] };
 type TemplateHolder = Element & { [TEMPLATE_START](): Node | null };
 
 const NODE_WRITERS = new Map<number, NodeWriter>([
-  [NODE_TYPE.element, (node, out) => writeElement(node as Element, out)],
-  [NODE_TYPE.text, (node, out) => writeText(node as Text, out)],
-  [NODE_TYPE.comment, (node, out) => out.push(`<!--${(node as Comment).data}-->`)],
-  [NODE_TYPE.document, (node, out) => writeChildren(node, out)],
-  [NODE_TYPE.documentType, (node, out) => out.push(`<!DOCTYPE ${(node as DocumentType).name}>`)],
-  [NODE_TYPE.fragment, (node, out) => writeChildren(node, out)],
+  [NODE_TYPE.element, (node, writer) => writeElement(node as Element, writer)],
+  [NODE_TYPE.text, (node, writer) => writeText(node as Text, writer)],
+  [NODE_TYPE.comment, (node, writer) => writer.out.push(`<!--${(node as Comment).data}-->`)],
+  [NODE_TYPE.document, (node, writer) => writeChildren(node, writer)],
+  [NODE_TYPE.documentType, (node, writer) => writer.out.push(`<!DOCTYPE ${(node as DocumentType).name}>`)],
+  [NODE_TYPE.fragment, (node, writer) => writeChildren(node, writer)],
 ]);
 
 /**
@@ -30,85 +47,99 @@ const NODE_WRITERS = new Map<number, NodeWriter>([
  * declarative shadow DOM (`<template shadowrootmode="open">`), which the browser attaches as it parses the page; the
  * values a component's attribute-bound fields were given in code, as those attributes, so its upgrade in the browser
  * starts from them; a mark before the template of a component without shadow root, which its upgrade replaces; and
- * the state of form fields (a value typed or set in code, a checked box, a chosen option) as their attributes. A
- * document or a fragment is written as its children.
+ * the state of form fields (a value typed or set in code, a checked box, a chosen option) as their attributes; and the
+ * stylesheets a shadow root adopted, which hold no node, inline or as links (`options.styles`). A document or a
+ * fragment is written as its children.
  * @param node The node to write
+ * @param options Where adopted stylesheets go
  * @returns The HTML
  * @example
  * document.body.append(card);
  * serializeHtml(card); // '<greeting-card><template shadowrootmode="open"><p>Hello</p></template></greeting-card>'
  */
-export function serializeHtml(node: Node): string {
-  const out: string[] = [];
-  writeNode(node, out);
-  return out.join('');
+export function serializeHtml(node: Node, options: SerializeOptions = {}): string {
+  const writer: Writer = { options, out: [] };
+  writeNode(node, writer);
+  return writer.out.join('');
 }
 
-function writeNode(node: Node, out: string[]): void {
-  NODE_WRITERS.get(node.nodeType)?.(node, out);
+function writeNode(node: Node, writer: Writer): void {
+  NODE_WRITERS.get(node.nodeType)?.(node, writer);
 }
 
-function writeChildren(parent: Node, out: string[]): void {
+function writeChildren(parent: Node, writer: Writer): void {
   for (const child of parent.childNodes) {
-    writeNode(child, out);
+    writeNode(child, writer);
   }
 }
 
-function writeText(text: Text, out: string[]): void {
+function writeText(text: Text, writer: Writer): void {
   const parent = text.parentNode;
   const isRaw = parent instanceof Element && isHtml(parent) && RAW_TEXT_ELEMENTS.has(parent.localName);
-  out.push(isRaw ? text.data : escapeText(text.data));
+  writer.out.push(isRaw ? text.data : escapeText(text.data));
 }
 
-function writeElement(element: Element, out: string[]): void {
+function writeElement(element: Element, writer: Writer): void {
   const name = isHtml(element) ? element.localName : element.tagName;
-  out.push(`<${name}`);
+  writer.out.push(`<${name}`);
   for (const [attribute, value] of attributesOf(element)) {
-    out.push(value === '' ? ` ${attribute}` : ` ${attribute}="${escapeAttribute(value)}"`);
+    writer.out.push(value === '' ? ` ${attribute}` : ` ${attribute}="${escapeAttribute(value)}"`);
   }
-  out.push('>');
+  writer.out.push('>');
   if (isHtml(element) && VOID_ELEMENTS.has(element.localName)) {
     return;
   }
 
-  writeShadowRoot(element, out);
-  writeContent(element, out);
-  out.push(`</${name}>`);
+  writeShadowRoot(element, writer);
+  writeContent(element, writer);
+  writer.out.push(`</${name}>`);
 }
 
-function writeShadowRoot(element: Element, out: string[]): void {
+function writeShadowRoot(element: Element, writer: Writer): void {
   const shadow = element.shadowRoot;
   if (!shadow || shadow.mode !== 'open') {
     return;
   }
 
-  out.push('<template shadowrootmode="open"');
-  out.push(shadow.delegatesFocus ? ' shadowrootdelegatesfocus' : '');
-  out.push(shadow.clonable ? ' shadowrootclonable' : '');
-  out.push(shadow.serializable ? ' shadowrootserializable' : '');
-  out.push('>');
-  writeChildren(shadow, out);
-  out.push('</template>');
+  writer.out.push('<template shadowrootmode="open"');
+  writer.out.push(shadow.delegatesFocus ? ' shadowrootdelegatesfocus' : '');
+  writer.out.push(shadow.clonable ? ' shadowrootclonable' : '');
+  writer.out.push(shadow.serializable ? ' shadowrootserializable' : '');
+  writer.out.push('>');
+  writeAdoptedStyles(shadow, writer);
+  writeChildren(shadow, writer);
+  writer.out.push('</template>');
 }
 
-function writeContent(element: Element, out: string[]): void {
+/** A shadow root's adopted stylesheets: inline, or as links to the files `options.styles` names. jsdom has none. */
+function writeAdoptedStyles(shadow: ShadowRoot, writer: Writer): void {
+  for (const sheet of shadow.adoptedStyleSheets ?? []) {
+    const css = styleSheetText(sheet);
+    const href = writer.options.styles?.(css);
+    writer.out.push(
+      href === undefined ? `<style>${css}</style>` : `<link rel="stylesheet" href="${escapeAttribute(href)}">`
+    );
+  }
+}
+
+function writeContent(element: Element, writer: Writer): void {
   if (element instanceof HTMLTemplateElement) {
-    writeChildren(element.content, out);
+    writeChildren(element.content, writer);
     return;
   }
   if (element instanceof HTMLTextAreaElement) {
-    out.push(escapeText(element.value));
+    writer.out.push(escapeText(element.value));
     return;
   }
-  writeLightChildren(element, out);
+  writeLightChildren(element, writer);
 }
 
 /** The children of an element, with a mark before the template of a component without shadow root. */
-function writeLightChildren(element: Element, out: string[]): void {
+function writeLightChildren(element: Element, writer: Writer): void {
   const templateStart = holdsTemplate(element) ? element[TEMPLATE_START]() : null;
   for (const child of element.childNodes) {
-    out.push(child === templateStart ? `<!--${LIGHT_TEMPLATE_MARK}-->` : '');
-    writeNode(child, out);
+    writer.out.push(child === templateStart ? `<!--${LIGHT_TEMPLATE_MARK}-->` : '');
+    writeNode(child, writer);
   }
 }
 

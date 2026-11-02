@@ -2,12 +2,12 @@ import { Worker } from 'node:worker_threads';
 
 import { workerExecArgv } from './worker-options.js';
 
-import type { PageResponse, RenderJob, WorkerMessage } from './types/plugin.type.js';
+import type { RenderJob, RenderResult, WorkerMessage } from './types/plugin.type.js';
 
 const WORKER_FILE = new URL('./render-worker.js', import.meta.url);
 
 interface Pending {
-  resolve: (response: PageResponse) => void;
+  resolve: (result: RenderResult) => void;
   reject: (error: Error) => void;
 }
 
@@ -36,7 +36,7 @@ export class RenderPool {
     this._workers = Array.from({ length: size }, () => this.spawn());
   }
 
-  async render(job: RenderJob): Promise<PageResponse> {
+  async render(job: RenderJob): Promise<RenderResult> {
     const target = this.leastBusy();
     await target.ready;
     this._nextId += 1;
@@ -68,7 +68,7 @@ export class RenderPool {
     const handlers: {
       [Kind in WorkerMessage['kind']]: (message: Extract<WorkerMessage, { kind: Kind }>) => void;
     } = {
-      done: ({ id, response }) => settle(id)?.resolve(response),
+      done: ({ id, response, styles }) => settle(id)?.resolve({ response, styles }),
       failed: ({ id, error }) => settle(id)?.reject(new Error(error)),
       ready: () => {
         pooled.started = true;

@@ -7,6 +7,12 @@ export interface ServerTools {
   fetch: typeof fetch;
   /** The server's own address (`http://localhost:3000`), to call its API with the request's credentials. */
   origin: string;
+  /**
+   * Gives the CSS of a stylesheet the components adopted the address of a file the plugin serves. Passed to
+   * `renderRoute` or `renderToHtml` as `styles`, each shadow root of the page links to its component's file instead
+   * of carrying its CSS: the browser downloads each file once for the whole site.
+   */
+  styles: (css: string) => string;
 }
 
 /** What a render answers for a page: its HTML, and what goes with it. */
@@ -79,10 +85,31 @@ export interface RenderJob {
   origin: string;
 }
 
+/** The stylesheets a render linked to, by address: the CSS each file holds. */
+export type StyleFiles = Record<string, string>;
+
+/** A page rendered by a worker: what the app's render answered, and the stylesheets it linked to. */
+export interface RenderResult {
+  response: PageResponse;
+  styles: StyleFiles;
+}
+
+/** The route of a stylesheet's file, named after a hash of its CSS. */
+export interface StyleRoute {
+  // biome-ignore lint/style/useNamingConvention: Fastify's own name for a route's parameters
+  Params: { file: string };
+}
+
+/** The stylesheets of one render, and the `styles` a render is given to collect them. */
+export interface StyleCollector {
+  files: StyleFiles;
+  styles: ServerTools['styles'];
+}
+
 /** What a worker sends back. */
 export type WorkerMessage =
   | { kind: 'ready' }
-  | { kind: 'done'; id: number; response: PageResponse }
+  | ({ kind: 'done'; id: number } & RenderResult)
   | { kind: 'failed'; id: number; error: string };
 
 /** Where the page's shell and the server entry come from: the build, or Vite in development. */

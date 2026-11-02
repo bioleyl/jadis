@@ -27,7 +27,11 @@ test.describe('Jadis component features', () => {
     const component = page.locator('browser-feature-test');
 
     await expect(
-      component.evaluate((element) => element.shadowRoot?.querySelector('style')?.textContent)
+      component.evaluate((element) =>
+        Array.from(element.shadowRoot?.adoptedStyleSheets ?? [], (sheet) =>
+          Array.from(sheet.cssRules, (rule) => rule.cssText).join('\n')
+        ).join('\n')
+      )
     ).resolves.toContain('display: block');
 
     await component.locator('#toggle').click();
@@ -35,6 +39,21 @@ test.describe('Jadis component features', () => {
 
     await component.locator('#toggle').click();
     await expect(component).not.toHaveClass(/active/);
+  });
+
+  test('shares one stylesheet between the instances of a component', async ({ page }) => {
+    const shared = await page.evaluate(() => {
+      const first = document.createElement('browser-feature-test');
+      const second = document.createElement('browser-feature-test');
+      document.body.append(first, second);
+      const sheets = [first, second].map((element) => element.shadowRoot?.adoptedStyleSheets ?? []);
+      const styles = [first, second].map((element) => element.shadowRoot?.querySelectorAll('style').length);
+      first.remove();
+      second.remove();
+      return { count: sheets[0].length, same: sheets[0][0] === sheets[1][0], styles };
+    });
+
+    expect(shared).toEqual({ count: 1, same: true, styles: [0, 0] });
   });
 
   test('creates and connects components with toTemplate', async ({ page }) => {

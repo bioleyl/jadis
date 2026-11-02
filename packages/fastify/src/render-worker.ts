@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { parentPort, workerData } from 'node:worker_threads';
 
 import { installServerDom, releaseDocumentCaches } from './server-dom.js';
+import { collectStyles } from './style-files.js';
 
 import type { RenderJob, RenderPage, WorkerMessage } from './types/plugin.type.js';
 
@@ -29,9 +30,10 @@ const describe = (error: unknown): string =>
   error instanceof Error ? (error.stack ?? error.message) : String(error);
 
 port.on('message', async ({ id, job }: { id: number; job: RenderJob }) => {
+  const { files, styles } = collectStyles();
   try {
-    const response = await render(job.url, job.request, { fetch: nodeFetch, origin: job.origin });
-    send({ id, kind: 'done', response });
+    const response = await render(job.url, job.request, { fetch: nodeFetch, origin: job.origin, styles });
+    send({ id, kind: 'done', response, styles: files });
   } catch (error) {
     send({ error: describe(error), id, kind: 'failed' });
   } finally {

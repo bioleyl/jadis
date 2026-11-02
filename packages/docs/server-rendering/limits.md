@@ -8,7 +8,7 @@
 
 **Interactivity comes with the code.** The components render again in the browser: server rendering gives the first paint, not an earlier interactive page. The code to load and run is the same as without it.
 
-**Styles in every shadow root.** Each instance of a component carries its `<style>` in the markup. A page of many components repeats the same CSS many times: it compresses very well (a 180 kB page of jlib components is 14 kB gzipped, 10 kB with brotli), but it is parsed each time.
+**Styles in every shadow root.** Written inline, each instance of a component carries its stylesheet in the markup. A page of many components repeats the same CSS many times: it compresses very well (a 180 kB page of jlib components is 14 kB gzipped, 10 kB with brotli), but it is parsed each time before the code loads. The `styles` option of the render writes each distinct stylesheet once, as a file every root links to ([Stylesheets shared between roots and pages](../api/server.md#stylesheets-shared-between-roots-and-pages)); once the code has loaded, the instances of a component share one stylesheet either way.
 
 **Module state is shared.** A worker renders many requests: a module's state (a translator's language, a cache) is the same for all of them. Per-request values go through `render`'s arguments.
 
