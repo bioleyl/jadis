@@ -14,7 +14,7 @@ describe('Jadis - constructor', () => {
     expect(el.shadowRoot).toBeDefined();
   });
 
-  it('should inject template HTML + CSS', async () => {
+  it('should inject template HTML + CSS, as a <style> where shadow roots cannot adopt a stylesheet', async () => {
     const el = createElement(TestComponent, {}, document.body);
 
     const style = el.shadowRoot?.querySelector('style');

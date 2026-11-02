@@ -1,7 +1,9 @@
 import { serializeHtml } from './html-writer';
 import { SETTLE_TASKS } from './server-constants';
 
-export interface RenderOptions {
+import type { SerializeOptions } from './html-writer';
+
+export interface RenderOptions extends SerializeOptions {
   /**
    * Resolves once the content is ready to be written, called after the components' `onConnect`: a page that loads
    * its data once connected gives a promise of that data here.
@@ -28,7 +30,7 @@ async function settle(): Promise<void> {
  * runs; when a component upgrades, its shadow root is emptied and rendered again, so the first paint needs no
  * JavaScript and the component then behaves as usual.
  * @param content A node (a component written in JSX) or HTML text
- * @param options When the content is ready to be written
+ * @param options When the content is ready to be written, and where adopted stylesheets go
  * @returns The HTML of the content
  * @example
  * const html = await renderToHtml(<ProductPage product={product} />);
@@ -45,7 +47,7 @@ export async function renderToHtml(content: Node | string, options: RenderOption
   try {
     await settle();
     await options.ready?.();
-    return Array.from(container.childNodes, serializeHtml).join('');
+    return Array.from(container.childNodes, (node) => serializeHtml(node, options)).join('');
   } finally {
     container.remove();
   }

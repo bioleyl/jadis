@@ -4,6 +4,7 @@ import { assert } from './helpers/assert.helper';
 import { ATTRIBUTE_BINDINGS, defaultAttributeParser } from './helpers/attribute.helper';
 import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
+import { canAdoptStyleSheets, holdsStyleSheets, sharedStyleSheet } from './helpers/style.helper';
 import { removeServerTemplate, TEMPLATE_START } from './helpers/template.helper';
 
 import type { Bus } from './helpers/bus.helper';
@@ -122,7 +123,10 @@ export abstract class Jadis extends HTMLElement {
   /**
    * The CSS styles for the component.
    * This method should return a string containing the CSS styles for the component.
-   * It can be overridden to provide custom styles.
+   * It can be overridden to provide custom styles. The CSS becomes one stylesheet, made once and adopted by the
+   * shadow root of every instance: return the same text for each, and give an instance its own values through custom
+   * properties. Without a shadow root, where roots cannot adopt a stylesheet (jsdom), or when `templateHtml()` holds a
+   * `<style>` or a linked stylesheet of its own, a `<style>` before the template holds the CSS.
    * @returns The CSS styles as a string
    * @example
    * ```typescript
@@ -607,18 +611,36 @@ export abstract class Jadis extends HTMLElement {
     const fragment = document.createDocumentFragment();
 
     const templateCss = this.templateCss?.();
+    const htmlContent = this.templateHtml?.();
     if (templateCss) {
-      const style = document.createElement('style');
-      style.textContent = templateCss;
-      fragment.appendChild(style);
+      this.applyStyles(templateCss, fragment, htmlContent);
     }
 
-    const htmlContent = this.templateHtml?.();
     if (htmlContent) {
       fragment.appendChild(htmlContent);
     }
 
     return fragment;
+  }
+
+  /**
+   * A shadow root adopts the stylesheet the instances of the component share. A `<style>` at the start of the template
+   * holds the CSS instead without a shadow root, where roots cannot adopt one (jsdom), and when the template brings
+   * stylesheets of its own: a root applies its adopted stylesheets after those, and the template's rules must keep
+   * coming after the component's CSS.
+   */
+  private applyStyles(css: string, fragment: DocumentFragment, template: Node | undefined): void {
+    if (this.shadowRoot && canAdoptStyleSheets(this.shadowRoot) && !holdsStyleSheets(template)) {
+      // First, so that the stylesheets the root adopted before its render still come after the component's CSS.
+      this.shadowRoot.adoptedStyleSheets = [
+        sharedStyleSheet(this.constructor, css),
+        ...this.shadowRoot.adoptedStyleSheets,
+      ];
+      return;
+    }
+    const style = document.createElement('style');
+    style.textContent = css;
+    fragment.appendChild(style);
   }
 
   private static get typeOfClass(): JadisConstructor {

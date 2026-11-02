@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Jadis } from '../../base-component';
 import { defineRouteGroup, defineRoutes } from '../../helpers/router.helper';
+import { sharedStyleSheet } from '../../helpers/style.helper';
 import { serializeHtml } from '../../server/html-writer';
 import { renderRoute } from '../../server/route-render';
 import { renderToHtml } from '../../server/server-render';
@@ -351,5 +352,47 @@ describe('renderRoute', () => {
 
   it('gives nothing for a path no route matches', async () => {
     expect(await renderRoute(routes, '/nowhere/at/all')).toBeUndefined();
+  });
+});
+
+describe('adopted stylesheets on the server', () => {
+  const css = ':host { display: block; }';
+  class Styled {}
+
+  // A root that adopted a stylesheet, as happy-dom and browsers have them; jsdom's roots cannot.
+  const hostWithSheet = (): HTMLElement => {
+    const host = document.createElement('div');
+    const root = host.attachShadow({ mode: 'open' });
+    Object.defineProperty(root, 'adoptedStyleSheets', {
+      configurable: true,
+      value: [sharedStyleSheet(Styled, css)],
+    });
+    root.append(Object.assign(document.createElement('p'), { textContent: 'Hi' }));
+    return host;
+  };
+
+  it("writes a shadow root's adopted stylesheet inline by default", () => {
+    expect(serializeHtml(hostWithSheet())).toBe(
+      `<div><template shadowrootmode="open"><style>${css}</style><p>Hi</p></template></div>`
+    );
+  });
+
+  it('writes it as a link to the file the options name', () => {
+    const files: string[] = [];
+    const html = serializeHtml(hostWithSheet(), {
+      styles: (text) => {
+        files.push(text);
+        return '/assets/styles/a1.css';
+      },
+    });
+
+    expect(html).toBe(
+      '<div><template shadowrootmode="open"><link rel="stylesheet" href="/assets/styles/a1.css"><p>Hi</p></template></div>'
+    );
+    expect(files).toEqual([css]);
+  });
+
+  it('writes it inline when the options name no file for it', () => {
+    expect(serializeHtml(hostWithSheet(), { styles: () => undefined })).toContain(`<style>${css}</style>`);
   });
 });
