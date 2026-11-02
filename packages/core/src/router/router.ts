@@ -38,6 +38,15 @@ const defaultOptions: RouterConfig = {
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
+/** A parameter as a URL writes it, decoded: one with a malformed escape (`%E0`) is given as it is written. */
+function decodeParam(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 /** Whether a page's answer to leaving is still to come: it asks the person first. */
 const isPending = (answer: LeaveAnswer | undefined): answer is Promise<boolean> => answer instanceof Promise;
 
@@ -564,14 +573,16 @@ export class Router<T extends Record<string, RouteDefinition>> {
     return { componentSelector, name, params: this.getRouteParameters({ ...route, urlPath }), path, query };
   }
 
+  /** The path of a route, each parameter encoded: a `/`, a `?` or a `#` in a value stays in the value. */
   private buildPath(routePath: string, params: Record<string, string> = {}): string {
     const path = this.extractPathParams(routePath).reduce((acc, param) => {
       assert(Object.hasOwn(params, param), `Missing parameter "${param}" for path: ${routePath}`);
-      return acc.replace(`${ROUTER_PARAMETER_PREFIX}${param}`, params[param]);
+      return acc.replace(`${ROUTER_PARAMETER_PREFIX}${param}`, encodeURIComponent(params[param]));
     }, routePath);
     return normalizePath(path);
   }
 
+  /** The parameters of a path, decoded: `/user/J%C3%BCrg` gives `Jürg`. */
   private getRouteParameters(matchedRoute: MatchedRoute): Record<string, string> {
     const { urlPath, regexp, path } = matchedRoute;
 
@@ -579,7 +590,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
     assert(match, `No match found for path: ${urlPath}`);
 
     return this.extractPathParams(path).reduce<Record<string, string>>((acc, param, index) => {
-      acc[param] = match[index + 1];
+      acc[param] = decodeParam(match[index + 1]);
       return acc;
     }, {});
   }

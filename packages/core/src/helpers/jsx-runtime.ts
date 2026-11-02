@@ -212,12 +212,18 @@ function createJsxNode(
     return fragment;
   }
 
+  const el = createWithProps(type, props);
+  appendChild(el, content);
+  return el;
+}
+
+/** Creates an element or a component with its props: JSX and mounted VNodes share it, so they apply props alike. */
+function createWithProps(type: string | JadisConstructor, props: JadisProps | null | undefined): HTMLElement {
   const isComponent = typeof type !== 'string';
   const el: HTMLElement | Jadis = isComponent ? new type() : document.createElement(type);
   if (props) {
     applyProps(el, props, isComponent);
   }
-  appendChild(el, content);
   return el;
 }
 
@@ -382,49 +388,9 @@ export function mountVNodes(parent: AppendableElement, children: Array<Node | VN
   }
 }
 
+/** Mounts a VNode: its element made with its props as JSX makes it, then its children. */
 function mountSingleVNode(parent: AppendableElement, vnode: VNode): void {
-  const { tag, props, children } = vnode;
-
-  if (typeof tag === 'string') {
-    // Intrinsic element
-    const el = document.createElement(tag);
-
-    for (const [key, value] of Object.entries(props)) {
-      if (value == null) {
-        continue;
-      }
-      if (isListenerProp(key, value)) {
-        el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
-      } else if (key.includes('-') || key.startsWith('data-') || key.startsWith('aria-')) {
-        el.setAttribute(key, String(value));
-      } else {
-        (el as unknown as Record<string, unknown>)[key] = value;
-      }
-    }
-
-    mountVNodes(el, children);
-    parent.appendChild(el);
-  } else {
-    // Jadis component
-    const instance = new tag();
-    for (const [key, value] of Object.entries(props)) {
-      if (value == null) {
-        continue;
-      }
-      if (key === 'className') {
-        instance.setAttribute('class', toClassName(String(value)));
-      } else if (key === 'class') {
-        const propsObj = props as Record<string, unknown>;
-        if (!propsObj.className) {
-          instance.setAttribute('class', toClassName(String(value)));
-        }
-      } else if (typeof value === 'function' && key.startsWith('on')) {
-        instance.addEventListener(componentEventName(key), detailListener(value as Callable));
-      } else if (!RESERVED_PROPS.has(key)) {
-        (instance as unknown as Record<string, unknown>)[key] = value;
-      }
-    }
-    mountVNodes(instance, children);
-    parent.appendChild(instance);
-  }
+  const el = createWithProps(vnode.tag, vnode.props as JadisProps);
+  mountVNodes(el, vnode.children);
+  parent.appendChild(el);
 }

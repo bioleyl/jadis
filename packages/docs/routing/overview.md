@@ -59,6 +59,8 @@ const routes = defineRoutes({
 
 Navigating to `/user/42` renders `<user-page id="42"></user-page>`.
 
+Parameters are encoded in the URL and decoded when it is read: `router.goto('user', { id: 'Jürg' })` writes `/user/J%C3%BCrg`, and the page gets `id="Jürg"`, as `router.match('/user/J%C3%BCrg')` and a link to that address do. Give `goto` the value itself, not an encoded one.
+
 ## Query
 
 The query is not part of matching: `/user/42?tab=posts` (or `/#/user/42?tab=posts` in hash mode) matches `/user/:id`. Read it from `router.currentRoute.query`, a `URLSearchParams`, or from the route a [routed page](./routed-pages.md) receives.

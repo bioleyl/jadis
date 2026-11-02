@@ -68,6 +68,39 @@ describe('Router navigation', () => {
     it('finds nothing for a path no route matches', () => {
       expect(start().match('/invoices/7')).toBeUndefined();
     });
+
+    it("decodes a path's parameters", () => {
+      expect(start().match('/orders/J%C3%BCrg%20%2F%2042')?.params).toEqual({ id: 'Jürg / 42' });
+    });
+
+    it('gives a parameter with a malformed escape as it is written', () => {
+      expect(start().match('/orders/100%')?.params).toEqual({ id: '100%' });
+    });
+  });
+
+  describe('parameters', () => {
+    it('encodes the parameters it writes in the URL, and gives them back decoded', () => {
+      const router = start();
+
+      router.goto('order', { id: 'a/b c?d#e' });
+
+      expect(window.location.pathname).toBe('/orders/a%2Fb%20c%3Fd%23e');
+      expect(window.location.search).toBe('');
+      expect(router.currentRoute.params).toEqual({ id: 'a/b c?d#e' });
+      expect(container.querySelector(OrderView.selector)?.getAttribute('id')).toBe('a/b c?d#e');
+    });
+
+    it('reads the parameters of the URL it starts on, decoded', () => {
+      window.history.replaceState({}, '', '/orders/J%C3%BCrg');
+
+      expect(start().currentRoute.params).toEqual({ id: 'Jürg' });
+    });
+
+    it('reads the parameters of the hash it starts on, decoded', () => {
+      window.history.replaceState({}, '', '/#/orders/J%C3%BCrg');
+
+      expect(start({ mode: 'hash' }).currentRoute.params).toEqual({ id: 'Jürg' });
+    });
   });
 
   describe('gotoPath', () => {
