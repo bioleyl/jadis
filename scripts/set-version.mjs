@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import readline from 'node:readline';
@@ -87,7 +87,7 @@ const updates = [
   },
   // Claude plugin - Claude Code gives its users a new copy only when its version changes
   {
-    path: 'plugins/jadis/.claude-plugin/plugin.json',
+    path: 'plugins/jadis-official/.claude-plugin/plugin.json',
     update: (data) => {
       data.version = newCoreVersion;
       return data;
@@ -117,9 +117,18 @@ const escapeDots = (version) => version.replaceAll('.', '\\.');
 const cdnReference = (version) => `@jadis/core@${version}`;
 const testedDependency = (version) => `\\^${escapeDots(version)}`;
 
+// The skill's files that name the version: SKILL.md, which says which release it describes, and the references'
+// CDN addresses.
+const skillFolder = 'plugins/jadis-official/skills/jadis-official';
+const skillUpdates = readdirSync(join(root, skillFolder), { recursive: true })
+  .filter((path) => path.endsWith('.md'))
+  .map((path) => join(skillFolder, path))
+  .filter((path) => readFileSync(join(root, path), 'utf8').includes(cdnReference(coreVersion)))
+  .map((path) => ({ path, reference: cdnReference }));
+
 const textUpdates = [
   { path: 'packages/docs/guides/installation.md', reference: cdnReference },
-  { path: 'plugins/jadis/skills/jadis/SKILL.md', reference: cdnReference },
+  ...skillUpdates,
   { path: 'packages/create/test/index.test.js', reference: testedDependency },
 ];
 

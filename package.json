@@ -18,7 +18,7 @@
     "publish:create": "npm publish --workspace=packages/create --access public",
     "publish:fastify": "npm publish --workspace=packages/fastify --access public",
     "test": "npm run test --workspaces --if-present",
-    "test:plugin": "node --test tests/claude-plugin.test.mjs",
+    "test:skill": "node --test tests/skill.test.mjs",
     "verify:packages": "node scripts/verify-packages.mjs",
     "check": "biome check",
     "prepare": "husky",

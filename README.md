@@ -12,14 +12,28 @@ Looking for ready-made components? [jlib](https://github.com/bioleyl/jlib) (`@sy
 
 ## Vibe coding
 
-The repository is also a Claude Code plugin marketplace: the `jadis` plugin teaches Claude the lifecycle, JSX, state, communication, routing, translations and tests, and where the API of the installed version is. In Claude Code:
+`jadis-official` is the official skill for coding agents: it teaches *Jadis* from zero (the model, components, templates, communication, routing, translations, server rendering and tests), the mistakes that React, Vue and Lit habits cause, and a self-check to run before delivering. Install it in one of three ways:
 
-```
-/plugin marketplace add bioleyl/jadis
-/plugin install jadis@jadis
-```
+- **Claude Code**, as a plugin that updates with each release:
 
-How a project's repository gives it to everyone working on it, and how to ask Claude well: the documentation's [Vibe Coding](https://bioleyl.github.io/jadis/guides/vibe-coding) page. The plugin is in [plugins/](plugins); its skill, [SKILL.md](plugins/jadis/skills/jadis/SKILL.md), also works as the instructions of other assistants.
+  ```
+  /plugin marketplace add bioleyl/jadis
+  /plugin install jadis-official@jadis
+  ```
+
+- **Any agent**, with [skills.sh](https://skills.sh) (Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode…):
+
+  ```bash
+  npx skills add bioleyl/jadis
+  ```
+
+- **Any agent**, with the install script, which asks where: `~/.agents/skills`, `~/.claude/skills`, the project's `.agents/skills` or `.claude/skills`, or another folder (`--help` for the options):
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/bioleyl/jadis/main/install-skill.sh | sh
+  ```
+
+The skill is [SKILL.md](plugins/jadis-official/skills/jadis-official/SKILL.md) and its [references](plugins/jadis-official/skills/jadis-official/references). How a team shares it and how to ask well: the documentation's [Vibe Coding](https://bioleyl.github.io/jadis/guides/vibe-coding) page.
 
 ## Why *Jadis*?
 
