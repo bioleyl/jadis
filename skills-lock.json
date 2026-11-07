@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "jadis-official": {
+      "source": "bioleyl/jadis",
+      "sourceType": "github",
+      "skillPath": "plugins/jadis-official/skills/jadis-official/SKILL.md",
+      "computedHash": "acd51e7ba5e362a755cd34c54b8ec2a2c1259573304676e6f0bba3fae2c18982"
+    },
+    "swcode-base": {
+      "source": "bioleyl/swcode",
+      "sourceType": "github",
+      "skillPath": "plugins/swcode-base/skills/swcode-base/SKILL.md",
+      "computedHash": "db5f93b6cba8849c2e2d9ebd68cf7b5a9137649866719547d53c61a6f1139af0"
+    }
+  }
+}
