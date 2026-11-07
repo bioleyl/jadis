@@ -11,10 +11,9 @@ describe('Jadis — lifecycle', () => {
     const spy = vi.fn();
     el.onConnect = spy;
     document.body.appendChild(el);
+    await new Promise((resolve) => setTimeout(resolve));
 
-    setTimeout(() => {
-      expect(spy).toHaveBeenCalled();
-    }, 0);
+    expect(spy).toHaveBeenCalledOnce();
   });
 
   it('aborts the kill signal and calls onDisconnect once removed, a microtask later', async () => {
@@ -87,6 +86,37 @@ describe('Jadis — lifecycle', () => {
 
       expect(signal.aborted).toBe(true);
       expect(el['killSignal'].aborted).toBe(false);
+    });
+
+    it('runs onConnect once, for the connection that is current, when removed and put back before it ran', async () => {
+      const [first] = lists();
+      const el = createElement(TestComponent);
+      const onConnect = vi.fn(() => el['on'](el, 'click', onClick));
+      const onClick = vi.fn();
+      el.onConnect = onConnect;
+      first.append(el);
+
+      el.remove();
+      await Promise.resolve();
+      first.append(el);
+      await new Promise((resolve) => setTimeout(resolve));
+      el.click();
+
+      expect(onConnect).toHaveBeenCalledOnce();
+      expect(onClick).toHaveBeenCalledOnce();
+    });
+
+    it('skips onConnect when removed before it ran', async () => {
+      const [first] = lists();
+      const el = createElement(TestComponent);
+      const onConnect = vi.fn();
+      el.onConnect = onConnect;
+      first.append(el);
+
+      el.remove();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(onConnect).not.toHaveBeenCalled();
     });
 
     it('ends removed when it is put back, then removed again, in the same task', async () => {

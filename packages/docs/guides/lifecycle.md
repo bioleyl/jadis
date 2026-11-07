@@ -69,7 +69,7 @@ Constructor → connectedCallback (render template) → onConnect → ... → di
 
 1. **Constructor** — Runs when the class is instantiated. Shadow DOM is attached here if `useShadowDom` is `true`.
 2. **`connectedCallback()`** — Runs when the component is connected. On the first connection it renders `templateHtml()` and `templateCss()`; the rendered DOM is reused on reconnection. It then applies the `useChange` values set before the connection, then the attribute callbacks, all synchronously, before scheduling `onConnect()`.
-3. **`onConnect()`** — Runs asynchronously after the component is connected. It runs again after each reconnection.
+3. **`onConnect()`** — Runs asynchronously after the component is connected. It runs again after each reconnection. A component removed before that task gets no `onConnect()` for that connection: the next connection schedules its own.
 4. **Active** — The component is in the DOM and responding to user interaction.
 5. **`disconnectedCallback()` / `onDisconnect()`** — A microtask after the component is removed, `killSignal` is aborted and `onDisconnect()` runs, unless the component was put back meanwhile: it was moved.
 

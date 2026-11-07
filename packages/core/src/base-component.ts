@@ -208,7 +208,13 @@ export abstract class Jadis extends HTMLElement {
     this.runConnectActions();
     this.runConnectionActions();
 
+    // A removal before this task ends the connection it was scheduled for: the next connection schedules its own
+    // onConnect, and running this one too would wire its listeners twice, on the next connection's kill signal.
+    const connection = this._abortController.signal;
     setTimeout(() => {
+      if (connection.aborted) {
+        return;
+      }
       this.onConnect?.();
     });
   }
