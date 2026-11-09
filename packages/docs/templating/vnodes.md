@@ -27,7 +27,7 @@ createVNode(
 | Parameter | Type | Description |
 |---|---|---|
 | `tag` | `string \| JadisConstructor` | A tag name, or a component class |
-| `options.props` | `Record<string, unknown>` | Properties and attributes to set when the node is mounted |
+| `options.props` | `Record<string, unknown>` | Set when the node is mounted, as JSX sets them: `class`, `attrs`, a hyphenated name as an attribute, `on…` as a listener, any other as a property (a `useChange` field through its handler) |
 | `options.children` | `unknown[]` | Nested VNodes, strings, numbers and DOM nodes. `null`, `undefined` and booleans are dropped |
 
 ## `createComponentVNode()`

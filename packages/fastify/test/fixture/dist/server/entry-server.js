@@ -27,6 +27,12 @@ export const render = async (url, request, server) => {
   if (url === '/styled') {
     return styledPage(server);
   }
+  if (url === '/never') {
+    return new Promise(() => undefined);
+  }
+  if (url === '/exit') {
+    process.exit(1);
+  }
   const paragraph = document.createElement('p');
   paragraph.textContent = `${url} for ${request?.user ?? 'nobody'}`;
   paragraph.part.toggle('greeting', true);

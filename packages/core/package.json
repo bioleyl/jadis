@@ -84,7 +84,7 @@
     "prepack": "npm run clean && npm run build",
     "test": "vitest",
     "test:coverage": "vitest run --coverage --reporter=html",
-    "test:types": "tsc --project tests/types/tsconfig.json"
+    "test:types": "npm run build:types && tsc --project tests/types/tsconfig.json"
   },
   "sideEffects": false,
   "type": "module",

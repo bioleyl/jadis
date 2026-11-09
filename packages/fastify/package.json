@@ -7,8 +7,7 @@
     "@fastify/middie": "^9.3.6",
     "@fastify/static": "^10.1.8",
     "@happy-dom/global-registrator": "^21.0.4",
-    "fastify-plugin": "^6.0.1",
-    "happy-dom": "^21.0.4"
+    "fastify-plugin": "^6.0.1"
   },
   "description": "Renders the pages of a Jadis app on a Fastify server: declarative shadow DOM from the app's own routes, rendered in worker threads, taken over in the browser.",
   "devDependencies": {

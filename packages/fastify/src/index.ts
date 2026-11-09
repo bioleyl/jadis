@@ -9,6 +9,7 @@ import {
   ASSETS_PREFIX,
   CSS_TYPE,
   DEFAULT_OUT_DIR,
+  DEFAULT_RENDER_TIMEOUT_MS,
   HTML_TYPE,
   IMMUTABLE_CACHE,
   STATUS_OK,
@@ -68,10 +69,12 @@ function originOf(fastify: FastifyInstance): string {
 async function jadis(fastify: FastifyInstance, options: JadisPluginOptions): Promise<void> {
   const outDir = { ...DEFAULT_OUT_DIR, ...options.outDir };
   const workers = options.workers ?? (options.dev ? DEV_WORKERS : defaultWorkers());
+  const renderTimeout = options.renderTimeout ?? DEFAULT_RENDER_TIMEOUT_MS;
   const pool: { current?: RenderPool } = {};
+  // The renders the previous workers still hold fail: a page asked while the app was rebuilt answers a 500.
   const restart = (entryFile: string): void => {
     const previous = pool.current;
-    pool.current = new RenderPool(entryFile, workers);
+    pool.current = new RenderPool(entryFile, workers, renderTimeout);
     void previous?.close();
   };
   const assets: PageAssets = options.dev
