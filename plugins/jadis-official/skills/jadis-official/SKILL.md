@@ -8,7 +8,7 @@ license: MIT
 
 Jadis is a small TypeScript library over native Web Components. A component is a custom element: a class that extends `Jadis`. It draws its template **once**, as real DOM, then **you** change the nodes that need it when its state changes. There is no virtual DOM, no re-render, no reactive system and no framework runtime. Never bring React, Vue, Lit, a virtual DOM or a state library on top of it.
 
-Written for `@jadis/core@1.8.0`. Documentation: <https://bioleyl.github.io/jadis/> · Source: <https://github.com/bioleyl/jadis>
+Written for `@jadis/core@1.8.1`. Documentation: <https://bioleyl.github.io/jadis/> · Source: <https://github.com/bioleyl/jadis>
 
 ## How to use this skill
 

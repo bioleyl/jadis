@@ -1,6 +1,6 @@
 {
   "name": "jadis-official",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "The official Jadis skill: build web apps on native Web Components with @jadis/core, from setup to server rendering, with the mistakes to avoid and a self-check before delivering.",
   "author": {
     "name": "Leal Bioley"

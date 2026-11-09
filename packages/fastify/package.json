@@ -40,7 +40,7 @@
   "main": "./dist/index.js",
   "name": "@jadis/fastify",
   "peerDependencies": {
-    "@jadis/core": "^1.8.0",
+    "@jadis/core": "^1.8.1",
     "fastify": "^5.0.0"
   },
   "repository": {
@@ -55,5 +55,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "1.8.0"
+  "version": "1.8.1"
 }

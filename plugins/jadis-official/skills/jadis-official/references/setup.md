@@ -101,7 +101,7 @@ Browsers run neither JSX nor TypeScript. Two ways to skip the bundler:
 
 ```html
 <script type="importmap">
-  { "imports": { "@jadis/core": "https://esm.sh/@jadis/core@1.8.0" } }
+  { "imports": { "@jadis/core": "https://esm.sh/@jadis/core@1.8.1" } }
 </script>
 <script type="module" src="/src/main.js"></script>
 ```
@@ -132,8 +132,8 @@ The output imports `@jadis/core/jsx-runtime`, so the import map needs both entri
 ```json
 {
   "imports": {
-    "@jadis/core": "https://esm.sh/@jadis/core@1.8.0",
-    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.8.0/jsx-runtime"
+    "@jadis/core": "https://esm.sh/@jadis/core@1.8.1",
+    "@jadis/core/jsx-runtime": "https://esm.sh/@jadis/core@1.8.1/jsx-runtime"
   }
 }
 ```

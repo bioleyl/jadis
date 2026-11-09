@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@jadis/core": "^1.8.0",
-    "@jadis/fastify": "^1.8.0",
+    "@jadis/core": "^1.8.1",
+    "@jadis/fastify": "^1.8.1",
     "fastify": "^5.12.7"
   },
   "devDependencies": {
