@@ -1,7 +1,7 @@
 {
-  "name": "jadis",
+  "name": "jadis-official",
   "version": "1.8.1",
-  "description": "Build apps with Jadis: setup with or without a bundler, the lifecycle, JSX, state, communication, routing, translations, tests, and where the installed version's API is.",
+  "description": "The official Jadis skill: build web apps on native Web Components with @jadis/core, from setup to server rendering, with the mistakes to avoid and a self-check before delivering.",
   "author": {
     "name": "Leal Bioley"
   },
