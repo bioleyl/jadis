@@ -73,7 +73,7 @@ templateHtml(): Node {
 ```
 
 - **By class** (`<OrderRow />`): the element is created with `new OrderRow()`, so the class must be registered first (`register()` at the bottom of its module, and the module imported). Its public fields type the props, `useChange` fields by their value's type.
-- **Events as props**: a component whose public `readonly events = this.useEvents<{ select: Order }>()` accepts `onSelect`, typed with the payload; `valueChange` gives `onValueChange`. The handler gets the payload (the event's `detail`) directly. The listener lasts as long as the element, which suits rows a parent creates.
+- **Events as props**: a component whose public `readonly events = this.useEvents<{ select: Order }>()` accepts `onSelect`, typed with the payload; `valueChange` gives `onValueChange`. The handler gets the payload (the event's `detail`) directly, then the event (`event.preventDefault()` cancels it). It hears the component's own events, not one that bubbles up from an element slotted into it; a DOM handler in lower case (`onclick`, `oncontextmenu`) hears every event of that name and gets the event. The listener lasts as long as the element, which suits rows a parent creates.
 - **By tag** (`<order-row />`): props are not checked. The tag's module must still be imported somewhere before the template runs, or the properties land on a plain element and are hidden once it upgrades.
 - Children written between a component's tags become its light-DOM children, shown by its `<slot>`s.
 

@@ -222,6 +222,36 @@ describe('Jadis — useChange bound to an attribute', () => {
     expect(el.label.get()).toBe('initial');
   });
 
+  it('keeps a value set since, when the component is taken out and put back', async () => {
+    document.body.innerHTML = '<x-bound label="from HTML"></x-bound>';
+    const el = document.querySelector('x-bound') as BoundComponent;
+    el.label.set('typed since');
+
+    el.remove();
+    await Promise.resolve();
+    document.body.append(el);
+
+    expect(el.label.get()).toBe('typed since');
+    expect(el.shadowRoot?.querySelector('span')?.textContent).toBe('typed since');
+  });
+
+  it('takes an attribute changed, or removed, while the component was away', async () => {
+    document.body.innerHTML = '<x-bound label="from HTML"></x-bound>';
+    const el = document.querySelector('x-bound') as BoundComponent;
+
+    el.remove();
+    await Promise.resolve();
+    el.setAttribute('label', 'changed away');
+    document.body.append(el);
+    expect(el.label.get()).toBe('changed away');
+
+    el.remove();
+    await Promise.resolve();
+    el.removeAttribute('label');
+    document.body.append(el);
+    expect(el.label.get()).toBe('initial');
+  });
+
   it('reads a boolean as present or absent', async () => {
     const el = createElement(BoundComponent, { attrs: { disabled: '' } }, document.body);
     expect(el.disabled.get()).toBe(true);

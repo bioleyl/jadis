@@ -56,7 +56,7 @@ Every public export of `@jadis/core`, at the version [SKILL.md](../SKILL.md) nam
 | `options.immediate?: boolean` | Calls back with the initial value at the connection |
 | `options.attribute?: string`, `options.parse?: (value: string \| null) => T` | Sets the value from that attribute (turns `immediate` on); default parsers for string, number, boolean |
 | `useAttributes({ name: (value, oldValue) => void }): Record<name, string \| null>` | Callbacks on attribute changes, and getters |
-| `useEvents<{ name: Payload }>(): { emit(name, payload); register(name, (payload) => void) }` | Typed custom events on the element; `register` uses the element's kill signal. JavaScript: `useEvents({ name: String })` |
+| `useEvents<{ name: Payload }>(): { emit(name, payload): boolean; register(name, (payload, event) => void) }` | Typed custom events on the element, its own only; `emit` returns `false` when a listener called `event.preventDefault()`; `register` uses the element's kill signal. JavaScript: `useEvents({ name: String })` |
 | `on(target: HTMLElement \| Window \| Document, event, callback): void` | A listener removed at disconnection |
 | `onBus(bus, event, callback): void` | A bus listener removed at disconnection |
 | `useTranslation(translator, draw: () => void): void` | Calls `draw` at each connection and at each language change; call once, in the constructor |

@@ -4,6 +4,7 @@ import { assert } from './helpers/assert.helper';
 import { ATTRIBUTE_BINDINGS, defaultAttributeParser } from './helpers/attribute.helper';
 import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
+import { isOwnEvent } from './helpers/event.helper';
 import { canAdoptStyleSheets, holdsStyleSheets, sharedStyleSheet } from './helpers/style.helper';
 import { removeServerTemplate, TEMPLATE_START } from './helpers/template.helper';
 
@@ -87,6 +88,13 @@ export abstract class Jadis extends HTMLElement {
   private _abortController = new AbortController();
   private _attributeObserver: MutationObserver | null = null;
   private _attributesInitialized = false;
+  /**
+   * The value each observed attribute had when its callback last ran. A component that comes back hears only of the
+   * attributes that changed while it was away: an unchanged one would give its first value again, over what was set
+   * since (the text typed in a field whose `value` the page wrote). Made at the first attribute told: most
+   * components of a page observe none, and there may be thousands of them.
+   */
+  private _toldAttributes: Map<string, string | null> | undefined;
   private _isConnected = false;
   private _hasRendered = false;
   /** The first node of the template, for a component without shadow root: where a server render marks it. */
@@ -261,6 +269,8 @@ export abstract class Jadis extends HTMLElement {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    this._toldAttributes ??= new Map();
+    this._toldAttributes.set(name, newValue);
     this.attributesCallback[name]?.(newValue, oldValue);
   }
 
@@ -290,10 +300,19 @@ export abstract class Jadis extends HTMLElement {
 
     this._attributesInitialized = true;
     for (const name of Object.keys(this.attributesCallback)) {
-      const value = this.getAttribute(name);
-      if (value !== null) {
-        this.attributeChangedCallback(name, null, value);
-      }
+      this.tellAttributeIfChanged(name);
+    }
+  }
+
+  /**
+   * Runs an attribute's callback at a connection when its value is not the one the callback last heard: at the first
+   * connection for an attribute that is there, at a return for one set, changed or removed meanwhile.
+   */
+  private tellAttributeIfChanged(name: string): void {
+    const value = this.getAttribute(name);
+    const told = this._toldAttributes?.get(name) ?? null;
+    if (value !== told) {
+      this.attributeChangedCallback(name, told, value);
     }
   }
 
@@ -418,6 +437,9 @@ export abstract class Jadis extends HTMLElement {
   /**
    * Creates a handler for events on the component.
    * This handler allows registering and emitting events in a type-safe manner.
+   * A callback gets the event's detail, then the event itself, which it can cancel (`event.preventDefault()`):
+   * `emit` then returns false, for the component to leave out what it was about to do. It hears the component's own
+   * events only, not an event of the same name that bubbles up from an element slotted into the component.
    * @template EventTypes The type of events to handle
    * @returns An object with methods to register and emit events
    * @example
@@ -441,13 +463,17 @@ export abstract class Jadis extends HTMLElement {
   ): Readonly<UseEventsHandler<SchemaToEvents<TSchema>>>;
   protected useEvents(_schema?: EventSchema): Readonly<UseEventsHandler<Record<string, unknown>>> {
     const events = {
-      emit: (eventName: string, detail?: unknown): void => {
-        this.dispatchEvent(new CustomEvent(eventName, { detail }));
-      },
+      // Cancelable: a listener that calls `event.preventDefault()` makes emit answer false.
+      emit: (eventName: string, detail?: unknown): boolean =>
+        this.dispatchEvent(new CustomEvent(eventName, { cancelable: true, detail })),
 
       // biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
       register: (eventName: string, callback: (...args: any[]) => void): void => {
-        const listener = ({ detail }: CustomEventInit<Event>) => callback(detail);
+        const listener = (event: Event): void => {
+          if (isOwnEvent(event, this)) {
+            callback(event.detail, event);
+          }
+        };
 
         this.addEventListener(eventName, listener, { signal: this.killSignal });
       },

@@ -56,9 +56,9 @@ const events = this.useEvents({someEvent: String});
   - `register` is used to subscribe to an event
   - `emit` is used to emit an event.
 
-`emit` dispatches a `CustomEvent` on the child itself. It does not bubble or cross shadow roots, so only listeners registered on that element receive it; the callback receives the payload directly. `register` binds the listener to the **child's** `killSignal`: register it in the parent's `onConnect()`, which runs again after each reconnection.
+`emit` dispatches a `CustomEvent` on the child itself. It does not bubble or cross shadow roots, so only listeners registered on that element receive it; the callback receives the payload directly, then the event, which it can cancel with `event.preventDefault()` (`emit` then returns `false`: see [useEvents](../state/use-events.md#cancelling-an-event)). `register` binds the listener to the **child's** `killSignal`: register it in the parent's `onConnect()`, which runs again after each reconnection.
 
-In JSX, a child written by its class takes each of its events as a prop: `onSomeEvent` for `someEvent`, the callback receiving the payload. Such a listener lasts as long as the child element, so it suits children a parent creates itself, such as the rows of a list:
+In JSX, a child written by its class takes each of its events as a prop: `onSomeEvent` for `someEvent`, the callback receiving the payload, then the event. Such a listener lasts as long as the child element, so it suits children a parent creates itself, such as the rows of a list:
 
 ```tsx
 const rows = items.map((item) => <ChildComponent label={item.label} onSomeEvent={(data) => this.open(item, data)} />);

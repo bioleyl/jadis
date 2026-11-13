@@ -78,11 +78,61 @@
         }
       }
 
+      // Tabs whose own event is named as a field's native one, with a field slotted into them.
+      class BrowserTabs extends Jadis {
+        static selector = 'browser-tabs';
+
+        events = this.useEvents({ change: String });
+
+        templateHtml() {
+          return jsx('div', {}, [
+            jsx('button', { attrs: { id: 'second', type: 'button' } }, 'Second'),
+            jsx('button', { attrs: { id: 'locked', type: 'button' } }, 'Locked'),
+            jsx('output', { attrs: { id: 'current' } }, 'first'),
+            jsx('slot'),
+          ]);
+        }
+
+        onConnect() {
+          for (const name of ['second', 'locked']) {
+            this.on(this.getElement(`#${name}`), 'click', () => this.open(name));
+          }
+        }
+
+        // Asks first: a listener that cancels the event keeps the tab where it is.
+        open(name) {
+          if (this.events.emit('change', name)) {
+            this.getElement('#current').textContent = name;
+          }
+        }
+      }
+
       BrowserChild.register();
       BrowserParent.register();
       BrowserBusReceiver.register();
       BrowserBusEmitter.register();
+      BrowserTabs.register();
       window.__busMessages = [];
+      window.__tabChanges = [];
+      window.__contextButtons = [];
+      document.body.append(
+        jsx(
+          BrowserTabs,
+          {
+            onChange: (name, event) => {
+              window.__tabChanges.push(name);
+              if (name === 'locked') {
+                event.preventDefault();
+              }
+            },
+            oncontextmenu: (event) => {
+              window.__contextButtons.push(event.button);
+              event.preventDefault();
+            },
+          },
+          jsx('select', { attrs: { id: 'slotted' } }, [jsx('option', {}, 'one'), jsx('option', {}, 'two')])
+        )
+      );
       window.__communicationReady = true;
     </script>
   </body>

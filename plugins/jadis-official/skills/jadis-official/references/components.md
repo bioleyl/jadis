@@ -49,7 +49,7 @@ OrderCard.register();                           // defines the custom element; s
 | First connection | `templateCss()`, `templateHtml()`, appended once; attribute callbacks for the attributes present; queued `useChange` changes, once per field with the latest value; `useTranslation` callbacks | Refs, in every callback |
 | A task later | `onConnect()`, unless the component was removed meanwhile | Everything; add listeners here |
 | Removal from the document | A microtask later: the kill signal aborts (listeners added with `this.on`, `events.register`, `onBus`, or the signal go), then `onDisconnect()` | The DOM is kept as it is |
-| Put back later | No template drawn; attribute callbacks again for the attributes present; changes queued while away; `useTranslation` callbacks; a task later, `onConnect()` again | The same nodes as before |
+| Put back later | No template drawn; attribute callbacks for the attributes that changed while away; changes queued while away; `useTranslation` callbacks; a task later, `onConnect()` again | The same nodes as before |
 | Moved (`append`, `insertBefore`, `replaceChildren`, `moveBefore` of an element in the page) | Nothing | Listeners, signal and state as they were |
 
 Consequences:
@@ -138,7 +138,7 @@ this._attributes.variant; // string | null, read now with getAttribute()
 ```
 
 - No `static observedAttributes` and no list of names: `useAttributes` observes the attributes it has callbacks for.
-- Callbacks run at the connection for the attributes present, then on each change while connected, a microtask after it (changes are batched by a `MutationObserver`), and again at each reconnection.
+- Callbacks run at the connection for the attributes present, then on each change while connected, a microtask after it (changes are batched by a `MutationObserver`). At a reconnection they run only for the attributes set, changed or removed while the component was away: an unchanged attribute does not put its value back over what was set since.
 - Prefer a bound `useChange` field over a `useAttributes` entry that only calls `.set()`.
 
 ## Which tool for which data

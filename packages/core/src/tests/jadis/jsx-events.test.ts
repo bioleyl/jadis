@@ -28,7 +28,37 @@ describe('JSX event props', () => {
 
     row.events.emit('change', 'done');
 
-    expect(onChange).toHaveBeenCalledExactlyOnceWith('done');
+    expect(onChange).toHaveBeenCalledExactlyOnceWith('done', expect.any(CustomEvent));
+  });
+
+  it('give the event after the detail, for the handler to cancel it', () => {
+    const row = jsx(EventRow, {
+      onChange: (_text: string, event: CustomEvent) => event.preventDefault(),
+    }) as EventRow;
+
+    expect(row.events.emit('change', 'done')).toBe(false);
+  });
+
+  it('leave out an event of the same name that bubbles up from an element slotted into the component', () => {
+    const onChange = vi.fn();
+    const row = jsx(EventRow, { onChange }) as EventRow;
+    const field = document.createElement('select');
+    row.append(field);
+
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('give a handler written as the DOM writes it, in lower case, every event of that name', () => {
+    const onclick = vi.fn();
+    const row = jsx(EventRow, { onclick }) as EventRow;
+    const child = document.createElement('button');
+    row.append(child);
+
+    child.click();
+
+    expect(onclick.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent);
   });
 
   it('keep the case of an event named in camel case', () => {
@@ -37,7 +67,7 @@ describe('JSX event props', () => {
 
     row.events.emit('valueChange', 3);
 
-    expect(onValueChange).toHaveBeenCalledExactlyOnceWith(3);
+    expect(onValueChange).toHaveBeenCalledExactlyOnceWith(3, expect.any(CustomEvent));
   });
 
   it('listen to an event named with a hyphen, instead of writing an attribute', () => {
@@ -46,7 +76,7 @@ describe('JSX event props', () => {
 
     row.events.emit('play-source', 'clip.mp3');
 
-    expect(onPlaySource).toHaveBeenCalledExactlyOnceWith('clip.mp3');
+    expect(onPlaySource).toHaveBeenCalledExactlyOnceWith('clip.mp3', expect.any(CustomEvent));
     expect(row.hasAttribute('on-play-source')).toBe(false);
   });
 
@@ -79,7 +109,7 @@ describe('JSX event props', () => {
     expect(row.getAttribute('on-call')).toBe('yes');
   });
 
-  it('give any other event of a component as it is', () => {
+  it('give any other event dispatched on a component as it is', () => {
     const onClick = vi.fn();
     const row = jsx(EventRow, { onClick } as never) as EventRow;
 

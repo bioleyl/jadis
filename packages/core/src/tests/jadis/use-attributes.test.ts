@@ -41,4 +41,23 @@ describe('Jadis — useAttributes', () => {
     expect(callback).toHaveBeenLastCalledWith('after-connect', 'before-connect');
     el.remove();
   });
+
+  it('tells a component that comes back only of the attributes that changed while it was away', async () => {
+    const el = createElement(TestComponent);
+    const kept = vi.fn();
+    const changed = vi.fn();
+    el['useAttributes']({ changed, kept });
+    el.setAttribute('kept', 'same');
+    el.setAttribute('changed', 'before');
+    document.body.appendChild(el);
+
+    el.remove();
+    await Promise.resolve();
+    el.setAttribute('changed', 'after');
+    document.body.appendChild(el);
+
+    expect(kept).toHaveBeenCalledExactlyOnceWith('same', null);
+    expect(changed).toHaveBeenLastCalledWith('after', 'before');
+    el.remove();
+  });
 });

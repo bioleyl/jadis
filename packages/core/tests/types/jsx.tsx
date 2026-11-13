@@ -37,6 +37,16 @@ class TodoRow extends Jadis {
     Archived: undefined;
     'play-source': string;
   }>();
+
+  /** `register` gives the event after its detail, and `emit` says whether a listener cancelled it. */
+  cancelsItsOwnChange(): boolean {
+    this.events.register('change', (text, event) => {
+      const typed: CustomEvent<string> = event;
+      typed.preventDefault();
+      return text.toUpperCase();
+    });
+    return this.events.emit('change', 'done');
+  }
 }
 
 // A component's own events are props: `onDelete` for `delete`, its handler given the event's detail.
@@ -47,6 +57,17 @@ const rowWithEvents = (
       const typed: string = text;
       return typed;
     }}
+  />
+);
+// The handler gets the event after the detail, to cancel it; a DOM handler, in lower case, gets the DOM's event.
+const rowWithCancelledEvent = (
+  <TodoRow
+    onChange={(text, event) => {
+      const typed: CustomEvent<string> = event;
+      typed.preventDefault();
+      return text;
+    }}
+    oncontextmenu={(event) => event.button}
   />
 );
 // @ts-expect-error The detail of change is a string.
@@ -71,6 +92,7 @@ void validComponentWithChildren;
 void invalidComponent;
 void invalidButton;
 void rowWithEvents;
+void rowWithCancelledEvent;
 void rowWithWrongDetail;
 void rowWithUnknownEvent;
 void rowWithCamelCaseEvent;

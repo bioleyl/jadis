@@ -37,3 +37,7 @@ Each package is published by its own workflow (`release-core`, `release-fastify`
 `npm run test:skill`, `npm run test:types --workspace=@jadis/core`, `npm run test:browser --workspace=@jadis/core`
 (Chromium: `npx playwright install chromium` once), the templates' builds, `npm run verify:packages` (each export
 alone leaves the others out of an app's bundle) and `npm run docs:build`.
+
+To try a change of the core in an app before a release (jlib, in the folder beside this one): `npm run build` in
+`packages/core`, copy its `dist/` over `node_modules/@jadis/core/dist` of the app, run the app's own checks and
+browser tests, then put the app's folder back (`npm ci`, or a copy kept aside).

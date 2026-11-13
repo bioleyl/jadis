@@ -19,7 +19,41 @@ describe('Jadis — useEvents', () => {
     events.emit('ping', 'hello');
     events.emit('pong');
 
-    expect(spyPing).toHaveBeenCalledWith('hello');
-    expect(spyPong).toHaveBeenCalledWith(null);
+    expect(spyPing).toHaveBeenCalledWith('hello', expect.any(CustomEvent));
+    expect(spyPong).toHaveBeenCalledWith(null, expect.any(CustomEvent));
+  });
+
+  it('gives a callback the event after its detail, and says when it was cancelled', () => {
+    const el = createElement(TestComponent);
+    document.body.appendChild(el);
+    const events = el['useEvents']<{ close: string }>();
+
+    expect(events.emit('close', 'not heard')).toBe(true);
+
+    events.register('close', (reason, event) => {
+      if (reason === 'unsaved') {
+        event.preventDefault();
+      }
+    });
+
+    expect(events.emit('close', 'saved')).toBe(true);
+    expect(events.emit('close', 'unsaved')).toBe(false);
+  });
+
+  it("hears the component's own events only, not one of the same name that bubbles up from a child", () => {
+    const el = createElement(TestComponent);
+    const field = document.createElement('select');
+    el.append(field);
+    document.body.appendChild(el);
+    const events = el['useEvents']<{ change: string }>();
+    const heard = vi.fn();
+    events.register('change', heard);
+
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+    field.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: 'theirs' }));
+    expect(heard).not.toHaveBeenCalled();
+
+    events.emit('change', 'ours');
+    expect(heard).toHaveBeenCalledExactlyOnceWith('ours', expect.any(CustomEvent));
   });
 });

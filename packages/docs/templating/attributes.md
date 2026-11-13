@@ -20,7 +20,7 @@ Attribute changes are observed automatically when the component is connected:
 
 - When the component connects, each callback runs **synchronously** for its attribute if the attribute is set (with `oldValue` `null`). There is no need to apply the value again in `onConnect()`.
 - Later changes are delivered **asynchronously**, batched by a `MutationObserver`.
-- The callbacks run again on each reconnection, for the attributes currently set.
+- When the component is removed and put back, a callback runs only for an attribute that was set, changed or removed while it was away (with the value it last heard as `oldValue`). An attribute that did not change says nothing: a `useChange` field bound to it keeps the value set since, such as the text typed in a field whose `value` the page wrote.
 
 Do not declare `static observedAttributes`: the callbacks object is the list of observed attributes.
 
