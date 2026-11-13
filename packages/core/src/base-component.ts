@@ -4,6 +4,7 @@ import { assert } from './helpers/assert.helper';
 import { ATTRIBUTE_BINDINGS, defaultAttributeParser } from './helpers/attribute.helper';
 import { ChangeHandler } from './helpers/change.helper';
 import { createElement } from './helpers/element.helper';
+import { isOwnEvent } from './helpers/event.helper';
 import { canAdoptStyleSheets, holdsStyleSheets, sharedStyleSheet } from './helpers/style.helper';
 import { removeServerTemplate, TEMPLATE_START } from './helpers/template.helper';
 
@@ -434,6 +435,9 @@ export abstract class Jadis extends HTMLElement {
   /**
    * Creates a handler for events on the component.
    * This handler allows registering and emitting events in a type-safe manner.
+   * A callback gets the event's detail, then the event itself, which it can cancel (`event.preventDefault()`):
+   * `emit` then returns false, for the component to leave out what it was about to do. It hears the component's own
+   * events only, not an event of the same name that bubbles up from an element slotted into the component.
    * @template EventTypes The type of events to handle
    * @returns An object with methods to register and emit events
    * @example
@@ -457,13 +461,17 @@ export abstract class Jadis extends HTMLElement {
   ): Readonly<UseEventsHandler<SchemaToEvents<TSchema>>>;
   protected useEvents(_schema?: EventSchema): Readonly<UseEventsHandler<Record<string, unknown>>> {
     const events = {
-      emit: (eventName: string, detail?: unknown): void => {
-        this.dispatchEvent(new CustomEvent(eventName, { detail }));
-      },
+      // Cancelable: a listener that calls `event.preventDefault()` makes emit answer false.
+      emit: (eventName: string, detail?: unknown): boolean =>
+        this.dispatchEvent(new CustomEvent(eventName, { cancelable: true, detail })),
 
       // biome-ignore lint/suspicious/noExplicitAny: Needed for event listener callback
       register: (eventName: string, callback: (...args: any[]) => void): void => {
-        const listener = ({ detail }: CustomEventInit<Event>) => callback(detail);
+        const listener = (event: Event): void => {
+          if (isOwnEvent(event, this)) {
+            callback(event.detail, event);
+          }
+        };
 
         this.addEventListener(eventName, listener, { signal: this.killSignal });
       },

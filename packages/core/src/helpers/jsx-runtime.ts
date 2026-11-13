@@ -1,4 +1,5 @@
 import { applyElementAttributes, applyElementProperty, setElementAttribute } from './element.helper';
+import { isOwnEvent } from './event.helper';
 
 import type { Jadis, JadisConstructor } from '../base-component';
 import type { AppendableElement, Callable, ComponentEventProps, SafeElementValues } from './type.helper';
@@ -183,13 +184,29 @@ declare global {
 // ---------------------------------------------------------------------------
 
 /**
- * The listener of a component's `on…` prop: a component's own events (`useEvents`) are custom events, whose handler
- * gets the detail, as `events.register` gives it; any other event is given as it is.
+ * The listener of a component's `on…` prop. It hears what the component itself does: one of its own events
+ * (`useEvents`), whose handler gets the detail then the event, as `events.register` gives them; or another event
+ * dispatched on it (a click in its own content), given as it is. An event that bubbles up from an element slotted
+ * into the component is that element's, even under the name of one of the component's events.
  * It is added without the kill signal, so it lasts as long as the element.
  */
-function detailListener(handler: Callable): EventListener {
-  return (event) => handler(event instanceof CustomEvent ? event.detail : event);
+function componentListener(component: HTMLElement, handler: Callable): EventListener {
+  return (event) => {
+    if (isOwnEvent(event, component)) {
+      handler(event.detail, event);
+      return;
+    }
+    if (event.target === component) {
+      handler(event);
+    }
+  };
 }
+
+/**
+ * Whether an `on…` prop is one of the DOM's own handlers, written as the element's property is, all in lower case
+ * (`onclick`): on a component too, it hears every event of that name, as the property would.
+ */
+const isDomHandlerProp = (prop: string): boolean => prop === prop.toLowerCase();
 
 /**
  * The event a component's `on…` prop listens to: its name with the first letter in lower case, the rest as written,
@@ -267,8 +284,8 @@ function applyProp(el: HTMLElement, key: string, value: unknown, isComponent: bo
     return;
   }
   if (isListenerProp(key, value)) {
-    if (isComponent) {
-      el.addEventListener(componentEventName(key), detailListener(value as Callable));
+    if (isComponent && !isDomHandlerProp(key)) {
+      el.addEventListener(componentEventName(key), componentListener(el, value as Callable));
     } else {
       el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
     }

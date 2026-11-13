@@ -99,7 +99,9 @@ onConnect(): void {
 }
 ```
 
-- `emit(name, payload)` dispatches a `CustomEvent` on the child itself. It neither bubbles nor crosses shadow roots: only listeners on that element hear it. The listener receives the payload directly, not the event.
+- `emit(name, payload)` dispatches a `CustomEvent` on the child itself. It neither bubbles nor crosses shadow roots: only listeners on that element hear it. The listener receives the payload directly, then the event: `(order, event) => …`.
+- A listener cancels an event with `event.preventDefault()`, and `emit` then returns `false`. A child that emits before it acts lets its parent refuse: `if (!this.events.emit('close', reason)) return;`.
+- `register` and an `on…` prop hear the child's own events only. An event of the same name that bubbles up from an element slotted into the child (the native `change` of a `<select>` in a tab's panel, for a tab bar that emits `change`) does not call back. For those, and for native events with their `button` and `preventDefault()`, write the DOM's handler in lower case (`oncontextmenu={(event) => …}`) or use `this.on(child, 'contextmenu', …)`.
 - `register()` binds the listener to the **child's** kill signal: it goes when the child disconnects. A parent that registers in its own `onConnect` registers again each time it connects; a child the parent removes and puts back loses the listener, so a JSX prop suits it better.
 - An event emitted before anyone listens is lost. A child that emits from a callback at its connection is heard only through a JSX prop.
 - Name events in camel case starting with a lowercase letter: `valueChange` gives `onValueChange`. A name starting with a capital has no JSX prop.

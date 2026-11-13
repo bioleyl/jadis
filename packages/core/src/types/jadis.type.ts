@@ -21,32 +21,35 @@ export type UseRefsRef = {
 
 export type UseEventsHandler<EventTypes extends Record<string, unknown>> = {
   /**
-   * Registers a callback for a specific event.
+   * Registers a callback for a specific event. It hears the component's own events only: an event of the same name
+   * that bubbles up from an element slotted into the component is not one.
    * @param event The event key to listen for
-   * @param callback The callback to invoke when the event is emitted
+   * @param callback The callback to invoke when the event is emitted: it gets the detail, then the event itself,
+   * which it can cancel with `event.preventDefault()`
    */
   register<EventName extends KeysWithoutUndefined<EventTypes>>(
     eventName: EventName,
-    callback: (detail: EventTypes[EventName]) => void
+    callback: (detail: EventTypes[EventName], event: CustomEvent<EventTypes[EventName]>) => void
   ): void;
   register<EventName extends KeysWithUndefined<EventTypes>>(
     eventName: EventName,
-    callback: (detail?: EventTypes[EventName]) => void
+    callback: (detail: EventTypes[EventName] | undefined, event: CustomEvent<EventTypes[EventName]>) => void
   ): void;
 
   /**
    * Emits an event on the component.
    * @param event The event key to emit
    * @param params The parameters to include with the event
+   * @returns False when a listener cancelled the event (`event.preventDefault()`), true otherwise
    */
   emit<EventName extends KeysWithoutUndefined<EventTypes>>(
     eventName: EventName,
     detail: EventTypes[EventName]
-  ): void;
+  ): boolean;
   emit<EventName extends KeysWithUndefined<EventTypes>>(
     eventName: EventName,
     detail?: EventTypes[EventName]
-  ): void;
+  ): boolean;
 };
 
 export type UseChangeHandler<StateType> = Readonly<{
