@@ -91,9 +91,10 @@ export abstract class Jadis extends HTMLElement {
   /**
    * The value each observed attribute had when its callback last ran. A component that comes back hears only of the
    * attributes that changed while it was away: an unchanged one would give its first value again, over what was set
-   * since (the text typed in a field whose `value` the page wrote).
+   * since (the text typed in a field whose `value` the page wrote). Made at the first attribute told: most
+   * components of a page observe none, and there may be thousands of them.
    */
-  private readonly _toldAttributes = new Map<string, string | null>();
+  private _toldAttributes: Map<string, string | null> | undefined;
   private _isConnected = false;
   private _hasRendered = false;
   /** The first node of the template, for a component without shadow root: where a server render marks it. */
@@ -268,6 +269,7 @@ export abstract class Jadis extends HTMLElement {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    this._toldAttributes ??= new Map();
     this._toldAttributes.set(name, newValue);
     this.attributesCallback[name]?.(newValue, oldValue);
   }
@@ -308,7 +310,7 @@ export abstract class Jadis extends HTMLElement {
    */
   private tellAttributeIfChanged(name: string): void {
     const value = this.getAttribute(name);
-    const told = this._toldAttributes.get(name) ?? null;
+    const told = this._toldAttributes?.get(name) ?? null;
     if (value !== told) {
       this.attributeChangedCallback(name, told, value);
     }
