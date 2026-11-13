@@ -87,6 +87,12 @@ export abstract class Jadis extends HTMLElement {
   private _abortController = new AbortController();
   private _attributeObserver: MutationObserver | null = null;
   private _attributesInitialized = false;
+  /**
+   * The value each observed attribute had when its callback last ran. A component that comes back hears only of the
+   * attributes that changed while it was away: an unchanged one would give its first value again, over what was set
+   * since (the text typed in a field whose `value` the page wrote).
+   */
+  private readonly _toldAttributes = new Map<string, string | null>();
   private _isConnected = false;
   private _hasRendered = false;
   /** The first node of the template, for a component without shadow root: where a server render marks it. */
@@ -261,6 +267,7 @@ export abstract class Jadis extends HTMLElement {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    this._toldAttributes.set(name, newValue);
     this.attributesCallback[name]?.(newValue, oldValue);
   }
 
@@ -290,10 +297,19 @@ export abstract class Jadis extends HTMLElement {
 
     this._attributesInitialized = true;
     for (const name of Object.keys(this.attributesCallback)) {
-      const value = this.getAttribute(name);
-      if (value !== null) {
-        this.attributeChangedCallback(name, null, value);
-      }
+      this.tellAttributeIfChanged(name);
+    }
+  }
+
+  /**
+   * Runs an attribute's callback at a connection when its value is not the one the callback last heard: at the first
+   * connection for an attribute that is there, at a return for one set, changed or removed meanwhile.
+   */
+  private tellAttributeIfChanged(name: string): void {
+    const value = this.getAttribute(name);
+    const told = this._toldAttributes.get(name) ?? null;
+    if (value !== told) {
+      this.attributeChangedCallback(name, told, value);
     }
   }
 

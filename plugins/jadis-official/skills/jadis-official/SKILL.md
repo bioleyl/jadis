@@ -123,7 +123,7 @@ A parent uses it by its class in JSX (importing the class registers it), or by i
 2. **First connection** (`appendChild` into the document): `templateCss()` and `templateHtml()` run **once**. Then, in the same call: attribute callbacks, then `useChange` values set before the connection (once each, with the latest value) and `immediate` ones, then `useTranslation` callbacks. All before the browser paints.
 3. **`onConnect()`** runs **a task later** (`setTimeout`), not during `appendChild`; not at all if the component was removed meanwhile.
 4. **Removal**: a microtask later, the kill signal aborts, which removes every listener added with `this.on()`, `events.register()` and `onBus()`, then `onDisconnect()` runs. The DOM is **kept**.
-5. **Putting it back**: the same DOM is reused, the template is **not** drawn again, attribute callbacks run again for the attributes present, and `onConnect()` runs again.
+5. **Putting it back**: the same DOM is reused, the template is **not** drawn again, attribute callbacks run only for the attributes that changed while it was away (a value set since is kept), and `onConnect()` runs again.
 6. **A move** (`append`, `insertBefore`, `replaceChildren`, `moveBefore` of an element already in the page) is not a removal: nothing runs, listeners stay.
 
 So: `onConnect()` must be safe to run again, guard one-time work by what the DOM already holds, pass `this.killSignal` to `fetch`, and check `this.isConnected` after an `await`. Details: [references/components.md](references/components.md#lifecycle-in-detail).
