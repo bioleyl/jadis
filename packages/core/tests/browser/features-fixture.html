@@ -9,8 +9,8 @@
         createComponentVNode,
         css,
         Fragment,
+        h,
         Jadis,
-        jsx,
         mountVNodes,
       } from '/packages/core/dist/esm/index.mjs';
 
@@ -30,13 +30,13 @@
         events = this.useEvents();
 
         templateHtml() {
-          return jsx(Fragment, {
+          return h(Fragment, {
             children: [
-              jsx('output', { attrs: { id: 'count' } }),
-              jsx('button', { attrs: { id: 'increment', type: 'button' } }, 'Increment'),
-              jsx('button', { attrs: { id: 'toggle', type: 'button' } }, 'Toggle'),
-              jsx('output', { attrs: { id: 'event' } }),
-              jsx('slot', { attrs: { name: 'footer' } }),
+              h('output', { attrs: { id: 'count' } }),
+              h('button', { attrs: { id: 'increment', type: 'button' } }, 'Increment'),
+              h('button', { attrs: { id: 'toggle', type: 'button' } }, 'Toggle'),
+              h('output', { attrs: { id: 'event' } }),
+              h('slot', { attrs: { name: 'footer' } }),
             ],
           });
         }

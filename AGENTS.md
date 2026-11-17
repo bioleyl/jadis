@@ -11,7 +11,9 @@ An npm workspace (`packages/*` and the starter's templates):
   `src/helpers/` (attributes, buses, changes, elements, styles, templates, the JSX runtime…), `src/router/`,
   `src/translation/`, `src/server/` (server rendering), types in `src/types/`. Unit tests in `src/tests/` (Vitest),
   browser tests in `tests/browser/` (Playwright), type tests in `tests/types/` (`npm run test:types`: checked by
-  `tsc`, never run). Built with Rolldown, its declarations by `tsc`.
+  `tsc`, never run). Built with Rolldown, its declarations by `tsc`. `jsx` and `jsxs` are the automatic runtime's,
+  called as `jsx(type, props, key)` with the children in `props.children`: code calling the factory by hand (the
+  browser fixtures) uses `h(type, props, ...children)`.
 - `packages/fastify`: `@jadis/fastify`, which renders a Jadis app's pages on Fastify. Versioned with the core, whose
   server rendering it hosts.
 - `packages/create`: `@jadis/create`, the project starter, its templates in `templates/` (`ts`, `js`, `ssr`,

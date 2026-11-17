@@ -5,7 +5,7 @@
     <browser-bus-receiver></browser-bus-receiver>
     <browser-bus-emitter></browser-bus-emitter>
     <script type="module">
-      import { Bus, Jadis, jsx } from '/packages/core/dist/esm/index.mjs';
+      import { Bus, h, Jadis } from '/packages/core/dist/esm/index.mjs';
 
       const messageBus = new Bus({ message: String });
 
@@ -15,7 +15,7 @@
         events = this.useEvents({ message: String });
 
         templateHtml() {
-          return jsx('button', { attrs: { id: 'send', type: 'button' } }, 'Send message');
+          return h('button', { attrs: { id: 'send', type: 'button' } }, 'Send message');
         }
 
         onConnect() {
@@ -34,9 +34,9 @@
         }));
 
         templateHtml() {
-          return jsx('div', {}, [
-            jsx('browser-child'),
-            jsx('output', { attrs: { id: 'message' } }),
+          return h('div', {}, [
+            h('browser-child'),
+            h('output', { attrs: { id: 'message' } }),
           ]);
         }
 
@@ -53,7 +53,7 @@
         refs = this.useRefs((ref) => ({ message: ref('#message') }));
 
         templateHtml() {
-          return jsx('output', { attrs: { id: 'message' } });
+          return h('output', { attrs: { id: 'message' } });
         }
 
         onConnect() {
@@ -68,7 +68,7 @@
         static selector = 'browser-bus-emitter';
 
         templateHtml() {
-          return jsx('button', { attrs: { id: 'send', type: 'button' } }, 'Send bus message');
+          return h('button', { attrs: { id: 'send', type: 'button' } }, 'Send bus message');
         }
 
         onConnect() {
@@ -85,11 +85,11 @@
         events = this.useEvents({ change: String });
 
         templateHtml() {
-          return jsx('div', {}, [
-            jsx('button', { attrs: { id: 'second', type: 'button' } }, 'Second'),
-            jsx('button', { attrs: { id: 'locked', type: 'button' } }, 'Locked'),
-            jsx('output', { attrs: { id: 'current' } }, 'first'),
-            jsx('slot'),
+          return h('div', {}, [
+            h('button', { attrs: { id: 'second', type: 'button' } }, 'Second'),
+            h('button', { attrs: { id: 'locked', type: 'button' } }, 'Locked'),
+            h('output', { attrs: { id: 'current' } }, 'first'),
+            h('slot'),
           ]);
         }
 
@@ -116,7 +116,7 @@
       window.__tabChanges = [];
       window.__contextButtons = [];
       document.body.append(
-        jsx(
+        h(
           BrowserTabs,
           {
             onChange: (name, event) => {
@@ -130,7 +130,7 @@
               event.preventDefault();
             },
           },
-          jsx('select', { attrs: { id: 'slotted' } }, [jsx('option', {}, 'one'), jsx('option', {}, 'two')])
+          h('select', { attrs: { id: 'slotted' } }, [h('option', {}, 'one'), h('option', {}, 'two')])
         )
       );
       window.__communicationReady = true;

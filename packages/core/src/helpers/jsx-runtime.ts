@@ -219,10 +219,8 @@ function componentEventName(prop: string): string {
 function createJsxNode(
   type: string | JadisConstructor,
   props: JadisProps | null | undefined,
-  children: unknown[]
+  content: unknown
 ): Node {
-  const content = children.length > 0 ? children : props?.children;
-
   if (Object.is(type, Fragment)) {
     const fragment = document.createDocumentFragment();
     appendChild(fragment, content);
@@ -299,40 +297,40 @@ function applyProp(el: HTMLElement, key: string, value: unknown, isComponent: bo
 }
 
 /**
- * Factory function used by classic JSX mode (`jsxFactory: "jsx"`).
- * Called as `jsx(type, props, ...children)` for each JSX element.
+ * The automatic runtime's factory (`"jsx": "react-jsx"`), which the compiler calls as `jsx(type, props, key)` for each
+ * JSX element: the children come in `props.children`, and the third argument is the element's `key`, never a child.
+ * The key is left out, as it is in `props`: nothing reconciles lists.
  */
-export function jsx(type: string, props: JadisProps | null | undefined, ...children: unknown[]): Node;
+export function jsx(type: string, props: JadisProps | null | undefined, key?: string | number): Node;
 export function jsx<T extends Jadis>(
   type: JadisConstructor<T>,
   props: (ComponentProps<T> & CommonJsxAttributes) | null | undefined,
-  ...children: unknown[]
+  key?: string | number
 ): Node;
-export function jsx(
-  type: string | JadisConstructor,
-  props: JadisProps | null | undefined,
-  ...children: unknown[]
-): Node {
-  return createJsxNode(type, props, children);
+export function jsx(type: string | JadisConstructor, props: JadisProps | null | undefined): Node {
+  return createJsxNode(type, props, props?.children);
 }
 
-/** Alias used by TS JSX transforms that emit `jsxs` for grouped children. */
-export function jsxs(type: string, props: JadisProps | null | undefined, ...children: unknown[]): Node;
-export function jsxs<T extends Jadis>(
+/** The automatic runtime's factory for an element with several static children: the same call as `jsx`. */
+export const jsxs: typeof jsx = jsx;
+
+/**
+ * The factory to call by hand, and the classic runtime's (`"jsxFactory": "h"`): `h(type, props, ...children)`. The
+ * children given after the props win over `props.children`.
+ */
+export function h(type: string, props: JadisProps | null | undefined, ...children: unknown[]): Node;
+export function h<T extends Jadis>(
   type: JadisConstructor<T>,
   props: (ComponentProps<T> & CommonJsxAttributes) | null | undefined,
   ...children: unknown[]
 ): Node;
-export function jsxs(
+export function h(
   type: string | JadisConstructor,
   props: JadisProps | null | undefined,
   ...children: unknown[]
 ): Node {
-  return createJsxNode(type, props, children);
+  return createJsxNode(type, props, children.length > 0 ? children : props?.children);
 }
-
-/** Optional alias for users who prefer `jsxFactory: "h"`. */
-export const h: typeof jsx = jsx;
 
 // ---------------------------------------------------------------------------
 // VNode creation

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { Jadis } from '../../base-component';
-import { createComponentVNode, createVNode, Fragment, jsx, jsxs, mountVNodes } from '../../helpers/jsx-runtime';
+import { createComponentVNode, createVNode, Fragment, h, jsx, jsxs, mountVNodes } from '../../helpers/jsx-runtime';
 
 import type { VNode } from '../../helpers/jsx-runtime';
 
@@ -36,17 +36,39 @@ describe('JSX runtime', () => {
       expect(html(node)).toBe('<ul><li>a</li><li>b</li>c</ul>');
     });
 
-    it('takes the extra arguments of the classic factory before props.children', () => {
-      const node = jsx('p', { children: 'ignored' }, 'a', jsx('b', null, 'b'));
+    it('leaves out the key the compiler passes after the props, which is never a child', () => {
+      // `<p key="a">text</p>` compiles to `jsx('p', { children: 'text' }, 'a')`.
+      expect(html(jsx('p', { children: 'text' }, 'a'))).toBe('<p>text</p>');
+      expect(html(jsx('p', {}, 'a'))).toBe('<p></p>');
+      expect(
+        html(jsxs('ul', { children: [jsx('li', { children: 'a' }, 1), jsx('li', { children: 'b' }, 2)] }, 'list'))
+      ).toBe('<ul><li>a</li><li>b</li></ul>');
+    });
 
-      expect(html(node)).toBe('<p>a<b>b</b></p>');
+    it("leaves out a component's key too", () => {
+      const node = jsx(Labelled, { children: 'text', label: 'Ada' }, 'k') as Labelled;
+
+      expect(node.label.get()).toBe('Ada');
+      expect(node.textContent).toBe('text');
     });
 
     it('moves the children of a fragment into its parent', () => {
       const fragment = jsxs(Fragment as unknown as string, { children: [jsx('i', null), 'text'] });
 
       expect(fragment).toBeInstanceOf(DocumentFragment);
-      expect(html(jsx('p', null, fragment))).toBe('<p><i></i>text</p>');
+      expect(html(jsx('p', { children: fragment }))).toBe('<p><i></i>text</p>');
+    });
+  });
+
+  describe('h, called by hand', () => {
+    it('takes the children given after the props before props.children', () => {
+      const node = h('p', { children: 'ignored' }, 'a', h('b', null, 'b'));
+
+      expect(html(node)).toBe('<p>a<b>b</b></p>');
+    });
+
+    it('takes props.children when no children follow the props', () => {
+      expect(html(h('p', { children: ['a', 1] }))).toBe('<p>a1</p>');
     });
   });
 
