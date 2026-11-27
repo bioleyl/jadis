@@ -118,6 +118,15 @@ describe('Router with routed pages', () => {
       expect(page('plain-page').getAttribute('id')).toBe('2');
     });
 
+    it('has given the page its first route once Jadis.settled() resolves', async () => {
+      window.history.replaceState({}, '', '/items/4');
+      start();
+
+      await Jadis.settled();
+
+      expect(page<ItemsPage>(ItemsPage.selector).calls).toEqual(['connect', 'route']);
+    });
+
     it('keeps a page with onRoute while the routes stay on it, and gives it each route', async () => {
       const router = start();
       router.goto('items');

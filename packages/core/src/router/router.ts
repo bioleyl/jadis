@@ -1,5 +1,6 @@
 import { assert } from '../helpers/assert.helper';
 import { Bus } from '../helpers/bus.helper';
+import { onConnectEnded, onConnectScheduled } from '../helpers/connection.helper';
 import { applyElementAttributes } from '../helpers/element.helper';
 import { createRouteElements, normalizePath } from '../helpers/router.helper';
 import { toKebabCase } from '../helpers/string.helper';
@@ -562,10 +563,16 @@ export class Router<T extends Record<string, RouteDefinition>> {
   }
 
   private sendRouteOnceConnected(mounted: MountedPage) {
-    // Jadis runs onConnect in the task after connecting: the page gets its route once it is wired.
+    // Jadis runs onConnect in the task after connecting: the page gets its route once it is wired. The task counts
+    // with the onConnect calls still to come, so Jadis.settled() waits for a page's first onRoute too.
+    onConnectScheduled();
     setTimeout(() => {
-      mounted.connected = true;
-      this.sendRouteToPage(mounted);
+      try {
+        mounted.connected = true;
+        this.sendRouteToPage(mounted);
+      } finally {
+        onConnectEnded();
+      }
     });
   }
 

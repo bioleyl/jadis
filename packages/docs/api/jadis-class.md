@@ -43,11 +43,23 @@ const instance = MyComponent.toTemplate(
 
 See [toTemplate()](../templating/to-template.md) for details.
 
+### `settled()`
+
+Resolves once no component has an `onConnect` left to call, those an `onConnect` connected included, and the router has given the page it showed its route: one wait after drawing a page, mainly in tests.
+
+```typescript
+document.body.append(page);
+await Jadis.settled();
+```
+
+See [Waiting for onConnect()](../guides/lifecycle.md#waiting-for-onconnect).
+
 ## Instance properties
 
 | Property | Type | Description |
 |---|---|---|
 | `isConnected` | `boolean` | Whether the component is currently in the DOM. |
+| `connected` | `Promise<void>` | Resolves once the `onConnect` of the current connection has returned, or of the next one when the component is not connected. See [Waiting for onConnect()](../guides/lifecycle.md#waiting-for-onconnect). |
 | `shadowRoot` | `ShadowRoot \| null` | The shadow root, or `null` if `useShadowDom` is `false`. |
 | `killSignal` | `AbortSignal` | Aborted when the component disconnects; a new one is created on reconnection. See [killSignal](../dom/kill-signal.md). |
 

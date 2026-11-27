@@ -70,6 +70,8 @@ Every public export of `@jadis/core`, at the version [SKILL.md](../SKILL.md) nam
 | Member | Meaning |
 |---|---|
 | `isConnected: boolean` | From the connection until the disconnection ran |
+| `connected: Promise<void>` | Resolves once this connection's `onConnect` returned (the next connection's when not connected); also when removed before it ran |
+| `static settled(): Promise<void>` | `Jadis.settled()`: resolves once no component has an `onConnect` left to call, those an `onConnect` drew included, and the router called the `onRoute` of the page it showed |
 | `shadowRoot: ShadowRoot \| null` | Open, unless `useShadowDom` is false |
 
 Never override: `connectedCallback`, `disconnectedCallback`, `attributeChangedCallback`, `connectedMoveCallback`, `observedAttributes`.

@@ -153,7 +153,7 @@ Each rule has a short name; use the name when you cite it in a review.
 
 12. **The platform first.** `fetch` with a signal, `URL`, `Intl`, `<form>`, `<dialog>`, `<template>`, CSS. No package for what a few lines of DOM do, and never a second component model.
 13. **Real APIs only.** Check every Jadis call against the installed declarations before using it. Never write what an API "should" look like.
-14. **Test the timing.** In jsdom tests, what callbacks draw is there after `appendChild`; what `onConnect` does needs a task. Run the type check, the tests, and look at the page in a browser.
+14. **Test the timing.** In jsdom tests, what callbacks draw is there after `appendChild`; what `onConnect` does needs a task: `await Jadis.settled()`. Run the type check, the tests, and look at the page in a browser.
 
 ## Where to look
 

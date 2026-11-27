@@ -415,7 +415,7 @@ expect(stepper.value.get()).toBe(2);
 ```ts
 // Good
 document.body.append(stepper);
-await new Promise((resolve) => setTimeout(resolve)); // onConnect runs a task after the connection
+await Jadis.settled(); // onConnect runs a task after the connection
 stepper.shadowRoot?.querySelector<HTMLButtonElement>('#increase')?.click();
 expect(stepper.value.get()).toBe(2);
 ```
