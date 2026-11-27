@@ -65,6 +65,10 @@ Parameters are encoded in the URL and decoded when it is read: `router.goto('use
 
 The query is not part of matching: `/user/42?tab=posts` (or `/#/user/42?tab=posts` in hash mode) matches `/user/:id`. Read it from `router.currentRoute.query`, a `URLSearchParams`, or from the route a [routed page](./routed-pages.md) receives.
 
+## Hash
+
+In history mode, the hash is not part of matching either: `/guide/deploying#base` matches `/guide/deploying`, by `gotoPath`, by `match` and by a followed link, and stays in the URL. It is the route's `hash` (`'#base'`, or `''`). The router does not scroll to the element it names: see [Routed Pages](./routed-pages.md#showing-the-place-a-hash-names). In hash mode the hash holds the route, and `hash` is empty.
+
 ## Root Components
 
 Routes can specify a `rootComponentSelector` for shared layouts:

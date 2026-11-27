@@ -67,8 +67,14 @@ export interface Route {
   componentSelector: string;
 }
 
-/** The route the URL is on: its parameters, and its query. */
+/** The route the URL is on: its parameters, its query and its hash. */
 export interface ActiveRoute extends Route {
+  /**
+   * The hash of the URL with its `#`, as `location.hash` gives it (`'#base'`): the place on the page a link names.
+   * Empty when the URL has none, and in hash mode, where the hash holds the route. The router keeps it in the URL
+   * and does not scroll: the page knows where its element is.
+   */
+  hash: string;
   /** The path parameters read from the URL, by their names in the route's path. */
   params: Record<string, string>;
   /** The query of the URL; in hash mode, the part of the hash after `?`. */

@@ -71,7 +71,7 @@ router.replace('home');                         // in place of the current histo
 router.gotoPath('/orders/42?tab=lines');        // by path, query included: an address known at run time
 router.replacePath('/login');
 router.match('/orders/42');                     // the route of a path, or undefined: never navigates
-router.currentRoute;                            // the route shown: name, path, params, query
+router.currentRoute;                            // the route shown: name, path, params, query, hash
 ```
 
 `goto` and `gotoPath` throw for an unknown name or a path no route matches. Use `replace` for a page that only redirects, so Back skips it.
@@ -92,6 +92,7 @@ Without `links: true`, a plain link reloads the page. In hash mode, write `href=
 - Parameters become **attributes** of the page (and of its root component), in kebab case: `:orderId` sets `order-id="42"`. Read them with a `useChange` field bound to the attribute, or in `onRoute` as `route.params.orderId`.
 - Values are taken from the URL as written: not URL-decoded, and `goto` does not encode them. Keep parameters URL-safe (ids, slugs), or `encodeURIComponent` them when navigating and `decodeURIComponent` them when reading.
 - The query is not matched. It is `route.query` (and `router.currentRoute.query`), a `URLSearchParams`, in hash mode too.
+- In history mode the hash is not matched either, and stays in the URL: `<a href="/guide/deploying#base">` and `gotoPath('/guide/deploying#base')` give `route.hash === '#base'` (`''` without one, and in hash mode). The router does not scroll: the page shows the element from `onRoute`, which is called again when only the hash changes (`this.shadowRoot?.getElementById(decodeURIComponent(route.hash.slice(1)))?.scrollIntoView()`).
 
 ```tsx
 export class OrderPage extends Jadis {

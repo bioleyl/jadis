@@ -115,7 +115,7 @@ class Bus<Events extends Record<string, unknown>> {
 |---|---|
 | `mountOn(element: HTMLElement, { show? }?)` | Shows the current URL's route and follows the URL |
 | `goto(name, params?)`, `replace(name, params?)` | Navigate by name; params typed from the path |
-| `gotoPath(path)`, `replacePath(path)` | Navigate by path, query included |
+| `gotoPath(path)`, `replacePath(path)` | Navigate by path, query included, and hash in history mode |
 | `match(path): ActiveRoute \| undefined` | The route of a path |
 | `currentRoute: ActiveRoute` | The route shown; throws before the first |
 | `config` | `{ mode, baseUrl, links }` |

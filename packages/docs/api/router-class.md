@@ -39,7 +39,7 @@ With `links: true`, a click on a link to one of the routes, in a shadow root too
 
 | Property | Type | Description |
 |---|---|---|
-| `currentRoute` | `ActiveRoute` | The currently matched route (`name`, `path`, `componentSelector`), with its `params` and its `query`. Throws if no route has been matched yet. |
+| `currentRoute` | `ActiveRoute` | The currently matched route (`name`, `path`, `componentSelector`), with its `params`, its `query` and its `hash`. Throws if no route has been matched yet. |
 | `bus` | `Bus<{ change: ActiveRoute }>` | Emits `change` with the route, once its page is shown, the first one included. |
 
 ## Methods
@@ -79,11 +79,11 @@ As `goto`, in place of the current history entry: back skips the page left. For 
 
 ### `gotoPath(path)` / `replacePath(path)`
 
-Navigates to a path of the app, its query included, as a link or a menu carries it: `router.gotoPath('/user/42?tab=posts')`. The path is written without the base URL. Throws when no route matches it.
+Navigates to a path of the app, its query and (in history mode) its hash included, as a link or a menu carries it: `router.gotoPath('/user/42?tab=posts')`, `router.gotoPath('/guide/deploying#base')`. The path is written without the base URL. Throws when no route matches it.
 
 ### `match(path)`
 
-Gives the route of a path of the app, with its parameters and its query, as the router matches it, or `undefined` when none does.
+Gives the route of a path of the app, with its parameters, its query and its hash, as the router matches it, or `undefined` when none does.
 
 ```typescript
 router.match('/user/42?tab=posts'); // { name: 'user', params: { id: '42' }, query: … }
