@@ -5,8 +5,10 @@ import type { AttributeParser } from '../types/jadis.type';
 /**
  * The method a server render asks a component for its attribute-bound fields: it writes their values set in code as
  * those attributes (`@jadis/core/server`). Only the server imports what does it, so a browser's bundle carries none of it.
+ * A registered symbol: `@jadis/core` and `@jadis/core/server` are two files, each with its own copy of this line, and
+ * the server must find the method a component of the other file holds.
  */
-export const ATTRIBUTE_BINDINGS = Symbol('jadis.attributeBindings');
+export const ATTRIBUTE_BINDINGS = Symbol.for('jadis.attributeBindings');
 
 type ParserFactory = (fallback: never) => AttributeParser<unknown>;
 

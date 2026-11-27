@@ -13,8 +13,11 @@ export const css = (strings: TemplateStringsArray, ...args: Array<string | numbe
   return strings.reduce((acc, curr, index) => `${acc}${curr}${args[index] ?? ''}`, '');
 };
 
-/** The method a server render asks a component without shadow root for the first node of its template. */
-export const TEMPLATE_START = Symbol('jadis.templateStart');
+/**
+ * The method a server render asks a component without shadow root for the first node of its template. A registered
+ * symbol, as `ATTRIBUTE_BINDINGS` is: the server's file and the component's each hold their own copy of this line.
+ */
+export const TEMPLATE_START = Symbol.for('jadis.templateStart');
 
 /** The comment a server render writes before the template of a component without shadow root. */
 export const LIGHT_TEMPLATE_MARK = 'jadis-template';
