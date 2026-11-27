@@ -147,7 +147,7 @@ Each rule has a short name; use the name when you cite it in a review.
 8. **JSX props set properties.** `<user-card name="Ada" />` assigns `element.name`, it does not set the `name` attribute. Attributes come from `attrs={{ name: 'Ada' }}` and from hyphenated names (`data-*`, `aria-*`).
 9. **Text through `textContent`.** Write data into the DOM with `textContent`, properties, or JSX children. Never `innerHTML` with data: it is a script injection.
 10. **Styles in `templateCss()`, the same for every instance.** It becomes one stylesheet shared by all instances. Give the host a display (`:host { display: block; }`), and an instance its own values through CSS custom properties or classes, never through different CSS text. Shadow DOM is on: global CSS does not reach inside.
-11. **No names an element already has.** A component is an `HTMLElement`: never declare `title`, `hidden`, `id`, `lang`, `dir`, `style`, `slot`, `translate`, `remove`, `click`, `focus`, `isConnected` or another inherited member as a field or method of your own.
+11. **No names an element already has.** A component is an `HTMLElement`: never declare `title`, `hidden`, `id`, `lang`, `dir`, `style`, `slot`, `translate`, `remove`, `click`, `focus`, `matches`, `isConnected`, `connected` or another inherited member as a field or method of your own. Nor a module-level `navigation`, `history` or `location`: the browser's global of that name hides a forgotten import.
 
 ### Platform and verification
 

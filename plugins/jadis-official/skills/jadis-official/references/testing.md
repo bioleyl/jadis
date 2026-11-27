@@ -5,6 +5,7 @@ Unit tests in Vitest with jsdom for components and services; Playwright in a rea
 ## Contents
 
 - Vitest and jsdom
+- Styles under jsdom
 - The timing to wait for
 - A component test
 - Services without a DOM
@@ -29,7 +30,31 @@ export default defineConfig({
 });
 ```
 
-jsdom has custom elements, open shadow roots, slots, `MutationObserver` and `CustomEvent`. It has no layout (sizes are zero), and no `adoptedStyleSheets`: components get a `<style>` there instead.
+jsdom has custom elements, open shadow roots, slots, `MutationObserver` and `CustomEvent`. It has no layout (sizes are zero), and no `adoptedStyleSheets`: components get a `<style>` there instead ([Styles under jsdom](#styles-under-jsdom)).
+
+## Styles under jsdom
+
+In a browser every instance of a class adopts one shared stylesheet. jsdom has no `adoptedStyleSheets`, so each instance gets a `<style>` of its own, which jsdom parses again at each connection: with CSS that is not empty in tests (written with `css` in the component's file, or `css: true`), a suite of a few hundred page tests can spend close to half its time there, and time out under load. CSS imported from `.css` files is empty by default and costs nothing.
+
+Tests that read no style skip the sheets, in a setup file (`test.setupFiles`): the roots then adopt a sheet nothing parses.
+
+```ts
+// tests/setup.ts
+const adopted = new WeakMap<ShadowRoot, CSSStyleSheet[]>();
+
+Object.defineProperty(ShadowRoot.prototype, 'adoptedStyleSheets', {
+  configurable: true,
+  get(this: ShadowRoot) {
+    return adopted.get(this) ?? [];
+  },
+  set(this: ShadowRoot, sheets: CSSStyleSheet[]) {
+    adopted.set(this, sheets);
+  },
+});
+CSSStyleSheet.prototype.replaceSync ??= () => undefined;   // jsdom has none: the CSS is not parsed
+```
+
+With it no component style applies: a test that reads `getComputedStyle` (what a class hides) runs without the setup file, or in Playwright.
 
 ## The timing to wait for
 
