@@ -17,6 +17,30 @@ class MyComponent extends Jadis {
 }
 ```
 
+### Waiting for `onConnect()`
+
+Code outside a component cannot see its `onConnect` run: a parent that calls a method of a child it just drew, or a test that clicks a button, may come before the listeners are wired. Two promises tell when they are.
+
+A component's `connected` resolves once the `onConnect` of its connection has returned:
+
+```typescript
+const input = createElement(SearchInput, {}, this.shadowRoot);
+await input.connected;
+input.focus();
+```
+
+It is resolved already when that is done. Before the first connection, and after a removal, it waits for the next connection; a component removed before its `onConnect` ran resolves it without calling `onConnect`.
+
+`Jadis.settled()` resolves once no component has an `onConnect` left to call, those an `onConnect` connected included, and once the router has called the [`onRoute`](../routing/routed-pages.md) of a page it just showed. One wait covers a page just drawn, which is what a test needs:
+
+```typescript
+document.body.append(page);
+await Jadis.settled();
+page.shadowRoot?.querySelector('button')?.click();
+```
+
+Neither waits for what a component starts later, such as a request: wait for that by what it draws.
+
 ### `onDisconnect()`
 
 Called a microtask after the component is removed from the DOM. Use this for cleanup that is not tied to `killSignal`, such as canceling timers or stopping external work. Listeners registered through Jadis helpers are cleaned up automatically.

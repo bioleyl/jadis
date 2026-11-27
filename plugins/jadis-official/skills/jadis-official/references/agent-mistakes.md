@@ -334,7 +334,12 @@ hidden = this.useChange(false, …);
 translate(): void { … } // HTMLElement.translate is a boolean property
 ```
 
-Use names of your own: `pageTitle()`, `collapsed`, `drawTexts()`. Others to avoid: `id`, `lang`, `dir`, `style`, `slot`, `part`, `children`, `remove`, `append`, `click`, `focus`, `blur`, `isConnected`, `shadowRoot`.
+Use names of your own: `pageTitle()`, `collapsed`, `drawTexts()`. Others to avoid: `id`, `lang`, `dir`, `style`, `slot`, `part`, `children`, `remove`, `append`, `click`, `focus`, `blur`, `matches`, `closest`, `isConnected`, `connected`, `shadowRoot`.
+
+Two that compile and still bite:
+
+- A method `matches(filter)`: it replaces `Element.matches(selector)`, which Jadis itself and libraries call on the element with a selector. Name it `matchesFilter`.
+- A module-level `navigation` (or `history`, `location`, `name`, `status`, `event`): the browser has a global of that name, so a file that forgets the import still compiles, and reads the browser's object. Name it `appNavigation`.
 
 ## 16. `innerHTML` with data
 
@@ -415,7 +420,7 @@ expect(stepper.value.get()).toBe(2);
 ```ts
 // Good
 document.body.append(stepper);
-await new Promise((resolve) => setTimeout(resolve)); // onConnect runs a task after the connection
+await Jadis.settled(); // onConnect runs a task after the connection
 stepper.shadowRoot?.querySelector<HTMLButtonElement>('#increase')?.click();
 expect(stepper.value.get()).toBe(2);
 ```

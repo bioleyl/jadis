@@ -1,11 +1,13 @@
 import { assert } from '../helpers/assert.helper';
 import { Bus } from '../helpers/bus.helper';
+import { onConnectEnded, onConnectScheduled } from '../helpers/connection.helper';
 import { applyElementAttributes } from '../helpers/element.helper';
 import { createRouteElements, normalizePath } from '../helpers/router.helper';
 import { toKebabCase } from '../helpers/string.helper';
 import {
   COMPONENT_SELECTOR_SEPARATOR,
   EXTERNAL_LINK_REL,
+  HASH_SEPARATOR,
   HISTORY_INDEX_KEY,
   MAIN_BUTTON,
   QUERY_SEPARATOR,
@@ -176,8 +178,8 @@ export class Router<T extends Record<string, RouteDefinition>> {
   }
 
   /**
-   * Navigates to a path of the app, its query included (`'/orders/42?tab=lines'`), unless the current page refuses to
-   * be left: for an address a link or a menu carries.
+   * Navigates to a path of the app, its query included (`'/orders/42?tab=lines'`) and, in history mode, its hash
+   * (`'/guide/deploying#base'`), unless the current page refuses to be left: for an address a link or a menu carries.
    * @param {string} path The path, without the base URL
    * @throws When no route matches the path
    */
@@ -195,15 +197,16 @@ export class Router<T extends Record<string, RouteDefinition>> {
   }
 
   /**
-   * Finds the route of a path of the app, with its parameters and its query, as the router matches it.
-   * @param {string} path The path, without the base URL: `'/orders/42?tab=lines'`
+   * Finds the route of a path of the app, with its parameters, its query and its hash, as the router matches it.
+   * @param {string} path The path, without the base URL: `'/orders/42?tab=lines'`, `'/guide/deploying#base'`
    * @returns {ActiveRoute | undefined} The route, or undefined when none matches
    */
   match(path: string): ActiveRoute | undefined {
-    const [urlPath, query] = this.splitPathAndQuery(path);
+    const [location, hash] = this.splitHash(path);
+    const [urlPath, query] = this.splitPathAndQuery(location);
     const normalized = normalizePath(urlPath);
     const route = this.getRouteByPath(normalized);
-    return route ? this.activeRoute(route, normalized, query) : undefined;
+    return route ? this.activeRoute(route, normalized, query, hash) : undefined;
   }
 
   private pathOf(name: keyof T, params?: Record<string, string>): string {
@@ -236,7 +239,7 @@ export class Router<T extends Record<string, RouteDefinition>> {
     ) {
       return;
     }
-    const path = `${this.stripBaseUrl(url.pathname)}${url.search}`;
+    const path = `${this.stripBaseUrl(url.pathname)}${url.search}${url.hash}`;
     if (!this.match(path)) {
       return;
     }
@@ -287,10 +290,15 @@ export class Router<T extends Record<string, RouteDefinition>> {
     return new RegExp(`^${pathWithoutParameters}$`);
   }
 
-  /** The route of the current URL: its path, and its query (in hash mode, the hash's). */
+  /** The route of the current URL: its path, its query (in hash mode, the hash's) and its hash. */
   private matchCurrentUrl(): ActiveRoute {
     const [path, query] = this._mode === 'hash' ? this.readHashUrl() : this.readHistoryUrl();
-    return this.matchPath(normalizePath(path), query);
+    return this.matchPath(normalizePath(path), query, this.currentHash());
+  }
+
+  /** The hash of the current URL, which in hash mode is the route itself, not a place on its page. */
+  private currentHash(): string {
+    return this._mode === 'hash' ? '' : window.location.hash;
   }
 
   private readHashUrl(): [string, URLSearchParams] {
@@ -313,10 +321,18 @@ export class Router<T extends Record<string, RouteDefinition>> {
       : [text.slice(0, index), new URLSearchParams(text.slice(index))];
   }
 
+  /** Splits a path of the app from its hash, at the first `#`: none in hash mode, where the hash holds the path. */
+  private splitHash(path: string): [string, string] {
+    const index = this._mode === 'hash' ? -1 : path.indexOf(HASH_SEPARATOR);
+    return index === -1 ? [path, ''] : [path.slice(0, index), path.slice(index)];
+  }
+
   /** Writes the URL of a path in the history: as a new entry, or in place of the current one. */
   private writeUrl(path: string, write: HistoryWrite) {
-    const urlPath = this._mode === 'hash' ? `#${path}` : path;
-    const url = normalizePath(`${this.baseUrl}/${urlPath}`);
+    const [location, hash] = this.splitHash(path);
+    const urlPath = this._mode === 'hash' ? `#${location}` : location;
+    // The hash is written as given: it names an element, and is no path to tidy.
+    const url = `${normalizePath(`${this.baseUrl}/${urlPath}`)}${hash}`;
     const writes: Record<HistoryWrite, (to: string) => void> = {
       push: (to) => this.pushEntry(to),
       replace: (to) => this.replaceEntry(to),
@@ -547,10 +563,16 @@ export class Router<T extends Record<string, RouteDefinition>> {
   }
 
   private sendRouteOnceConnected(mounted: MountedPage) {
-    // Jadis runs onConnect in the task after connecting: the page gets its route once it is wired.
+    // Jadis runs onConnect in the task after connecting: the page gets its route once it is wired. The task counts
+    // with the onConnect calls still to come, so Jadis.settled() waits for a page's first onRoute too.
+    onConnectScheduled();
     setTimeout(() => {
-      mounted.connected = true;
-      this.sendRouteToPage(mounted);
+      try {
+        mounted.connected = true;
+        this.sendRouteToPage(mounted);
+      } finally {
+        onConnectEnded();
+      }
     });
   }
 
@@ -562,15 +584,15 @@ export class Router<T extends Record<string, RouteDefinition>> {
     mounted.page.onRoute?.(this.currentRoute);
   }
 
-  private matchPath(urlPath: string, query: URLSearchParams): ActiveRoute {
+  private matchPath(urlPath: string, query: URLSearchParams, hash: string): ActiveRoute {
     const route = this.getRouteByPath(urlPath);
     assert(route, `No route found for path: ${urlPath}`);
-    return this.activeRoute(route, urlPath, query);
+    return this.activeRoute(route, urlPath, query, hash);
   }
 
-  private activeRoute(route: InternalRoute, urlPath: string, query: URLSearchParams): ActiveRoute {
+  private activeRoute(route: InternalRoute, urlPath: string, query: URLSearchParams, hash: string): ActiveRoute {
     const { componentSelector, name, path } = route;
-    return { componentSelector, name, params: this.getRouteParameters({ ...route, urlPath }), path, query };
+    return { componentSelector, hash, name, params: this.getRouteParameters({ ...route, urlPath }), path, query };
   }
 
   /** The path of a route, each parameter encoded: a `/`, a `?` or a `#` in a value stays in the value. */

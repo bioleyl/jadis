@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { Jadis } from '../../base-component';
+import { ATTRIBUTE_BINDINGS } from '../../helpers/attribute.helper';
 import { defineRouteGroup, defineRoutes } from '../../helpers/router.helper';
 import { sharedStyleSheet } from '../../helpers/style.helper';
+import { TEMPLATE_START } from '../../helpers/template.helper';
 import { serializeHtml } from '../../server/html-writer';
 import { renderRoute } from '../../server/route-render';
 import { renderToHtml } from '../../server/server-render';
@@ -394,5 +396,14 @@ describe('adopted stylesheets on the server', () => {
 
   it('writes it inline when the options name no file for it', () => {
     expect(serializeHtml(hostWithSheet(), { styles: () => undefined })).toContain(`<style>${css}</style>`);
+  });
+});
+
+describe('what the server asks of a component', () => {
+  // `@jadis/core` and `@jadis/core/server` are built as two files, each with its own copy of the helpers: a symbol
+  // made with Symbol() would be two symbols, and the server would find neither method on a component.
+  it('is named by registered symbols, the same in every copy of the helpers', () => {
+    expect(Symbol.keyFor(ATTRIBUTE_BINDINGS)).toBe('jadis.attributeBindings');
+    expect(Symbol.keyFor(TEMPLATE_START)).toBe('jadis.templateStart');
   });
 });

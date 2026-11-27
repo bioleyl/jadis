@@ -71,7 +71,7 @@ router.replace('home');                         // in place of the current histo
 router.gotoPath('/orders/42?tab=lines');        // by path, query included: an address known at run time
 router.replacePath('/login');
 router.match('/orders/42');                     // the route of a path, or undefined: never navigates
-router.currentRoute;                            // the route shown: name, path, params, query
+router.currentRoute;                            // the route shown: name, path, params, query, hash
 ```
 
 `goto` and `gotoPath` throw for an unknown name or a path no route matches. Use `replace` for a page that only redirects, so Back skips it.
@@ -90,8 +90,9 @@ Without `links: true`, a plain link reloads the page. In hash mode, write `href=
 ## Parameters and query
 
 - Parameters become **attributes** of the page (and of its root component), in kebab case: `:orderId` sets `order-id="42"`. Read them with a `useChange` field bound to the attribute, or in `onRoute` as `route.params.orderId`.
-- Values are taken from the URL as written: not URL-decoded, and `goto` does not encode them. Keep parameters URL-safe (ids, slugs), or `encodeURIComponent` them when navigating and `decodeURIComponent` them when reading.
+- Pass and read **raw values**: the router encodes a parameter when it writes the URL and decodes it when it reads one. `router.goto('order', { orderId: 'A/7 b' })` writes `/orders/A%2F7%20b`, and the page gets `order-id="A/7 b"`, as `route.params.orderId` and `router.match(…)` give it. Never `encodeURIComponent` a value for `goto` or `decodeURIComponent` one read: it would be encoded or decoded twice. A path given to `gotoPath` or written in an `href` is a URL already: encode a value put into it.
 - The query is not matched. It is `route.query` (and `router.currentRoute.query`), a `URLSearchParams`, in hash mode too.
+- In history mode the hash is not matched either, and stays in the URL: `<a href="/guide/deploying#base">` and `gotoPath('/guide/deploying#base')` give `route.hash === '#base'` (`''` without one, and in hash mode). The router does not scroll: the page shows the element from `onRoute`, which is called again when only the hash changes (`this.shadowRoot?.getElementById(decodeURIComponent(route.hash.slice(1)))?.scrollIntoView()`).
 
 ```tsx
 export class OrderPage extends Jadis {
@@ -216,6 +217,6 @@ router.mountOn(outlet, {
 - A general route listed before a specific one takes its URLs.
 - History mode needs the server to answer every app path with `index.html` (Vite's dev server does); otherwise use hash mode.
 - Page state is lost at each navigation unless the page declares `onRoute`.
-- `route.params` hold the raw URL text.
+- `route.params` hold the decoded values, and `goto` takes them unencoded: encoding or decoding them yourself does it twice.
 - Pages and root components must be registered before the router shows them: import them in the routes module.
-- Pages import the router to navigate, and the router's module imports the routes, which import the pages. That cycle is harmless while the router is only used inside methods. A layout that imports the router must not be read while modules load: give the routes its selector as a constant from a module without imports, not `AppLayout.selector` ([recipes.md](recipes.md#an-app-shell-layout-router-language)).
+- Pages import the router to navigate, and the router's module imports the routes, which import the pages. That cycle is harmless while the router is only used inside methods. It bites when a module **uses the router while it loads**: an object built from it at the top of a module (`export const navigation = createNavigation(router)`), which the views import. Whichever module of the cycle is entered second sees the other's exports not yet set: the page throws at load, or a map of handlers built then holds `undefined` and its buttons do nothing. Hand the router over lazily (`createNavigation(() => router)`, read inside the methods), or keep the routes, the router and what is built from it in one module the app enters first. A layout that imports the router must not be read while modules load: give the routes its selector as a constant from a module without imports, not `AppLayout.selector` ([recipes.md](recipes.md#an-app-shell-layout-router-language)).

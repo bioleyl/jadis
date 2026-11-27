@@ -116,6 +116,50 @@ describe('Router navigation', () => {
       expect(container.querySelector(OrderView.selector)?.getAttribute('id')).toBe('42');
     });
 
+    it('keeps the hash of a path in the URL and gives it to the route, written as it is', () => {
+      const router = start();
+
+      router.gotoPath('/orders/42?tab=lines#line//3/');
+
+      expect(window.location.pathname).toBe('/orders/42');
+      expect(window.location.search).toBe('?tab=lines');
+      expect(window.location.hash).toBe('#line//3/');
+      expect(router.currentRoute.hash).toBe('#line//3/');
+      expect(router.currentRoute.query.get('tab')).toBe('lines');
+      expect(router.currentRoute.params).toEqual({ id: '42' });
+    });
+
+    it('gives a route without hash an empty one', () => {
+      const router = start();
+
+      router.gotoPath('/orders/42#top');
+      router.gotoPath('/orders/42');
+
+      expect(window.location.hash).toBe('');
+      expect(router.currentRoute.hash).toBe('');
+    });
+
+    it('reads the hash of the URL it starts on, and of the entry the person goes back to', async () => {
+      window.history.replaceState({}, '', '/orders/42#notes');
+      const router = start();
+      expect(router.currentRoute.hash).toBe('#notes');
+
+      router.gotoPath('/orders');
+      window.history.back();
+      await new Promise((resolve) => window.addEventListener('popstate', resolve, { once: true }));
+
+      expect(router.currentRoute.hash).toBe('#notes');
+    });
+
+    it('has no hash to give in hash mode, where the hash is the route', () => {
+      const router = start({ mode: 'hash' });
+
+      router.gotoPath('/orders/7');
+
+      expect(router.currentRoute.hash).toBe('');
+      expect(router.match('/orders/7')?.hash).toBe('');
+    });
+
     it('goes to a hash path in hash mode', () => {
       const router = start({ mode: 'hash' });
 
@@ -238,6 +282,23 @@ describe('Router navigation', () => {
       expect(click(link('/orders/42?tab=lines'))).toBe(true);
       expect(router.currentRoute.name).toBe('order');
       expect(window.location.search).toBe('?tab=lines');
+    });
+
+    it('keeps the hash of a link to another route', () => {
+      const router = start({ links: true });
+
+      expect(click(link('/orders/42?tab=lines#notes'))).toBe(true);
+      expect(window.location.pathname).toBe('/orders/42');
+      expect(window.location.search).toBe('?tab=lines');
+      expect(window.location.hash).toBe('#notes');
+      expect(router.currentRoute.hash).toBe('#notes');
+    });
+
+    it('leaves a link to a place on the page shown to the browser', () => {
+      const router = start({ links: true });
+      router.gotoPath('/orders/42');
+
+      expect(click(link('/orders/42#notes'))).toBe(false);
     });
 
     it('follows a link inside a shadow root', () => {

@@ -3,6 +3,7 @@
 import { assert } from './helpers/assert.helper';
 import { ATTRIBUTE_BINDINGS, defaultAttributeParser } from './helpers/attribute.helper';
 import { ChangeHandler } from './helpers/change.helper';
+import { connectionsSettled, deferred, onConnectEnded, onConnectScheduled } from './helpers/connection.helper';
 import { createElement } from './helpers/element.helper';
 import { isOwnEvent } from './helpers/event.helper';
 import { canAdoptStyleSheets, holdsStyleSheets, sharedStyleSheet } from './helpers/style.helper';
@@ -21,6 +22,7 @@ import type {
   SchemaToEvents,
   SelectorToElementWithFallback,
 } from './helpers/type.helper.ts';
+import type { Deferred } from './types/connection.type';
 import type {
   AttributeBinding,
   AttributeParser,
@@ -101,6 +103,10 @@ export abstract class Jadis extends HTMLElement {
   private _templateStart: Node | null = null;
   /** A disconnection waiting a microtask: a connection before it ends means the element was moved. */
   private _leaving = false;
+  /** Whether the `onConnect` of the current connection has returned. */
+  private _onConnectDone = false;
+  /** What `connected` gave while that `onConnect` was still to come. Made when asked: most components never are. */
+  private _connectionWaiter: Deferred | undefined;
 
   /**
    * Callback invoked when the component is connected to the DOM.
@@ -193,6 +199,39 @@ export abstract class Jadis extends HTMLElement {
     return this._isConnected;
   }
 
+  /**
+   * Resolves once the `onConnect` of this connection has returned, a task after the component connected: from then
+   * on its listeners are wired, and code outside it (a parent, a test) can use it. Resolved already when that is
+   * done; before the first connection and after a removal, it waits for the next one. A removal before `onConnect`
+   * ran resolves it too, without calling `onConnect`: nothing went wrong. Each connection has its own promise.
+   * @example
+   * ```typescript
+   * await input.connected;
+   * input.focus();
+   * ```
+   */
+  get connected(): Promise<void> {
+    if (this._onConnectDone) {
+      return Promise.resolve();
+    }
+    this._connectionWaiter ??= deferred();
+    return this._connectionWaiter.promise;
+  }
+
+  /**
+   * Resolves once no component has an `onConnect` left to call, those an `onConnect` connected included, and the
+   * router has given the page it showed its route (`onRoute`): one wait covers a page just drawn, mainly in tests.
+   * It does not wait for what a component starts later (a request, a timer).
+   * @example
+   * ```typescript
+   * document.body.append(page);
+   * await Jadis.settled();
+   * ```
+   */
+  static settled(): Promise<void> {
+    return connectionsSettled();
+  }
+
   connectedCallback(): void {
     if (this._leaving) {
       // Moved: disconnected and connected again in one go, the element stays as it was.
@@ -219,12 +258,33 @@ export abstract class Jadis extends HTMLElement {
     // A removal before this task ends the connection it was scheduled for: the next connection schedules its own
     // onConnect, and running this one too would wire its listeners twice, on the next connection's kill signal.
     const connection = this._abortController.signal;
+    onConnectScheduled();
     setTimeout(() => {
-      if (connection.aborted) {
-        return;
+      try {
+        this.runOnConnect(connection);
+      } finally {
+        onConnectEnded();
       }
-      this.onConnect?.();
     });
+  }
+
+  /** Calls `onConnect` for a connection still there, then tells those waiting for it, whether it returned or threw. */
+  private runOnConnect(connection: AbortSignal): void {
+    if (connection.aborted) {
+      return;
+    }
+    try {
+      this.onConnect?.();
+    } finally {
+      this.endConnecting(true);
+    }
+  }
+
+  /** Resolves what `connected` gave: `onConnect` returned, or the component left before it was called. */
+  private endConnecting(onConnectDone: boolean): void {
+    this._onConnectDone = onConnectDone;
+    this._connectionWaiter?.resolve();
+    this._connectionWaiter = undefined;
   }
 
   private runConnectActions(): void {
@@ -265,6 +325,7 @@ export abstract class Jadis extends HTMLElement {
     this._attributeObserver = null;
     this._attributesInitialized = false;
     this._abortController.abort();
+    this.endConnecting(false);
     this.onDisconnect?.();
   }
 

@@ -158,6 +158,34 @@ test.describe('Jadis router', () => {
     expect(await page.evaluate(() => window.__notReloaded)).toBe(true);
   });
 
+  test('keeps the hash of a followed link, and follows the hash of a link to a place on the page', async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.startRouter('history', { links: true });
+      window.__notReloaded = true;
+      for (const [href, text] of [
+        ['/details/5#notes', 'Notes of order 5'],
+        ['/details/5#lines', 'Lines of order 5'],
+      ]) {
+        document.body.appendChild(Object.assign(document.createElement('a'), { href, textContent: text }));
+      }
+    });
+
+    await page.getByRole('link', { name: 'Notes of order 5' }).click();
+
+    await expect(page).toHaveURL(/\/details\/5#notes$/);
+    await expect(page.locator('#router-app browser-details output')).toHaveText('details:5');
+    expect(await page.evaluate(() => window.__jadisRouter.currentRoute.hash)).toBe('#notes');
+
+    // A place on the page shown: the browser follows the link, and the route follows the URL.
+    await page.getByRole('link', { name: 'Lines of order 5' }).click();
+
+    await expect(page).toHaveURL(/\/details\/5#lines$/);
+    await expect.poll(() => page.evaluate(() => window.__jadisRouter.currentRoute.hash)).toBe('#lines');
+    expect(await page.evaluate(() => window.__notReloaded)).toBe(true);
+  });
+
   test('replaces the history entry, so back skips the page left', async ({ page }) => {
     await page.evaluate(() => window.startRouter('history'));
     await page.evaluate(() => window.__jadisRouter.goto('home'));

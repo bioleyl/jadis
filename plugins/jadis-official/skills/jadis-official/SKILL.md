@@ -8,7 +8,7 @@ license: MIT
 
 Jadis is a small TypeScript library over native Web Components. A component is a custom element: a class that extends `Jadis`. It draws its template **once**, as real DOM, then **you** change the nodes that need it when its state changes. There is no virtual DOM, no re-render, no reactive system and no framework runtime. Never bring React, Vue, Lit, a virtual DOM or a state library on top of it.
 
-Written for `@jadis/core@1.9.1`. Documentation: <https://bioleyl.github.io/jadis/> · Source: <https://github.com/bioleyl/jadis>
+Written for `@jadis/core@1.10.0`. Documentation: <https://bioleyl.github.io/jadis/> · Source: <https://github.com/bioleyl/jadis>
 
 ## How to use this skill
 
@@ -147,13 +147,13 @@ Each rule has a short name; use the name when you cite it in a review.
 8. **JSX props set properties.** `<user-card name="Ada" />` assigns `element.name`, it does not set the `name` attribute. Attributes come from `attrs={{ name: 'Ada' }}` and from hyphenated names (`data-*`, `aria-*`).
 9. **Text through `textContent`.** Write data into the DOM with `textContent`, properties, or JSX children. Never `innerHTML` with data: it is a script injection.
 10. **Styles in `templateCss()`, the same for every instance.** It becomes one stylesheet shared by all instances. Give the host a display (`:host { display: block; }`), and an instance its own values through CSS custom properties or classes, never through different CSS text. Shadow DOM is on: global CSS does not reach inside.
-11. **No names an element already has.** A component is an `HTMLElement`: never declare `title`, `hidden`, `id`, `lang`, `dir`, `style`, `slot`, `translate`, `remove`, `click`, `focus`, `isConnected` or another inherited member as a field or method of your own.
+11. **No names an element already has.** A component is an `HTMLElement`: never declare `title`, `hidden`, `id`, `lang`, `dir`, `style`, `slot`, `translate`, `remove`, `click`, `focus`, `matches`, `isConnected`, `connected` or another inherited member as a field or method of your own. Nor a module-level `navigation`, `history` or `location`: the browser's global of that name hides a forgotten import.
 
 ### Platform and verification
 
 12. **The platform first.** `fetch` with a signal, `URL`, `Intl`, `<form>`, `<dialog>`, `<template>`, CSS. No package for what a few lines of DOM do, and never a second component model.
 13. **Real APIs only.** Check every Jadis call against the installed declarations before using it. Never write what an API "should" look like.
-14. **Test the timing.** In jsdom tests, what callbacks draw is there after `appendChild`; what `onConnect` does needs a task. Run the type check, the tests, and look at the page in a browser.
+14. **Test the timing.** In jsdom tests, what callbacks draw is there after `appendChild`; what `onConnect` does needs a task: `await Jadis.settled()`. Run the type check, the tests, and look at the page in a browser.
 
 ## Where to look
 

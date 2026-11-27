@@ -5,6 +5,7 @@ Unit tests in Vitest with jsdom for components and services; Playwright in a rea
 ## Contents
 
 - Vitest and jsdom
+- Styles under jsdom
 - The timing to wait for
 - A component test
 - Services without a DOM
@@ -29,20 +30,42 @@ export default defineConfig({
 });
 ```
 
-jsdom has custom elements, open shadow roots, slots, `MutationObserver` and `CustomEvent`. It has no layout (sizes are zero), and no `adoptedStyleSheets`: components get a `<style>` there instead.
+jsdom has custom elements, open shadow roots, slots, `MutationObserver` and `CustomEvent`. It has no layout (sizes are zero), and no `adoptedStyleSheets`: components get a `<style>` there instead ([Styles under jsdom](#styles-under-jsdom)).
+
+## Styles under jsdom
+
+In a browser every instance of a class adopts one shared stylesheet. jsdom has no `adoptedStyleSheets`, so each instance gets a `<style>` of its own, which jsdom parses again at each connection: with CSS that is not empty in tests (written with `css` in the component's file, or `css: true`), a suite of a few hundred page tests can spend close to half its time there, and time out under load. CSS imported from `.css` files is empty by default and costs nothing.
+
+Tests that read no style skip the sheets, in a setup file (`test.setupFiles`): the roots then adopt a sheet nothing parses.
+
+```ts
+// tests/setup.ts
+const adopted = new WeakMap<ShadowRoot, CSSStyleSheet[]>();
+
+Object.defineProperty(ShadowRoot.prototype, 'adoptedStyleSheets', {
+  configurable: true,
+  get(this: ShadowRoot) {
+    return adopted.get(this) ?? [];
+  },
+  set(this: ShadowRoot, sheets: CSSStyleSheet[]) {
+    adopted.set(this, sheets);
+  },
+});
+CSSStyleSheet.prototype.replaceSync ??= () => undefined;   // jsdom has none: the CSS is not parsed
+```
+
+With it no component style applies: a test that reads `getComputedStyle` (what a class hides) runs without the setup file, or in Playwright.
 
 ## The timing to wait for
 
 | After | Already done | Wait for the rest |
 |---|---|---|
-| `document.body.append(element)` | Template, attribute callbacks, queued `useChange` changes, `immediate` callbacks, translations | `onConnect()` and its listeners: `await nextTask()` |
+| `document.body.append(element)` | Template, attribute callbacks, queued `useChange` changes, `immediate` callbacks, translations | `onConnect()` and its listeners: `await Jadis.settled()` |
 | `element.setAttribute(…)` on a connected component | Nothing | The attribute callback: `await Promise.resolve()` (a `MutationObserver` delivers it) |
 | `field.set(value)` on a connected component | The callback | Nothing |
 | `element.remove()` | Nothing | `onDisconnect()` and the end of listeners: `await Promise.resolve()` |
 
-```ts
-const nextTask = (): Promise<void> => new Promise((resolve) => setTimeout(resolve));
-```
+`await Jadis.settled()` resolves once no component has an `onConnect` left to call, those an `onConnect` drew included, and once the router gave a page it just showed its route (`onRoute`): one line after drawing a component or a whole page. `await element.connected` waits for one component only. Neither waits for a request a component started: wait for what it draws. On a version without them, wait a task: `await new Promise((resolve) => setTimeout(resolve))`.
 
 Never sleep for a fixed time: wait for the step that does the work.
 
@@ -50,12 +73,11 @@ Never sleep for a fixed time: wait for the step that does the work.
 
 ```ts
 // src/components/quantity-stepper.test.ts
-import { createElement } from '@jadis/core';
+import { createElement, Jadis } from '@jadis/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { QuantityStepper } from './quantity-stepper';   // importing it registers it
 
-const nextTask = (): Promise<void> => new Promise((resolve) => setTimeout(resolve));
 const output = (stepper: QuantityStepper) => stepper.shadowRoot?.querySelector('output')?.textContent;
 const button = (stepper: QuantityStepper, id: string) => stepper.shadowRoot?.querySelector<HTMLButtonElement>(`#${id}`);
 
@@ -72,7 +94,7 @@ describe('quantity-stepper', () => {
     const stepper = createElement(QuantityStepper, {}, document.body);
     const onValueChange = vi.fn();
     stepper.events.register('valueChange', onValueChange);
-    await nextTask();                                   // onConnect wires the buttons
+    await Jadis.settled();                              // onConnect wires the buttons
 
     button(stepper, 'increase')?.click();
 
@@ -82,7 +104,7 @@ describe('quantity-stepper', () => {
 
   it('stays at the minimum, its decrease button disabled', async () => {
     const stepper = createElement(QuantityStepper, {}, document.body);
-    await nextTask();
+    await Jadis.settled();
 
     button(stepper, 'decrease')?.click();
 
@@ -101,11 +123,11 @@ describe('quantity-stepper', () => {
 
   it('keeps working after it is removed and put back', async () => {
     const stepper = createElement(QuantityStepper, {}, document.body);
-    await nextTask();                                   // the first onConnect
+    await Jadis.settled();                              // the first onConnect
     stepper.remove();
     await Promise.resolve();                            // the disconnection
     document.body.append(stepper);
-    await nextTask();                                   // onConnect again
+    await Jadis.settled();                              // onConnect again
 
     button(stepper, 'increase')?.click();
 
@@ -126,7 +148,7 @@ Rules and app state in `services/` take plain values and return plain values: te
 
 ## The router in tests
 
-`new Router(routes, { signal })` listens on `window` for the life of the test file: pass a signal and abort it after each test. Set the URL with `history.replaceState({}, '', '/orders/42')` before `mountOn(container)`, then wait a task for the page's `onConnect` and `onRoute`.
+`new Router(routes, { signal })` listens on `window` for the life of the test file: pass a signal and abort it after each test. Set the URL with `history.replaceState({}, '', '/orders/42')` before `mountOn(container)`, then `await Jadis.settled()` for the page's `onConnect` and its first `onRoute`.
 
 ## Playwright
 

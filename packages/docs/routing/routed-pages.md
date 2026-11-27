@@ -83,10 +83,25 @@ interface ActiveRoute {
   componentSelector: string;
   params: Record<string, string>;  // the parameters read from the URL
   query: URLSearchParams;          // the URL's query; in hash mode, the part of the hash after '?'
+  hash: string;                    // the URL's hash with its '#', such as '#base'; '' without one, and in hash mode
 }
 ```
 
-The query is not part of matching: `/#/users?sort=name` matches `/users`.
+The query is not part of matching: `/#/users?sort=name` matches `/users`. Neither is the hash: in history mode, `/guide/deploying#base` matches `/guide/deploying`.
+
+### Showing the place a hash names
+
+The router keeps the hash in the URL and gives it to the page; it does not scroll. A browser scrolls to a hash only when it loads a document, and it does not look inside shadow roots, where a page's headings are: the page, which knows where its element is and when it is drawn, shows it from `onRoute`.
+
+```typescript
+onRoute(route: ActiveRoute): void {
+  const id = decodeURIComponent(route.hash.slice(1));
+  const target = id ? this.shadowRoot?.getElementById(id) : undefined;
+  target?.scrollIntoView();
+}
+```
+
+`onRoute` is called again when a link changes only the hash of the page shown, so the same lines follow a table of contents.
 
 ## See Also
 
